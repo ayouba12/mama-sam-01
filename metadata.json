@@ -1,0 +1,6 @@
+{
+  "name": "Mama Sam African & Caribbean Mini Supermarket",
+  "description": "Authentic African & Caribbean supermarket in Messina, Italy. Order fresh yams, plantains, garri, palm oil, spices, and cosmetics online for convenient store pickup.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

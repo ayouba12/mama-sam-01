@@ -1,0 +1,51 @@
+[
+  {
+    "id": "cat-1",
+    "name": "Tuberi e Verdure Fresche",
+    "summary": "Yam, Platani, Manioca e Peperoncini Scotch Bonnet",
+    "image": "catTubers",
+    "itemCount": 6
+  },
+  {
+    "id": "cat-2",
+    "name": "Cereali e Farine Tradizionali",
+    "summary": "Garri Ijebu, Farina di Yam, Riso e Fagioli",
+    "image": "catGrains",
+    "itemCount": 5
+  },
+  {
+    "id": "cat-3",
+    "name": "Pesce Affumicato e Carni",
+    "summary": "Pesce Gatto Affumicato, Stoccafisso e Carne di Capra",
+    "image": "catFishMeats",
+    "itemCount": 4
+  },
+  {
+    "id": "cat-4",
+    "name": "Spezie e Olio di Palma",
+    "summary": "Olio di Palma Puro, Dadi Maggi, Egusi e Suya",
+    "image": "catSpicesOil",
+    "itemCount": 5
+  },
+  {
+    "id": "cat-5",
+    "name": "Bevande al Malto e Ibisco",
+    "summary": "Malta Guinness, Supermalt e Succo di Zobo",
+    "image": "catMaltDrinks",
+    "itemCount": 4
+  },
+  {
+    "id": "cat-6",
+    "name": "Snack e Dolci Caraibici",
+    "summary": "Chin Chin Croccante, Chips di Platano e Jamaican Patty",
+    "image": "catSnacks",
+    "itemCount": 3
+  },
+  {
+    "id": "cat-7",
+    "name": "Cura Afro e Cosmetici",
+    "summary": "Burro di Karité Grezzo, Sapone Nero Dudu-Osun e Extension",
+    "image": "catCosmetics",
+    "itemCount": 3
+  }
+]

@@ -1,0 +1,191 @@
+[
+  {
+    "id": "recipe-1",
+    "title": "Riso Jollof Tradizionale delle Feste con Platani Dorati",
+    "region": "Nigeria & Ghana",
+    "difficulty": "Media",
+    "prepTime": "50 min",
+    "description": "Il piatto regina delle grandi riunioni famigliari dell'Africa Occidentale. Riso a chicco lungo cotto in una saporita riduzione di peperoni rossi, pomodori freschi, cipolle e spezie aromatiche, accompagnato da dodo di platani caramellati.",
+    "image": "jollofRice",
+    "totalPrice": 22.30,
+    "ingredients": [
+      {
+        "productId": "prod-11",
+        "name": "Riso Aromatico a Chicco Lungo (5kg)",
+        "image": "longGrainRice",
+        "amount": "Sacco da 5 kg",
+        "price": 11.50
+      },
+      {
+        "productId": "prod-5",
+        "name": "Dadi di Condimento Maggi Star (100 pz)",
+        "image": "maggiCubes",
+        "amount": "Scatola da 100 cubetti",
+        "price": 4.00
+      },
+      {
+        "productId": "prod-9",
+        "name": "Platani Gialli Dolci Maturi",
+        "image": "yellowPlantains",
+        "amount": "Casco da 1 kg",
+        "price": 3.20
+      },
+      {
+        "productId": "prod-17",
+        "name": "Peperoncini Scotch Bonnet Rossi Freschi",
+        "image": "scotchBonnets",
+        "amount": "Vaschetta da 250g",
+        "price": 2.80
+      }
+    ],
+    "cookingMethod": [
+      "Frulla pomodori freschi, peperoni rossi dolci, cipolle e peperoncini scotch bonnet fino ad ottenere una purea liscia. Fai ridurre a fuoco medio in una pentola capiente finché l'acqua evapora.",
+      "Scalda olio vegetale o olio di palma puro, soffriggi cipolle a fettine sottili, poi aggiungi la purea di peperoni con foglie d'alloro, timo e curry finché l'olio profumato sale in superficie.",
+      "Unisci brodo caldo di carne, dadi Maggi sbriciolati e sale. Sciacqua bene il riso a chicco lungo con acqua tiepida, scola e uniscilo delicatamente al sugo in ebollizione.",
+      "Sigilla la pentola con carta alluminio e coperchio pesante per trattenere il vapore. Abbassa la fiamma al minimo e lascia cuocere per 30 minuti senza sollevare il coperchio.",
+      "Taglia i platani maturi a rondelle oblique. Friggili in olio caldo finché non risultano dorati e caramellati. Servili caldi accanto al riso jollof."
+    ]
+  },
+  {
+    "id": "recipe-2",
+    "title": "Zuppa Tradizionale di Egusi con Pounded Yam",
+    "region": "Nigeria & Camerun",
+    "difficulty": "Classico Tradizionale",
+    "prepTime": "45 min",
+    "description": "Un piatto ancestrale ricco e confortante. Semi di melone macinati sobbolliti in olio di palma dorato con tenera carne di capra, pesce gatto affumicato e verdure a foglia verde, da gustare con il soffice swallow di yam pestato.",
+    "image": "egusiSoup",
+    "totalPrice": 30.20,
+    "ingredients": [
+      {
+        "productId": "prod-2",
+        "name": "Farina di Yam Pounded Ayoola (Iyan)",
+        "image": "yamFlour",
+        "amount": "Busta da 1 kg",
+        "price": 5.80
+      },
+      {
+        "productId": "prod-10",
+        "name": "Pesce Gatto Intero Essiccato e Affumicato",
+        "image": "smokedCatfish",
+        "amount": "Intero da 350g",
+        "price": 8.90
+      },
+      {
+        "productId": "prod-8",
+        "name": "Olio di Palma Rosso Puro Extra Vergine (1L)",
+        "image": "palmOil1L",
+        "amount": "Bottiglia da 1 Litro",
+        "price": 5.50
+      },
+      {
+        "productId": "prod-26",
+        "name": "Carne di Capra Fresca a Bocconcini (Halal)",
+        "image": "goatMeat",
+        "amount": "Vaschetta macelleria da 1 kg",
+        "price": 11.90
+      }
+    ],
+    "cookingMethod": [
+      "Insaporisci i bocconcini di capra con cipolle affettate, scotch bonnet e dadi Maggi. Cuoci a fuoco dolce per 15 minuti, poi aggiungi acqua e fai bollire finché la carne è tenera.",
+      "Spina e sciacqua delicatamente il pesce gatto affumicato con acqua tiepida salata.",
+      "In una casseruola scalda l'olio di palma rosso. Aggiungi scalogno tritato e unisci l'egusi (semi di melone macinati) impastato con poca acqua. Soffriggi a fuoco medio-basso per 8-10 minuti finché si formano piccoli grumi consistenti.",
+      "Versa il brodo di capra, unisci il pesce gatto affumicato e fai sobbollire a fuoco dolce per 15 minuti affinché la zuppa si addensi armoniosamente.",
+      "Aggiungi spinaci freschi tritati o foglie amare sciacquate, fai cuocere per 3 minuti e spegni il fuoco.",
+      "Porta a ebollizione una pentola d'acqua. Versa gradualmente la farina Ayoola Pounded Yam mescolando energicamente con una spatola di legno fino ad ottenere una massa liscia ed elastica. Servi caldo."
+    ]
+  },
+  {
+    "id": "recipe-3",
+    "title": "Pepper Soup Speziata di Carne di Capra",
+    "region": "Africa Occidentale",
+    "difficulty": "Facile",
+    "prepTime": "40 min",
+    "description": "Una zuppa leggera e profondamente tonificante ricca di spezie indigene aromatiche, peperoncini scotch bonnet ardenti e tenera carne di capra. Il brodo rinvigorente per eccellenza.",
+    "image": "pepperSoup",
+    "totalPrice": 23.70,
+    "ingredients": [
+      {
+        "productId": "prod-26",
+        "name": "Carne di Capra Fresca a Bocconcini (Halal)",
+        "image": "goatMeat",
+        "amount": "Vaschetta macelleria da 1 kg",
+        "price": 11.90
+      },
+      {
+        "productId": "prod-30",
+        "name": "Miscela di Spezie per Suya Yaji Hausa",
+        "image": "suyaSpice",
+        "amount": "Spargitore da 150g",
+        "price": 4.20
+      },
+      {
+        "productId": "prod-17",
+        "name": "Peperoncini Scotch Bonnet Rossi Freschi",
+        "image": "scotchBonnets",
+        "amount": "Vaschetta da 250g",
+        "price": 2.80
+      },
+      {
+        "productId": "prod-5",
+        "name": "Dadi di Condimento Maggi Star (100 pz)",
+        "image": "maggiCubes",
+        "amount": "Scatola da 100 cubetti",
+        "price": 4.00
+      }
+    ],
+    "cookingMethod": [
+      "Sciacqua accuratamente la carne di capra. Mettila in una pentola capiente con cipolle tritate, peperoncini scotch bonnet pestati e 2 dadi Maggi sbriciolati.",
+      "Cuoci a fuoco medio con coperchio per 10 minuti affinché la carne si sigilli rilasciando i suoi succhi saporiti.",
+      "Aggiungi 1,5 litri d'acqua e porta a vivace ebollizione. Rimuovi la schiuma in superficie.",
+      "Unisci le spezie aromatiche per pepper soup (noce moscata calabash, zenzero e mix Yaji). Fai sobbollire a fuoco dolce per 30 minuti finché la carne è tenerissima.",
+      "Aggiungi foglie fresche di basilico profumato o menta, regola di sale e servi fumante in ciotole profonde."
+    ]
+  },
+  {
+    "id": "recipe-4",
+    "title": "Ila Alasepo Fresca (Zuppa di Okra ai Frutti di Mare)",
+    "region": "Nigeria & Benin",
+    "difficulty": "Facile",
+    "prepTime": "35 min",
+    "description": "Una vibrante delizia Yoruba cotta in pentola unica in meno di 35 minuti. Okra fresca croccante a rondelle sobbollita in brodo di olio di palma rosso con gamberetti essiccati, pesce gatto e peperoni.",
+    "image": "okraSoup",
+    "totalPrice": 23.10,
+    "ingredients": [
+      {
+        "productId": "prod-18",
+        "name": "Okra Fresca e Tenera (Gombo)",
+        "image": "freshOkra",
+        "amount": "Vaschetta da 500g",
+        "price": 3.50
+      },
+      {
+        "productId": "prod-24",
+        "name": "Crayfish Intero Essiccato al Sole",
+        "image": "crayfish",
+        "amount": "Barattolo da 200g",
+        "price": 5.20
+      },
+      {
+        "productId": "prod-10",
+        "name": "Pesce Gatto Intero Essiccato e Affumicato",
+        "image": "smokedCatfish",
+        "amount": "Intero da 350g",
+        "price": 8.90
+      },
+      {
+        "productId": "prod-8",
+        "name": "Olio di Palma Rosso Puro Extra Vergine (1L)",
+        "image": "palmOil1L",
+        "amount": "Bottiglia da 1 Litro",
+        "price": 5.50
+      }
+    ],
+    "cookingMethod": [
+      "Taglia l'okra fresca a dischetti sottili, oppure tritala grossolanamente per mantenerne la piacevole consistenza croccante.",
+      "In una pentola unisci l'olio di palma rosso, il crayfish tritato, i pezzi di pesce gatto affumicato sciacquato, lo scotch bonnet sminuzzato e il brodo.",
+      "Porta a forte ebollizione per 6-8 minuti in modo che i sapori si fondano in una base profumata e dorata.",
+      "Versa l'okra fresca tutta in una volta. Mescola continuamente con un cucchiaio di legno a fuoco medio-alto per 4-5 minuti: l'okra rilascerà la sua tipica densità vellutata mantenendo un vivo colore verde smeraldo.",
+      "Togli subito dal fuoco per non stracuocerla. Servi calda con pounded yam o eba."
+    ]
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "announcement": "Ordina online e ritira comodamente in negozio in Via Ugo Bassi 104, Messina (~30 min)",
+  "announcementActive": true,
+  "storeName": "Mama Sam Supermercato Africano & Caraibico",
+  "address": "Via Ugo Bassi 104, Isolato 147, 98123 Messina ME, Italia",
+  "googleMapsUrl": "https://maps.google.com/?q=Via+Ugo+Bassi+104+Messina+Italy",
+  "phone1": "+39 351 290 1397",
+  "phone2": "+39 351 206 2949",
+  "whatsappNumber": "393512901397",
+  "email": "mamasamafrican@gmail.com",
+  "hoursMonSat": "8:00 - 20:30 (Orario Continuato)",
+  "hoursSun": "10:00 - 16:00",
+  "pickupEstimatedMinutes": 30
+}

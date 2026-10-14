@@ -1,0 +1,89 @@
+[
+  {
+    "id": "ord-1001",
+    "orderNumber": "MS-2026-1001",
+    "createdAt": "2026-10-12T09:15:00Z",
+    "status": "ready",
+    "customerName": "Emmanuel Okafor",
+    "customerPhone": "+39 347 112 9081",
+    "customerEmail": "emmanuel.okafor@gmail.com",
+    "pickupTimePreference": "Today at 12:30 PM",
+    "customerNote": "Please pick well-ripened yellow plantains if possible, thanks Mama Sam!",
+    "items": [
+      {
+        "productId": "prod-3",
+        "productName": "Fresh African White Yam (Puna Yam)",
+        "packageSize": "Approx. 2.5kg tuber",
+        "unitPrice": 6.9,
+        "quantity": 1,
+        "lineTotal": 6.9,
+        "image": "catTubers"
+      },
+      {
+        "productId": "prod-9",
+        "productName": "Sweet Yellow Plantains (Ripe)",
+        "packageSize": "1 kg bunch",
+        "unitPrice": 3.2,
+        "quantity": 2,
+        "lineTotal": 6.4,
+        "image": "catTubers"
+      },
+      {
+        "productId": "prod-8",
+        "productName": "Pure Golden Red Palm Oil (1 Litre)",
+        "packageSize": "1 Litre bottle",
+        "unitPrice": 5.5,
+        "quantity": 1,
+        "lineTotal": 5.5,
+        "image": "catSpicesOil"
+      }
+    ],
+    "subtotal": 18.8,
+    "total": 18.8,
+    "paymentMethod": "Pay at Store (Cash / Card / Satispay)",
+    "staffNotes": "Packed in brown crate #4. Ready for pickup."
+  },
+  {
+    "id": "ord-1002",
+    "orderNumber": "MS-2026-1002",
+    "createdAt": "2026-10-12T10:45:00Z",
+    "status": "preparing",
+    "customerName": "Fatou Camara",
+    "customerPhone": "+39 333 892 4105",
+    "customerEmail": "fatou.camara@libero.it",
+    "pickupTimePreference": "In ~30 mins",
+    "customerNote": "Will arrive around 11:30 by tramway.",
+    "items": [
+      {
+        "productId": "prod-4",
+        "productName": "Ijebu Garri Premium Cassava Grains",
+        "packageSize": "2 kg bag",
+        "unitPrice": 6.5,
+        "quantity": 1,
+        "lineTotal": 6.5,
+        "image": "catGrains"
+      },
+      {
+        "productId": "prod-10",
+        "productName": "Whole Dried Smoked Catfish",
+        "packageSize": "Approx. 350g whole dried",
+        "unitPrice": 8.9,
+        "quantity": 1,
+        "lineTotal": 8.9,
+        "image": "catFishMeats"
+      },
+      {
+        "productId": "prod-6",
+        "productName": "Malta Guinness Non-Alcoholic Malt (6x330ml)",
+        "packageSize": "6 x 330ml cans",
+        "unitPrice": 8.5,
+        "quantity": 1,
+        "lineTotal": 8.5,
+        "image": "catMaltDrinks"
+      }
+    ],
+    "subtotal": 23.9,
+    "total": 23.9,
+    "paymentMethod": "Pay at Store (Cash / Card / Satispay)"
+  }
+]
