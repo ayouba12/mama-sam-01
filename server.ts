@@ -214,15 +214,40 @@ app.post('/api/products', requireAdminAuth, (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Stock must be 0 or greater.' });
   }
 
+  let originalPrice: number | undefined = undefined;
+  if (body.originalPrice !== undefined && body.originalPrice !== null && body.originalPrice !== '') {
+    const parsedOriginal = Number(body.originalPrice);
+    if (!isNaN(parsedOriginal) && parsedOriginal > 0) {
+      originalPrice = Number(parsedOriginal.toFixed(2));
+    }
+  }
+
+  const isDiscounted = Boolean(body.isDiscounted);
+  if (isDiscounted && originalPrice !== undefined && originalPrice <= price) {
+    return res.status(400).json({ error: 'Il prezzo originale deve essere superiore al prezzo scontato.' });
+  }
+
+  // Validate start and end dates if provided
+  const discountStartDate = body.discountStartDate ? String(body.discountStartDate).trim() : undefined;
+  const discountEndDate = body.discountEndDate ? String(body.discountEndDate).trim() : undefined;
+
+  if (discountStartDate && discountEndDate) {
+    const start = new Date(discountStartDate);
+    const end = new Date(discountEndDate);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start > end) {
+      return res.status(400).json({ error: 'La data di inizio sconto non può essere successiva alla data di fine sconto.' });
+    }
+  }
+
   const newProduct = {
     id: `prod-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
     name: body.name.trim(),
-    category: body.category || 'Fresh Tubers & Veggies',
-    origin: (body.origin || 'Imported').trim(),
+    category: body.category || 'Tuberi e Verdure Fresche',
+    origin: (body.origin || 'Importato').trim(),
     subCategory: (body.subCategory || '').trim(),
     price: Number(price.toFixed(2)),
-    originalPrice: body.originalPrice ? Number(Number(body.originalPrice).toFixed(2)) : undefined,
-    packageSize: (body.packageSize || '1 unit').trim(),
+    originalPrice,
+    packageSize: (body.packageSize || '1 pezzo / conf.').trim(),
     image: body.image || 'catTubers',
     imageStatus: body.imageStatus || 'needs_review',
     gallery: Array.isArray(body.gallery) ? body.gallery : [],
@@ -231,8 +256,15 @@ app.post('/api/products', requireAdminAuth, (req: Request, res: Response) => {
     isAvailable: body.isAvailable !== false,
     ingredients: (body.ingredients || '').trim(),
     allergenInfo: (body.allergenInfo || '').trim(),
+    dietaryInfo: body.dietaryInfo || undefined,
     sku: (body.sku || `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`).trim(),
-    salesRank: products.length + 1
+    salesRank: products.length + 1,
+    isNewArrival: Boolean(body.isNewArrival),
+    isDiscounted,
+    discountActive: body.discountActive !== false,
+    discountStartDate,
+    discountEndDate,
+    createdAt: new Date().toISOString()
   };
 
   products.unshift(newProduct);
@@ -261,6 +293,39 @@ app.put('/api/products/:id', requireAdminAuth, (req: Request, res: Response) => 
     return res.status(400).json({ error: 'Stock must be a non-negative integer.' });
   }
 
+  let originalPrice = current.originalPrice;
+  if (body.originalPrice !== undefined) {
+    if (body.originalPrice === null || body.originalPrice === '') {
+      originalPrice = undefined;
+    } else {
+      const parsed = Number(body.originalPrice);
+      if (!isNaN(parsed) && parsed > 0) {
+        originalPrice = Number(parsed.toFixed(2));
+      }
+    }
+  }
+
+  const isDiscounted = body.isDiscounted !== undefined ? Boolean(body.isDiscounted) : current.isDiscounted;
+  if (isDiscounted && originalPrice !== undefined && originalPrice <= updatedPrice) {
+    return res.status(400).json({ error: 'Il prezzo originale deve essere superiore al prezzo scontato.' });
+  }
+
+  const discountStartDate = body.discountStartDate !== undefined
+    ? (body.discountStartDate ? String(body.discountStartDate).trim() : undefined)
+    : current.discountStartDate;
+
+  const discountEndDate = body.discountEndDate !== undefined
+    ? (body.discountEndDate ? String(body.discountEndDate).trim() : undefined)
+    : current.discountEndDate;
+
+  if (discountStartDate && discountEndDate) {
+    const start = new Date(discountStartDate);
+    const end = new Date(discountEndDate);
+    if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start > end) {
+      return res.status(400).json({ error: 'La data di inizio sconto non può essere successiva alla data di fine sconto.' });
+    }
+  }
+
   // Track if image changed to clean up old uploaded image safely
   const oldImage = current.image;
   const newImage = body.image !== undefined ? body.image : current.image;
@@ -272,7 +337,7 @@ app.put('/api/products/:id', requireAdminAuth, (req: Request, res: Response) => 
     origin: body.origin !== undefined ? String(body.origin).trim() : current.origin,
     subCategory: body.subCategory !== undefined ? String(body.subCategory).trim() : current.subCategory,
     price: Number(updatedPrice.toFixed(2)),
-    originalPrice: body.originalPrice !== undefined ? Number(Number(body.originalPrice).toFixed(2)) : current.originalPrice,
+    originalPrice,
     packageSize: body.packageSize !== undefined ? String(body.packageSize).trim() : current.packageSize,
     image: newImage,
     imageStatus: body.imageStatus || current.imageStatus || 'verified',
@@ -282,7 +347,13 @@ app.put('/api/products/:id', requireAdminAuth, (req: Request, res: Response) => 
     isAvailable: body.isAvailable !== undefined ? Boolean(body.isAvailable) : current.isAvailable,
     ingredients: body.ingredients !== undefined ? String(body.ingredients).trim() : current.ingredients,
     allergenInfo: body.allergenInfo !== undefined ? String(body.allergenInfo).trim() : current.allergenInfo,
-    sku: body.sku !== undefined ? String(body.sku).trim() : current.sku
+    dietaryInfo: body.dietaryInfo !== undefined ? body.dietaryInfo : current.dietaryInfo,
+    sku: body.sku !== undefined ? String(body.sku).trim() : current.sku,
+    isNewArrival: body.isNewArrival !== undefined ? Boolean(body.isNewArrival) : current.isNewArrival,
+    isDiscounted: Boolean(isDiscounted),
+    discountActive: body.discountActive !== undefined ? Boolean(body.discountActive) : (current.discountActive !== false),
+    discountStartDate,
+    discountEndDate
   };
 
   writeData('products.json', products);

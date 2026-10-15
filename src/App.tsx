@@ -18,6 +18,7 @@ import { RecipeModal } from './components/RecipeModal';
 import { BiometricsModal } from './components/BiometricsModal';
 import { AdminPortal } from './components/AdminPortal';
 import { AllergenInfoModal } from './components/AllergenInfoModal';
+import { PromotionsSection } from './components/PromotionsSection';
 
 import { Product, Recipe, Review, StoreSettings, CartItem, Order } from './types';
 
@@ -203,11 +204,21 @@ export default function App() {
         <Hero
           settings={settings}
           onShopClick={() => handleNavigateSection('products-section')}
+          onShopOffersClick={() => handleNavigateSection('special-offers-section')}
+          onDiscoverNewClick={() => handleNavigateSection('new-arrivals-section')}
           onWhatsAppClick={handleWhatsAppOrder}
         />
 
         {/* 3. Trust Strip (4 informational cards) */}
         <TrustStrip />
+
+        {/* 3.5. Special Offers & New Arrivals Showcases */}
+        <PromotionsSection
+          products={products}
+          onAddToCart={handleAddToCart}
+          onOpenProductDetail={(prod) => setSelectedProduct(prod)}
+          onNavigateSection={handleNavigateSection}
+        />
 
         {/* 4. Shop by Categories */}
         <CategoriesSection

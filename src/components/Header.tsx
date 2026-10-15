@@ -135,6 +135,20 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-6 text-[13px] font-medium text-slate-700">
             <button 
+              onClick={() => onNavigateSection('special-offers-section')}
+              className="hover:text-rose-600 text-rose-700 font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-600"></span>
+              Offerte
+            </button>
+            <button 
+              onClick={() => onNavigateSection('new-arrivals-section')}
+              className="hover:text-[#124b2e] text-emerald-800 font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+              Nuovi Arrivi
+            </button>
+            <button 
               onClick={() => onNavigateSection('products-section')}
               className="hover:text-[#124b2e] transition-colors cursor-pointer"
             >
@@ -221,6 +235,20 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Mobile dropdown menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2.5 text-sm font-medium text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+            <button 
+              onClick={() => { onNavigateSection('special-offers-section'); setMobileMenuOpen(false); }}
+              className="text-left py-1.5 text-rose-700 font-semibold flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-rose-600"></span>
+              Offerte Speciali
+            </button>
+            <button 
+              onClick={() => { onNavigateSection('new-arrivals-section'); setMobileMenuOpen(false); }}
+              className="text-left py-1.5 text-emerald-800 font-semibold flex items-center gap-2"
+            >
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              Nuovi Arrivi
+            </button>
             <button 
               onClick={() => { onNavigateSection('products-section'); setMobileMenuOpen(false); }}
               className="text-left py-1.5 hover:text-[#124b2e]"

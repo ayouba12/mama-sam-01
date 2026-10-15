@@ -28,6 +28,12 @@ export interface Product {
   allergenInfo?: string;
   dietaryInfo?: ProductDietaryInfo;
   sku?: string;
+  isNewArrival?: boolean;
+  isDiscounted?: boolean;
+  discountActive?: boolean;
+  discountStartDate?: string;
+  discountEndDate?: string;
+  createdAt?: string;
 }
 
 export type AllergenKey = 

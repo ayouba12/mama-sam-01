@@ -21,11 +21,22 @@ import {
   Eye,
   ShieldCheck,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Flame,
+  Sparkles,
+  Calendar,
+  Tag
 } from 'lucide-react';
 import { Product, Order, OrderStatus, StoreSettings, ProductCategory } from '../types';
 import { ImageUploadDropzone } from './ImageUploadDropzone';
 import { resolveImage } from '../utils/imageHelper';
+import { 
+  isProductDiscountActive, 
+  isProductNewArrival, 
+  calculateDiscountPercentage, 
+  getPromotionScheduleStatus,
+  formatDateToItalian 
+} from '../utils/promotionsHelper';
 
 interface AdminPortalProps {
   isOpen: boolean;
@@ -66,6 +77,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [productForm, setProductForm] = useState<Partial<Product>>({});
   const [productSearch, setProductSearch] = useState('');
+  const [productPromoFilter, setProductPromoFilter] = useState<'all' | 'offers' | 'new' | 'lowstock'>('all');
   const [productSaveError, setProductSaveError] = useState<string | null>(null);
 
   // Settings form
@@ -175,6 +187,33 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setProductSaveError(null);
+
+    const price = Number(productForm.price);
+    if (isNaN(price) || price < 0) {
+      setProductSaveError('Inserisci un prezzo valido.');
+      return;
+    }
+
+    if (productForm.isDiscounted) {
+      const orig = Number(productForm.originalPrice);
+      if (isNaN(orig) || orig <= 0) {
+        setProductSaveError('Per abilitare lo sconto, inserisci un prezzo originale valido maggiore di zero.');
+        return;
+      }
+      if (orig <= price) {
+        setProductSaveError(`Il prezzo originale (€${orig.toFixed(2)}) deve essere superiore al prezzo scontato (€${price.toFixed(2)}).`);
+        return;
+      }
+    }
+
+    if (productForm.discountStartDate && productForm.discountEndDate) {
+      const start = new Date(productForm.discountStartDate);
+      const end = new Date(productForm.discountEndDate);
+      if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && start > end) {
+        setProductSaveError('La data di inizio sconto non può essere successiva alla data di fine sconto.');
+        return;
+      }
+    }
 
     try {
       if (isCreatingProduct) {
@@ -742,6 +781,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           category: 'Tuberi e Verdure Fresche',
                           origin: 'Importato',
                           price: 5.00,
+                          originalPrice: undefined,
                           packageSize: '1 pezzo / conf.',
                           stock: 20,
                           description: '',
@@ -750,7 +790,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           imageStatus: 'needs_review',
                           ingredients: '',
                           allergenInfo: '',
-                          sku: `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`
+                          sku: `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+                          isNewArrival: false,
+                          isDiscounted: false,
+                          discountActive: true,
+                          discountStartDate: '',
+                          discountEndDate: ''
                         });
                       }}
                       className="px-3.5 py-2 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
@@ -760,16 +805,68 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                     </button>
                   </div>
 
-                  {/* Search filter for products */}
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      type="text"
-                      placeholder="Filter product list by name, category, or SKU..."
-                      value={productSearch}
-                      onChange={e => setProductSearch(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 bg-white text-xs border border-stone-200 rounded-xl"
-                    />
+                  {/* Search and Promotion Filters */}
+                  <div className="space-y-2.5">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      <span className="text-slate-400 font-semibold text-[11px] mr-1">Filtra per:</span>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('all')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'all'
+                            ? 'bg-[#124b2e] text-white shadow-2xs'
+                            : 'bg-stone-100 hover:bg-stone-200 text-slate-700'
+                        }`}
+                      >
+                        Tutti ({products.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('offers')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
+                          productPromoFilter === 'offers'
+                            ? 'bg-rose-600 text-white shadow-2xs'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200'
+                        }`}
+                      >
+                        <Flame className="w-3 h-3 fill-current" />
+                        <span>In Offerta ({products.filter(p => isProductDiscountActive(p)).length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('new')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
+                          productPromoFilter === 'new'
+                            ? 'bg-emerald-700 text-white shadow-2xs'
+                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        }`}
+                      >
+                        <Sparkles className="w-3 h-3 text-amber-500" />
+                        <span>Nuovi Arrivi ({products.filter(p => isProductNewArrival(p)).length})</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('lowstock')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'lowstock'
+                            ? 'bg-amber-600 text-white shadow-2xs'
+                            : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}
+                      >
+                        Scorte Basse ({products.filter(p => p.stock <= 5).length})
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Filtra prodotti per nome, categoria o codice SKU..."
+                        value={productSearch}
+                        onChange={e => setProductSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 bg-white text-xs border border-stone-200 rounded-xl focus:border-[#124b2e] outline-hidden"
+                      />
+                    </div>
                   </div>
 
                   {/* Product Form Modal / Section */}
@@ -955,13 +1052,269 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
 
                         <div className="sm:col-span-2">
-                          <label className="block font-bold text-slate-700 mb-1">Description</label>
+                          <label className="block font-bold text-slate-700 mb-1">Descrizione del Prodotto</label>
                           <textarea
                             rows={2}
                             value={productForm.description || ''}
                             onChange={e => setProductForm({ ...productForm, description: e.target.value })}
-                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
+                            placeholder="Descrivi ingredienti, sapore o usi culinari tradizionali..."
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs"
                           />
+                        </div>
+
+                        {/* PROMOTIONAL & MARKETING CONTROLS */}
+                        <div className="sm:col-span-2 p-4 bg-amber-50/70 rounded-xl border border-amber-200/90 space-y-4">
+                          <div className="flex items-center justify-between pb-2 border-b border-amber-200">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-900 flex items-center justify-center">
+                                <Flame className="w-4 h-4 text-amber-700" />
+                              </div>
+                              <div>
+                                <h5 className="font-bold text-xs uppercase tracking-wider text-amber-950">
+                                  Promozioni, Sconti &amp; Nuovi Arrivi
+                                </h5>
+                                <p className="text-[11px] text-amber-800/80">
+                                  Configura sconti a tempo, date di validità e contrassegno Nuovi Arrivi
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {/* Toggle 1: Mark as New Arrival */}
+                            <div className="p-3 bg-white rounded-xl border border-amber-200/80 shadow-2xs flex items-start justify-between gap-3">
+                              <div className="space-y-0.5">
+                                <label htmlFor="isNewArrivalToggle" className="font-bold text-slate-900 text-xs flex items-center gap-1.5 cursor-pointer">
+                                  <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+                                  <span>Contrassegna come Nuovo Arrivo</span>
+                                </label>
+                                <p className="text-[11px] text-slate-500 leading-tight">
+                                  Mostra nella vetrina "Nuovi Arrivi" in homepage con badge "NUOVO".
+                                </p>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                                <input
+                                  id="isNewArrivalToggle"
+                                  type="checkbox"
+                                  checked={Boolean(productForm.isNewArrival)}
+                                  onChange={e => setProductForm({ ...productForm, isNewArrival: e.target.checked })}
+                                  className="sr-only peer"
+                                />
+                                <div className="w-9 h-5 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#124b2e]"></div>
+                              </label>
+                            </div>
+
+                            {/* Toggle 2: Enable Discount */}
+                            <div className="p-3 bg-white rounded-xl border border-amber-200/80 shadow-2xs flex items-start justify-between gap-3">
+                              <div className="space-y-0.5">
+                                <label htmlFor="isDiscountedToggle" className="font-bold text-slate-900 text-xs flex items-center gap-1.5 cursor-pointer">
+                                  <Flame className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Abilita Sconto Promozionale</span>
+                                </label>
+                                <p className="text-[11px] text-slate-500 leading-tight">
+                                  Mostra nella sezione "Offerte Speciali" con prezzo originale barrato e badge -%.
+                                </p>
+                              </div>
+                              <label className="relative inline-flex items-center cursor-pointer shrink-0 mt-0.5">
+                                <input
+                                  id="isDiscountedToggle"
+                                  type="checkbox"
+                                  checked={Boolean(productForm.isDiscounted)}
+                                  onChange={e => {
+                                    const checked = e.target.checked;
+                                    setProductForm({ 
+                                      ...productForm, 
+                                      isDiscounted: checked,
+                                      discountActive: checked ? (productForm.discountActive !== false) : false
+                                    });
+                                  }}
+                                  className="sr-only peer"
+                                />
+                                <div className="w-9 h-5 bg-stone-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-600"></div>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* DISCOUNT DETAILS & SCHEDULING (shown if discount is enabled) */}
+                          {productForm.isDiscounted && (
+                            <div className="p-3.5 bg-white rounded-xl border border-rose-200 space-y-3.5">
+                              
+                              {/* Promotion Active Toggle */}
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-stone-100">
+                                <div>
+                                  <span className="font-bold text-slate-800 text-xs">Stato Attivazione Promozione</span>
+                                  <p className="text-[11px] text-slate-500">
+                                    Attiva o disattiva l'offerta senza cancellare i prezzi impostati.
+                                  </p>
+                                </div>
+                                <select
+                                  value={productForm.discountActive !== false ? 'active' : 'inactive'}
+                                  onChange={e => setProductForm({ ...productForm, discountActive: e.target.value === 'active' })}
+                                  className={`text-xs font-bold px-2.5 py-1.5 rounded-lg border outline-hidden cursor-pointer ${
+                                    productForm.discountActive !== false
+                                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                      : 'bg-stone-100 text-stone-700 border-stone-300'
+                                  }`}
+                                >
+                                  <option value="active">🟢 Promozione Attiva</option>
+                                  <option value="inactive">⚪ Sospesa / Disattivata</option>
+                                </select>
+                              </div>
+
+                              {/* Prices Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block font-bold text-slate-700 mb-1">
+                                    Prezzo Originale Pieno (€) *
+                                  </label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    required={productForm.isDiscounted}
+                                    value={productForm.originalPrice !== undefined ? productForm.originalPrice : ''}
+                                    onChange={e => {
+                                      const val = e.target.value ? parseFloat(e.target.value) : undefined;
+                                      setProductForm({ ...productForm, originalPrice: val });
+                                    }}
+                                    placeholder="es. 8.00"
+                                    className="w-full px-3 py-1.5 text-xs bg-stone-50 border border-stone-300 rounded-lg focus:border-rose-500 outline-hidden"
+                                  />
+                                  <span className="text-[10px] text-slate-400">Prezzo pieno precedente (mostrato barrato)</span>
+                                </div>
+
+                                <div>
+                                  <label className="block font-bold text-slate-700 mb-1">
+                                    Prezzo Scontato Promozionale (€) *
+                                  </label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0.01"
+                                    required
+                                    value={productForm.price !== undefined ? productForm.price : ''}
+                                    onChange={e => setProductForm({ ...productForm, price: parseFloat(e.target.value) })}
+                                    placeholder="es. 6.50"
+                                    className="w-full px-3 py-1.5 text-xs font-bold text-emerald-900 bg-stone-50 border border-stone-300 rounded-lg focus:border-emerald-600 outline-hidden"
+                                  />
+                                  <span className="text-[10px] text-slate-400">Prezzo effettivo pagato dal cliente</span>
+                                </div>
+                              </div>
+
+                              {/* Live Discount Calculation Feedback */}
+                              {(() => {
+                                const orig = Number(productForm.originalPrice);
+                                const curr = Number(productForm.price);
+                                if (orig > 0 && curr > 0) {
+                                  if (orig > curr) {
+                                    const pct = Math.round(((orig - curr) / orig) * 100);
+                                    const savings = (orig - curr).toFixed(2);
+                                    return (
+                                      <div className="p-2.5 bg-emerald-50 rounded-lg border border-emerald-200 text-xs text-emerald-900 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-extrabold text-white bg-rose-600 px-2 py-0.5 rounded text-[11px]">
+                                            -{pct}% SCONTO
+                                          </span>
+                                          <span>Il cliente risparmia <strong>€{savings}</strong> per unità</span>
+                                        </div>
+                                        <span className="text-[11px] text-emerald-700 font-medium hidden sm:inline">Calcolo verificato</span>
+                                      </div>
+                                    );
+                                  } else {
+                                    return (
+                                      <div className="p-2.5 bg-rose-50 rounded-lg border border-rose-200 text-xs text-rose-800 flex items-center gap-2">
+                                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                                        <span>Attenzione: Il prezzo originale (€{orig}) deve essere superiore al prezzo scontato (€{curr}).</span>
+                                      </div>
+                                    );
+                                  }
+                                }
+                                return null;
+                              })()}
+
+                              {/* Dates Scheduling */}
+                              <div className="pt-2 border-t border-stone-100">
+                                <label className="block font-bold text-slate-800 text-xs mb-1">
+                                  Programmazione Date Validità Sconto (Opzionale)
+                                </label>
+                                <p className="text-[11px] text-slate-500 mb-2">
+                                  Lo sconto si attiva e scade automaticamente in base a queste date. Senza date, rimane sempre attivo finché non lo disattivi.
+                                </p>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                  <div>
+                                    <label className="block text-slate-600 font-medium mb-1">Data Inizio Sconto</label>
+                                    <input
+                                      type="date"
+                                      value={productForm.discountStartDate || ''}
+                                      onChange={e => setProductForm({ ...productForm, discountStartDate: e.target.value })}
+                                      className="w-full px-3 py-1.5 bg-white border border-stone-300 rounded-lg"
+                                    />
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-slate-600 font-medium mb-1">Data Fine Sconto (Scadenza)</label>
+                                    <input
+                                      type="date"
+                                      value={productForm.discountEndDate || ''}
+                                      onChange={e => setProductForm({ ...productForm, discountEndDate: e.target.value })}
+                                      className="w-full px-3 py-1.5 bg-white border border-stone-300 rounded-lg"
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Quick Date Presets */}
+                                <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10.5px]">
+                                  <span className="text-slate-400">Scorciatoie:</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const start = new Date().toISOString().split('T')[0];
+                                      const end = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+                                      setProductForm({ ...productForm, discountStartDate: start, discountEndDate: end });
+                                    }}
+                                    className="px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-slate-700 cursor-pointer"
+                                  >
+                                    +7 giorni
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const start = new Date().toISOString().split('T')[0];
+                                      const end = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
+                                      setProductForm({ ...productForm, discountStartDate: start, discountEndDate: end });
+                                    }}
+                                    className="px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-slate-700 cursor-pointer"
+                                  >
+                                    +14 giorni
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const start = new Date().toISOString().split('T')[0];
+                                      const end = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+                                      setProductForm({ ...productForm, discountStartDate: start, discountEndDate: end });
+                                    }}
+                                    className="px-2 py-0.5 rounded bg-stone-100 hover:bg-stone-200 text-slate-700 cursor-pointer"
+                                  >
+                                    +30 giorni
+                                  </button>
+                                  {(productForm.discountStartDate || productForm.discountEndDate) && (
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        setProductForm({ ...productForm, discountStartDate: '', discountEndDate: '' });
+                                      }}
+                                      className="px-2 py-0.5 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 cursor-pointer"
+                                    >
+                                      Rimuovi date
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+
+                            </div>
+                          )}
                         </div>
 
                         <div className="sm:col-span-2 flex items-center justify-end gap-2 pt-2">
@@ -990,68 +1343,128 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <table className="w-full text-left">
                         <thead className="bg-stone-50 border-b border-stone-200 text-slate-600 font-bold">
                           <tr>
-                            <th className="p-3">Photo &amp; Product</th>
-                            <th className="p-3">Category</th>
-                            <th className="p-3">Price</th>
-                            <th className="p-3">Stock</th>
-                            <th className="p-3">Photo Accuracy</th>
-                            <th className="p-3">Status</th>
-                            <th className="p-3 text-right">Actions</th>
+                            <th className="p-3">Foto &amp; Prodotto</th>
+                            <th className="p-3">Categoria</th>
+                            <th className="p-3">Prezzo</th>
+                            <th className="p-3">Promozioni &amp; Badge</th>
+                            <th className="p-3">Giacenza</th>
+                            <th className="p-3">Accuratezza Foto</th>
+                            <th className="p-3">Stato</th>
+                            <th className="p-3 text-right">Azioni</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-stone-100">
                           {products
-                            .filter(p => 
-                              p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-                              p.category.toLowerCase().includes(productSearch.toLowerCase()) ||
-                              (p.sku && p.sku.toLowerCase().includes(productSearch.toLowerCase()))
-                            )
-                            .map(prod => (
-                              <tr key={prod.id} className="hover:bg-stone-50/60">
-                                <td className="p-3 font-semibold text-slate-900 max-w-xs">
-                                  <div className="flex items-center gap-2.5">
-                                    <div className="w-9 h-9 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
-                                      <img
-                                        src={resolveImage(prod.image)}
-                                        alt=""
-                                        className="w-full h-full object-cover"
-                                      />
+                            .filter(p => {
+                              if (productSearch) {
+                                const q = productSearch.toLowerCase().trim();
+                                const matchesSearch = (
+                                  p.name.toLowerCase().includes(q) ||
+                                  p.category.toLowerCase().includes(q) ||
+                                  (p.sku && p.sku.toLowerCase().includes(q))
+                                );
+                                if (!matchesSearch) return false;
+                              }
+                              if (productPromoFilter === 'offers') {
+                                return isProductDiscountActive(p) || p.isDiscounted || (p.originalPrice && p.originalPrice > p.price);
+                              }
+                              if (productPromoFilter === 'new') {
+                                return isProductNewArrival(p);
+                              }
+                              if (productPromoFilter === 'lowstock') {
+                                return p.stock <= 5;
+                              }
+                              return true;
+                            })
+                            .map(prod => {
+                              const promoStatus = getPromotionScheduleStatus(prod);
+                              const hasDiscount = isProductDiscountActive(prod);
+                              const isNew = isProductNewArrival(prod);
+
+                              return (
+                                <tr key={prod.id} className="hover:bg-stone-50/60">
+                                  <td className="p-3 font-semibold text-slate-900 max-w-xs">
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="w-9 h-9 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
+                                        <img
+                                          src={resolveImage(prod.image)}
+                                          alt=""
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                      <div className="truncate">
+                                        <span className="block truncate font-bold text-slate-900">{prod.name}</span>
+                                        <span className="block text-[11px] text-slate-400 font-normal">
+                                          {prod.packageSize} {prod.sku && `· ${prod.sku}`}
+                                        </span>
+                                      </div>
                                     </div>
-                                    <div className="truncate">
-                                      <span className="block truncate font-bold text-slate-900">{prod.name}</span>
-                                      <span className="block text-[11px] text-slate-400 font-normal">
-                                        {prod.packageSize} {prod.sku && `· ${prod.sku}`}
-                                      </span>
+                                  </td>
+                                  <td className="p-3 text-slate-600">{prod.category}</td>
+                                  <td className="p-3">
+                                    <div className="font-extrabold text-slate-900">
+                                      €{prod.price.toFixed(2)}
                                     </div>
-                                  </div>
-                                </td>
-                                <td className="p-3 text-slate-600">{prod.category}</td>
-                                <td className="p-3 font-extrabold text-slate-900">€{prod.price.toFixed(2)}</td>
-                                <td className="p-3">
-                                  <span className={`font-bold ${prod.stock <= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
-                                    {prod.stock} units
-                                  </span>
-                                </td>
-                                <td className="p-3">
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    prod.imageStatus === 'verified'
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : prod.imageStatus === 'missing'
-                                      ? 'bg-rose-100 text-rose-800'
-                                      : 'bg-amber-100 text-amber-800'
-                                  }`}>
-                                    {prod.imageStatus === 'verified' ? '✓ Verified' : prod.imageStatus === 'missing' ? 'Missing' : 'Needs Review'}
-                                  </span>
-                                </td>
-                                <td className="p-3">
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                    prod.isAvailable && prod.stock > 0
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : 'bg-rose-100 text-rose-800'
-                                  }`}>
-                                    {prod.isAvailable && prod.stock > 0 ? 'Active' : 'Unavailable'}
-                                  </span>
-                                </td>
+                                    {hasDiscount && prod.originalPrice && prod.originalPrice > prod.price && (
+                                      <div className="text-[11px] text-slate-400 line-through">
+                                        €{prod.originalPrice.toFixed(2)}
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  {/* Promozioni & Badge */}
+                                  <td className="p-3">
+                                    <div className="flex flex-col gap-1 items-start">
+                                      {isNew && (
+                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[#124b2e] text-white inline-flex items-center gap-1 shadow-2xs">
+                                          <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                                          <span>Nuovo Arrivo</span>
+                                        </span>
+                                      )}
+
+                                      {(prod.isDiscounted || (prod.originalPrice && prod.originalPrice > prod.price)) ? (
+                                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border inline-flex items-center gap-1 ${promoStatus.badgeClass}`}>
+                                          <Flame className="w-2.5 h-2.5" />
+                                          <span>
+                                            {prod.originalPrice && prod.originalPrice > prod.price 
+                                              ? `-${calculateDiscountPercentage(prod.originalPrice, prod.price)}% ` 
+                                              : ''}
+                                            {promoStatus.label}
+                                          </span>
+                                        </span>
+                                      ) : null}
+
+                                      {!isNew && !prod.isDiscounted && !prod.originalPrice && (
+                                        <span className="text-slate-400 text-[11px]">—</span>
+                                      )}
+                                    </div>
+                                  </td>
+
+                                  <td className="p-3">
+                                    <span className={`font-bold ${prod.stock <= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
+                                      {prod.stock} unità
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      prod.imageStatus === 'verified'
+                                        ? 'bg-emerald-100 text-emerald-800'
+                                        : prod.imageStatus === 'missing'
+                                        ? 'bg-rose-100 text-rose-800'
+                                        : 'bg-amber-100 text-amber-800'
+                                    }`}>
+                                      {prod.imageStatus === 'verified' ? '✓ Verificata' : prod.imageStatus === 'missing' ? 'Mancante' : 'Da Rivedere'}
+                                    </span>
+                                  </td>
+                                  <td className="p-3">
+                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                      prod.isAvailable && prod.stock > 0
+                                        ? 'bg-emerald-100 text-emerald-800'
+                                        : 'bg-rose-100 text-rose-800'
+                                    }`}>
+                                      {prod.isAvailable && prod.stock > 0 ? 'Attivo' : 'Non disp.'}
+                                    </span>
+                                  </td>
                                 <td className="p-3 text-right space-x-1">
                                   <button
                                     onClick={() => {
@@ -1075,7 +1488,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                   </button>
                                 </td>
                               </tr>
-                            ))}
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

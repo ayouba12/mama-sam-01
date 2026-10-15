@@ -7,11 +7,13 @@ import {
   ShoppingBag, 
   Sparkles,
   Info,
-  AlertTriangle
+  AlertTriangle,
+  Flame
 } from 'lucide-react';
 import { Product, ProductCategory } from '../types';
 import { resolveImage } from '../utils/imageHelper';
 import { getContainsList, getMayContainList, getDietaryBadges } from '../utils/allergenHelper';
+import { isProductDiscountActive, isProductNewArrival, calculateDiscountPercentage } from '../utils/promotionsHelper';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -217,13 +219,25 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                     className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                   />
-                  {product.originalPrice && (
-                    <span className="absolute top-3 right-3 px-1.5 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded-md shadow-2xs">
-                      OFFERTA
-                    </span>
-                  )}
+                  {/* Badges */}
+                  <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-1 pointer-events-none">
+                    {isProductNewArrival(product) ? (
+                      <span className="px-1.5 py-0.5 bg-[#124b2e] text-white text-[9.5px] font-bold rounded shadow-2xs flex items-center gap-1 uppercase tracking-wider">
+                        <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                        <span>Nuovo</span>
+                      </span>
+                    ) : <div />}
+
+                    {isProductDiscountActive(product) && (
+                      <span className="px-1.5 py-0.5 bg-rose-600 text-white text-[10px] font-bold rounded shadow-2xs flex items-center gap-0.5">
+                        <Flame className="w-2.5 h-2.5 fill-white" />
+                        <span>-{calculateDiscountPercentage(product.originalPrice, product.price)}%</span>
+                      </span>
+                    )}
+                  </div>
+
                   {product.stock <= 5 && product.stock > 0 && (
-                    <span className="absolute bottom-3 left-3 px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-bold rounded-md shadow-2xs">
+                    <span className="absolute bottom-2.5 left-2.5 px-1.5 py-0.5 bg-amber-500/95 text-white text-[10px] font-bold rounded shadow-2xs pointer-events-none">
                       Solo {product.stock} rimasti
                     </span>
                   )}
@@ -299,7 +313,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                       <span className="font-extrabold text-base text-slate-900">
                         €{product.price.toFixed(2)}
                       </span>
-                      {product.originalPrice && (
+                      {isProductDiscountActive(product) && product.originalPrice && product.originalPrice > product.price && (
                         <span className="text-xs text-slate-400 line-through">
                           €{product.originalPrice.toFixed(2)}
                         </span>

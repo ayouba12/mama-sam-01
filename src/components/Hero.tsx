@@ -1,16 +1,21 @@
 import React from 'react';
+import { Flame, Sparkles } from 'lucide-react';
 import { IMAGES } from '../assets/images';
 import { StoreSettings } from '../types';
 
 interface HeroProps {
   settings: StoreSettings;
   onShopClick: () => void;
+  onShopOffersClick?: () => void;
+  onDiscoverNewClick?: () => void;
   onWhatsAppClick?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
   settings,
-  onShopClick
+  onShopClick,
+  onShopOffersClick,
+  onDiscoverNewClick
 }) => {
   return (
     <section className="relative pt-6 pb-10 sm:pt-10 sm:pb-14 bg-white border-b border-stone-100 overflow-hidden">
@@ -37,13 +42,31 @@ export const Hero: React.FC<HeroProps> = ({
               Ordina online e ritira in circa 30 minuti presso il nostro negozio a Messina. Dagli autentici yam puna del Ghana e garri dorato all'olio di palma puro, pesce affumicato e platani freschi.
             </p>
 
-            {/* Single Primary CTA */}
-            <div className="flex items-center gap-4 mb-6">
+            {/* Promotional & Primary CTAs */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 mb-6">
               <button
                 onClick={onShopClick}
-                className="px-7 py-3 bg-[#124b2e] hover:bg-[#0e3b24] text-white font-semibold text-sm sm:text-base rounded-xl shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                className="px-5 sm:px-6 py-2.5 sm:py-3 bg-[#124b2e] hover:bg-[#0e3b24] text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-all active:scale-[0.98] cursor-pointer"
               >
                 Acquista Prodotti Freschi
+              </button>
+
+              <button
+                onClick={onShopOffersClick || onShopClick}
+                className="px-4 sm:px-5 py-2.5 sm:py-3 bg-rose-50 hover:bg-rose-100/90 text-rose-800 border border-rose-200 font-bold text-xs sm:text-sm rounded-xl transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title="Vedi le offerte speciali con sconti attivi"
+              >
+                <Flame className="w-4 h-4 text-rose-600 fill-rose-600" />
+                <span>Acquista Offerte</span>
+              </button>
+
+              <button
+                onClick={onDiscoverNewClick || onShopClick}
+                className="px-4 sm:px-5 py-2.5 sm:py-3 bg-emerald-50 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-200 font-bold text-xs sm:text-sm rounded-xl transition-all active:scale-[0.98] cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title="Scopri i nuovi prodotti appena arrivati"
+              >
+                <Sparkles className="w-4 h-4 text-emerald-700" />
+                <span>Scopri Nuovi Prodotti</span>
               </button>
             </div>
 

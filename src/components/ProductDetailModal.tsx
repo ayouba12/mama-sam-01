@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, Plus, Minus, Check, MapPin, ShieldCheck, 
-  AlertTriangle, ShieldAlert, CheckCircle2, Leaf, Info, Calendar, Sparkles
+  AlertTriangle, ShieldAlert, CheckCircle2, Leaf, Info, Calendar, Sparkles, Flame, Clock
 } from 'lucide-react';
 import { Product } from '../types';
 import { resolveImage } from '../utils/imageHelper';
@@ -11,6 +11,12 @@ import {
   getVerifiedAbsentList, 
   getDietaryBadges 
 } from '../utils/allergenHelper';
+import { 
+  isProductDiscountActive, 
+  isProductNewArrival, 
+  calculateDiscountPercentage,
+  formatDateToItalian 
+} from '../utils/promotionsHelper';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -73,6 +79,30 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               alt={product.name}
               className="w-full h-full object-cover"
             />
+
+            {/* Badges */}
+            <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-1 pointer-events-none">
+              {isProductNewArrival(product) ? (
+                <span className="px-2 py-0.5 bg-[#124b2e] text-white text-[10px] font-bold rounded-md shadow-xs flex items-center gap-1 uppercase tracking-wider">
+                  <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                  <span>Nuovo Arrivo</span>
+                </span>
+              ) : <div />}
+
+              {isProductDiscountActive(product) && product.originalPrice && product.originalPrice > product.price && (
+                <span className="px-2 py-0.5 bg-rose-600 text-white text-[10.5px] font-extrabold rounded-md shadow-xs flex items-center gap-1 tracking-tight">
+                  <Flame className="w-3 h-3 fill-white" />
+                  <span>-{calculateDiscountPercentage(product.originalPrice, product.price)}% OFFERTA</span>
+                </span>
+              )}
+            </div>
+
+            {product.discountEndDate && isProductDiscountActive(product) && (
+              <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-medium rounded-md shadow-xs flex items-center gap-1 pointer-events-none">
+                <Clock className="w-3 h-3 text-amber-300" />
+                <span>Offerta valida fino al {formatDateToItalian(product.discountEndDate)}</span>
+              </span>
+            )}
           </div>
 
           <div>
@@ -263,10 +293,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 <span className="text-2xl font-extrabold text-slate-900">
                   €{product.price.toFixed(2)}
                 </span>
-                {product.originalPrice && (
-                  <span className="text-sm text-slate-400 line-through">
-                    €{product.originalPrice.toFixed(2)}
-                  </span>
+                {isProductDiscountActive(product) && product.originalPrice && product.originalPrice > product.price && (
+                  <>
+                    <span className="text-sm text-slate-400 line-through">
+                      €{product.originalPrice.toFixed(2)}
+                    </span>
+                    <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md">
+                      Risparmi €{(product.originalPrice - product.price).toFixed(2)} (-{calculateDiscountPercentage(product.originalPrice, product.price)}%)
+                    </span>
+                  </>
                 )}
               </div>
             </div>
