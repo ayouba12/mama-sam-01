@@ -3,7 +3,6 @@ import {
   ShoppingBag, 
   Search, 
   Phone, 
-  Lock, 
   X, 
   Menu 
 } from 'lucide-react';
@@ -13,7 +12,7 @@ interface HeaderProps {
   settings: StoreSettings;
   cartCount: number;
   onOpenCart: () => void;
-  onOpenAdmin: () => void;
+  onOpenAdmin?: () => void;
   onOpenBiometrics: () => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
@@ -100,15 +99,6 @@ export const Header: React.FC<HeaderProps> = ({
               <Phone className="w-3 h-3 text-emerald-300" />
               <span>{settings.phone1}</span>
             </a>
-            <span className="text-emerald-500/60">|</span>
-            <button
-              onClick={onOpenAdmin}
-              className="flex items-center gap-1 text-emerald-200 hover:text-white transition-colors cursor-pointer"
-              title="Accesso Gestione e Staff"
-            >
-              <Lock className="w-3 h-3 text-emerald-300" />
-              <span>Area Staff</span>
-            </button>
           </div>
         </div>
       </div>

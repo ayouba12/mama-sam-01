@@ -18,6 +18,7 @@ import { RecipeModal } from './components/RecipeModal';
 import { BiometricsModal } from './components/BiometricsModal';
 import { AdminPortal } from './components/AdminPortal';
 import { AllergenInfoModal } from './components/AllergenInfoModal';
+import { LegalNoticeModal } from './components/LegalNoticeModal';
 import { PromotionsSection } from './components/PromotionsSection';
 
 import { Product, Recipe, Review, StoreSettings, CartItem, Order } from './types';
@@ -67,6 +68,21 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isAllergenInfoOpen, setIsAllergenInfoOpen] = useState(false);
+  const [isLegalNoticeOpen, setIsLegalNoticeOpen] = useState(false);
+
+  // Allow direct access to Admin via URL hash (#admin) or query (?admin=true)
+  useEffect(() => {
+    const handleUrlRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      const params = new URLSearchParams(window.location.search);
+      if (hash === '#admin' || hash === '#portal' || params.get('admin') === 'true') {
+        setIsAdminOpen(true);
+      }
+    };
+    handleUrlRoute();
+    window.addEventListener('hashchange', handleUrlRoute);
+    return () => window.removeEventListener('hashchange', handleUrlRoute);
+  }, []);
 
   // Sync cart to localStorage
   useEffect(() => {
@@ -270,6 +286,7 @@ export default function App() {
         onOpenBiometrics={() => setIsBiometricsOpen(true)}
         onWhatsAppOrder={handleWhatsAppOrder}
         onOpenAllergenInfo={() => setIsAllergenInfoOpen(true)}
+        onOpenLegalNotice={() => setIsLegalNoticeOpen(true)}
       />
 
       {/* Cart Drawer */}
@@ -342,11 +359,24 @@ export default function App() {
       {isAdminOpen && (
         <AdminPortal
           isOpen={isAdminOpen}
-          onClose={() => setIsAdminOpen(false)}
+          onClose={() => {
+            setIsAdminOpen(false);
+            if (window.location.hash.toLowerCase() === '#admin' || window.location.hash.toLowerCase() === '#portal') {
+              history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+          }}
           products={products}
           onRefreshProducts={loadInitialData}
           settings={settings}
           onUpdateSettings={setSettings}
+        />
+      )}
+
+      {/* Legal Notice & Privacy Modal */}
+      {isLegalNoticeOpen && (
+        <LegalNoticeModal
+          isOpen={isLegalNoticeOpen}
+          onClose={() => setIsLegalNoticeOpen(false)}
         />
       )}
 

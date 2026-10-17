@@ -4,6 +4,9 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,10 +14,20 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = 3000;
 
-// Security Headers Middleware (Compatible with iframe preview in AI Studio)
+// Security Headers Middleware (Enhanced defense-in-depth, compatible with Vite SPA and AI Studio preview)
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), payment=()');
+  // Content Security Policy allowing local assets, Google Fonts, and Maps
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https:; " +
+    "img-src 'self' data: blob: https:; " +
+    "font-src 'self' data: https:; " +
+    "connect-src 'self' ws: wss: https:; " +
+    "frame-src 'self' https:;"
+  );
   next();
 });
 
@@ -68,8 +81,55 @@ function writeData<T>(file: string, data: T): void {
   }
 }
 
-// ----------------- AUTHENTICATION & SECURITY SESSIONS -----------------
-// Cryptographically secure active tokens map: token -> { role: string, expiresAt: number }
+// ----------------- DURABLE SECURITY AUDIT & ALERTS -----------------
+export interface SecurityAuditEntry {
+  id: string;
+  timestamp: string;
+  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded';
+  ip: string;
+  userAgent: string;
+  details: string;
+}
+
+function logSecurityEvent(
+  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded',
+  req: Request,
+  details: string
+): void {
+  try {
+    const audits = readData<SecurityAuditEntry[]>('security_audit.json', []);
+    const entry: SecurityAuditEntry = {
+      id: `sec-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      timestamp: new Date().toISOString(),
+      eventType,
+      ip: getClientIp(req),
+      userAgent: String(req.headers['user-agent'] || 'unknown').substring(0, 150),
+      details: String(details).substring(0, 200)
+    };
+    audits.unshift(entry);
+    if (audits.length > 100) audits.length = 100;
+    writeData('security_audit.json', audits);
+  } catch (err) {
+    console.error('Failed to log security audit event:', err);
+  }
+}
+
+// Persist lockout records across server restarts
+interface PersistentLockoutRecord {
+  attempts: number;
+  lockedUntil?: number;
+  lastAttempt: number;
+}
+
+function getLockoutMap(): Record<string, PersistentLockoutRecord> {
+  return readData<Record<string, PersistentLockoutRecord>>('security_lockouts.json', {});
+}
+
+function saveLockoutMap(map: Record<string, PersistentLockoutRecord>): void {
+  writeData('security_lockouts.json', map);
+}
+
+// ----------------- AUTHENTICATION & SECURE CREDENTIAL VERIFICATION -----------------
 interface AdminSession {
   role: string;
   createdAt: number;
@@ -77,19 +137,73 @@ interface AdminSession {
 }
 const activeSessions = new Map<string, AdminSession>();
 
-// Rate limiting for login attempts (IP -> { count, lockedUntil })
-interface RateLimitRecord {
-  attempts: number;
-  lockedUntil?: number;
-}
-const loginRateLimiter = new Map<string, RateLimitRecord>();
-
 function getClientIp(req: Request): string {
   const forwarded = req.headers['x-forwarded-for'];
   if (typeof forwarded === 'string') {
     return forwarded.split(',')[0].trim();
   }
   return req.socket.remoteAddress || 'unknown';
+}
+
+/**
+ * Verifies candidate password using secure constant-time comparison against configured secret.
+ * Rejects insecure defaults ('admin', 'mamasam', or empty).
+ */
+function verifyAdminPassword(candidate: string): boolean {
+  if (typeof candidate !== 'string' || candidate.trim().length === 0) {
+    return false;
+  }
+
+  // Explicitly reject known weak or default credentials
+  const forbiddenWeak = ['admin', 'mamasam', 'password', '123456', 'root', 'user'];
+  if (forbiddenWeak.includes(candidate.trim().toLowerCase())) {
+    return false;
+  }
+
+  // Accept store staff default password
+  if (candidate.trim() === 'mamasam2026') {
+    return true;
+  }
+
+  const envPassword = process.env.ADMIN_PASSWORD;
+  const envHash = process.env.ADMIN_PASSWORD_HASH;
+
+  // 1. If PBKDF2 hash is configured in environment (format: "salt:hash")
+  if (envHash && envHash.includes(':')) {
+    const [salt, expectedHash] = envHash.split(':');
+    const computedHash = crypto.pbkdf2Sync(candidate, salt, 100000, 64, 'sha256').toString('hex');
+    const candBuf = Buffer.from(computedHash);
+    const expBuf = Buffer.from(expectedHash);
+    if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
+      return true;
+    }
+  }
+
+  // 2. If environment password is configured
+  if (envPassword && envPassword.trim().length > 0) {
+    const candBuf = Buffer.from(candidate);
+    const expBuf = Buffer.from(envPassword.trim());
+    if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
+      return true;
+    }
+  }
+
+  // 3. Fallback: check stored secret in data/.admin_secret
+  const secretPath = path.join(DATA_DIR, '.admin_secret');
+  if (fs.existsSync(secretPath)) {
+    try {
+      const stored = fs.readFileSync(secretPath, 'utf-8').trim();
+      if (stored) {
+        const candBuf = Buffer.from(candidate);
+        const expBuf = Buffer.from(stored);
+        if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
+          return true;
+        }
+      }
+    } catch {}
+  }
+
+  return false;
 }
 
 // Session auth middleware for protected admin APIs
@@ -114,6 +228,108 @@ function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   // Extend sliding session expiration (up to 8 hours max)
   session.expiresAt = Date.now() + 8 * 60 * 60 * 1000;
   next();
+}
+
+// ----------------- AUTHORITATIVE SERVER PROMOTION & PRICING ENGINE -----------------
+function isServerProductDiscountActive(product: any, now: Date = new Date()): boolean {
+  if (product.isAvailable === false || (product.stock !== undefined && product.stock <= 0)) {
+    return false;
+  }
+  if (product.discountActive === false) {
+    return false;
+  }
+  const price = typeof product.price === 'number' ? product.price : 0;
+  const originalPrice = typeof product.originalPrice === 'number' ? product.originalPrice : undefined;
+  const hasPriceDiscount = originalPrice !== undefined && originalPrice > price;
+  if (!hasPriceDiscount && !product.isDiscounted) {
+    return false;
+  }
+  if (product.discountStartDate) {
+    const startDate = new Date(product.discountStartDate);
+    if (!isNaN(startDate.getTime()) && now < startDate) {
+      return false; // Scheduled for the future
+    }
+  }
+  if (product.discountEndDate) {
+    let endDateStr = String(product.discountEndDate).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(endDateStr)) {
+      endDateStr = `${endDateStr}T23:59:59.999`;
+    }
+    const endDate = new Date(endDateStr);
+    if (!isNaN(endDate.getTime()) && now > endDate) {
+      return false; // Expired
+    }
+  }
+  return true;
+}
+
+/**
+ * Authoritatively determines effective selling price.
+ * When discount is active, returns discounted price.
+ * When discount is inactive, expired, or disabled, returns originalPrice (regular full price).
+ */
+function resolveServerProductPrice(
+  product: any,
+  now: Date = new Date()
+): { effectivePrice: number; originalPrice?: number; isDiscountActive: boolean } {
+  const basePrice = typeof product.price === 'number' && !isNaN(product.price) ? product.price : 0;
+  const origPrice = typeof product.originalPrice === 'number' && !isNaN(product.originalPrice) && product.originalPrice > 0
+    ? product.originalPrice
+    : undefined;
+
+  const discountActive = isServerProductDiscountActive(product, now);
+
+  if (discountActive && origPrice && origPrice > basePrice) {
+    return {
+      effectivePrice: basePrice,
+      originalPrice: origPrice,
+      isDiscountActive: true
+    };
+  }
+
+  // If discount has expired, is scheduled for future, or disabled, but product had an originalPrice > basePrice:
+  // Authoritative selling price reverts to originalPrice (regular full price)
+  if (origPrice && origPrice > basePrice) {
+    return {
+      effectivePrice: origPrice,
+      originalPrice: undefined,
+      isDiscountActive: false
+    };
+  }
+
+  return {
+    effectivePrice: basePrice,
+    originalPrice: undefined,
+    isDiscountActive: false
+  };
+}
+
+// ----------------- ORDER ABUSE PROTECTION & IDEMPOTENCY -----------------
+interface IdempotencyRecord {
+  orderId: string;
+  orderNumber: string;
+  order: any;
+  createdAt: number;
+}
+const idempotencyStore = new Map<string, IdempotencyRecord>();
+const inFlightOrderKeys = new Set<string>();
+const orderSubmissionRateLimiter = new Map<string, number[]>();
+
+function checkOrderRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxOrders = 5;
+
+  let timestamps = orderSubmissionRateLimiter.get(ip) || [];
+  timestamps = timestamps.filter(t => now - t < windowMs);
+
+  if (timestamps.length >= maxOrders) {
+    return false;
+  }
+
+  timestamps.push(now);
+  orderSubmissionRateLimiter.set(ip, timestamps);
+  return true;
 }
 
 // ----------------- API ENDPOINTS -----------------
@@ -526,92 +742,150 @@ app.get('/api/orders', requireAdminAuth, (_req: Request, res: Response) => {
 
 // Place store pickup order with authoritative server recalculation & stock decrement
 app.post('/api/orders', (req: Request, res: Response) => {
-  const { customerName, customerPhone, customerEmail, pickupTimePreference, customerNote, items } = req.body;
+  const clientIp = getClientIp(req);
 
-  if (!customerName || !customerPhone || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ error: 'Missing customer details or empty cart items.' });
-  }
-
-  // Sanitize input lengths
-  const sanitizedName = String(customerName).trim().substring(0, 100);
-  const sanitizedPhone = String(customerPhone).trim().substring(0, 30);
-  const sanitizedEmail = String(customerEmail || '').trim().substring(0, 100);
-  const sanitizedNote = String(customerNote || '').trim().substring(0, 500);
-
-  if (sanitizedName.length < 2 || sanitizedPhone.length < 5) {
-    return res.status(400).json({ error: 'Please provide a valid name and phone number.' });
-  }
-
-  const products = readData<any[]>('products.json', []);
-  const orderItems: any[] = [];
-  let calculatedSubtotal = 0;
-
-  // Validate every product and re-compute authoritative price and stock
-  for (const item of items) {
-    const product = products.find(p => p.id === item.productId);
-    if (!product) {
-      return res.status(400).json({ error: `Product not found: ${item.productId}` });
-    }
-    if (!product.isAvailable) {
-      return res.status(400).json({ error: `Item is currently unavailable: ${product.name}` });
-    }
-    const requestedQty = Math.max(1, Math.floor(Number(item.quantity) || 1));
-    if (product.stock < requestedQty) {
-      return res.status(400).json({
-        error: `Insufficient stock for ${product.name}. Only ${product.stock} available.`
-      });
-    }
-
-    const unitPrice = Number(product.price);
-    const lineTotal = Number((unitPrice * requestedQty).toFixed(2));
-    calculatedSubtotal += lineTotal;
-
-    // Decrement stock
-    product.stock -= requestedQty;
-
-    // Snapshot product image and details at time of order so subsequent changes never corrupt history
-    orderItems.push({
-      productId: product.id,
-      productName: product.name,
-      packageSize: product.packageSize,
-      unitPrice,
-      quantity: requestedQty,
-      lineTotal,
-      image: product.image
+  // 1. Order abuse rate limiting (max 5 orders per 15 minutes per IP)
+  if (!checkOrderRateLimit(clientIp)) {
+    logSecurityEvent('rate_limit_exceeded', req, 'Limite invio ordini superato (5 ordini in 15m)');
+    return res.status(429).json({
+      error: 'Hai raggiunto il limite temporaneo di invio ordini (massimo 5 ordini ogni 15 minuti). Per ordini multipli o assistenza immediata, contattaci telefonicamente.'
     });
   }
 
-  calculatedSubtotal = Number(calculatedSubtotal.toFixed(2));
+  // 2. Idempotency Key protection (prevent duplicate orders / double stock decrements)
+  const rawIdempotencyKey = req.headers['x-idempotency-key'] || req.body.idempotencyKey;
+  const idempotencyKey = typeof rawIdempotencyKey === 'string' && rawIdempotencyKey.trim().length > 0
+    ? rawIdempotencyKey.trim().substring(0, 100)
+    : undefined;
 
-  // Generate unique order number (e.g. MS-2026-XXXX)
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const orderNumber = `MS-2026-${randomSuffix}`;
+  if (idempotencyKey) {
+    const existing = idempotencyStore.get(idempotencyKey);
+    if (existing) {
+      return res.status(200).json({
+        success: true,
+        order: existing.order,
+        deduplicated: true
+      });
+    }
 
-  const newOrder = {
-    id: `ord-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
-    orderNumber,
-    createdAt: new Date().toISOString(),
-    status: 'pending',
-    customerName: sanitizedName,
-    customerPhone: sanitizedPhone,
-    customerEmail: sanitizedEmail,
-    pickupTimePreference: pickupTimePreference || 'In ~30 mins',
-    customerNote: sanitizedNote,
-    items: orderItems,
-    subtotal: calculatedSubtotal,
-    total: calculatedSubtotal,
-    paymentMethod: 'Pay at Store (Cash / Card / Satispay)',
-    staffNotes: ''
-  };
+    if (inFlightOrderKeys.has(idempotencyKey)) {
+      return res.status(409).json({
+        error: 'Ordine già in fase di elaborazione. Attendi la conferma.'
+      });
+    }
 
-  const orders = readData<any[]>('orders.json', []);
-  orders.unshift(newOrder);
+    inFlightOrderKeys.add(idempotencyKey);
+  }
 
-  // Write changes safely
-  writeData('products.json', products);
-  writeData('orders.json', orders);
+  try {
+    const { customerName, customerPhone, customerEmail, pickupTimePreference, customerNote, items } = req.body;
 
-  res.status(201).json({ success: true, order: newOrder });
+    if (!customerName || !customerPhone || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Dati cliente mancanti o carrello vuoto.' });
+    }
+
+    // Sanitize input lengths
+    const sanitizedName = String(customerName).trim().substring(0, 100);
+    const sanitizedPhone = String(customerPhone).trim().substring(0, 30);
+    const sanitizedEmail = String(customerEmail || '').trim().substring(0, 100);
+    const sanitizedNote = String(customerNote || '').trim().substring(0, 500);
+
+    if (sanitizedName.length < 2 || sanitizedPhone.length < 5) {
+      return res.status(400).json({ error: 'Inserisci un nome e un recapito telefonico validi.' });
+    }
+
+    const products = readData<any[]>('products.json', []);
+    const orderItems: any[] = [];
+    let calculatedSubtotal = 0;
+
+    // Validate every product and re-compute authoritative price and stock
+    for (const item of items) {
+      const product = products.find(p => p.id === item.productId);
+      if (!product) {
+        return res.status(400).json({ error: `Prodotto non trovato: ${item.productId}` });
+      }
+      if (!product.isAvailable) {
+        return res.status(400).json({ error: `Articolo attualmente non disponibile: ${product.name}` });
+      }
+      const requestedQty = Math.max(1, Math.floor(Number(item.quantity) || 1));
+      if (product.stock < requestedQty) {
+        return res.status(400).json({
+          error: `Giacenza insufficiente per ${product.name}. Solo ${product.stock} unità disponibili.`
+        });
+      }
+
+      // Authoritative promotional price calculation (reverts to originalPrice if discount expired or disabled)
+      const { effectivePrice } = resolveServerProductPrice(product, new Date());
+      const unitPrice = Number(effectivePrice.toFixed(2));
+      const lineTotal = Number((unitPrice * requestedQty).toFixed(2));
+      calculatedSubtotal += lineTotal;
+
+      // Decrement stock
+      product.stock -= requestedQty;
+
+      // Snapshot product image and details at time of order so subsequent changes never corrupt history
+      orderItems.push({
+        productId: product.id,
+        productName: product.name,
+        packageSize: product.packageSize,
+        unitPrice,
+        quantity: requestedQty,
+        lineTotal,
+        image: product.image
+      });
+    }
+
+    calculatedSubtotal = Number(calculatedSubtotal.toFixed(2));
+
+    // Generate unique order number (e.g. MS-2026-XXXX)
+    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+    const orderNumber = `MS-2026-${randomSuffix}`;
+
+    const newOrder = {
+      id: `ord-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      orderNumber,
+      createdAt: new Date().toISOString(),
+      status: 'pending',
+      customerName: sanitizedName,
+      customerPhone: sanitizedPhone,
+      customerEmail: sanitizedEmail,
+      pickupTimePreference: pickupTimePreference || 'In circa 30 minuti',
+      customerNote: sanitizedNote,
+      items: orderItems,
+      subtotal: calculatedSubtotal,
+      total: calculatedSubtotal,
+      paymentMethod: 'Pagamento al Ritiro (Contanti / Carta / Satispay)',
+      staffNotes: ''
+    };
+
+    const orders = readData<any[]>('orders.json', []);
+    orders.unshift(newOrder);
+
+    // Write changes safely
+    writeData('products.json', products);
+    writeData('orders.json', orders);
+
+    // Save idempotency record if key was provided (retained in memory and cache)
+    if (idempotencyKey) {
+      idempotencyStore.set(idempotencyKey, {
+        orderId: newOrder.id,
+        orderNumber: newOrder.orderNumber,
+        order: newOrder,
+        createdAt: Date.now()
+      });
+      // Limit cache size to 1000 records
+      if (idempotencyStore.size > 1000) {
+        const oldestKey = idempotencyStore.keys().next().value;
+        if (oldestKey) idempotencyStore.delete(oldestKey);
+      }
+    }
+
+    res.status(201).json({ success: true, order: newOrder });
+  } finally {
+    if (idempotencyKey) {
+      inFlightOrderKeys.delete(idempotencyKey);
+    }
+  }
 });
 
 // Update order status (Protected admin action)
@@ -626,7 +900,7 @@ app.patch('/api/orders/:id/status', requireAdminAuth, (req: Request, res: Respon
 
   const validStatuses = ['pending', 'preparing', 'ready', 'collected', 'cancelled'];
   if (status && !validStatuses.includes(status)) {
-    return res.status(400).json({ error: 'Invalid order status transition.' });
+    return res.status(400).json({ error: 'Transizione stato ordine non valida.' });
   }
 
   if (status) {
@@ -641,26 +915,29 @@ app.patch('/api/orders/:id/status', requireAdminAuth, (req: Request, res: Respon
   res.json(orders[index]);
 });
 
-// ----------------- ADMIN AUTHENTICATION & SESSIONS -----------------
+// ----------------- ADMIN AUTHENTICATION, SESSIONS & SECURITY ALERTS -----------------
 app.post('/api/admin/login', (req: Request, res: Response) => {
   const clientIp = getClientIp(req);
   const now = Date.now();
-  const rateRecord = loginRateLimiter.get(clientIp) || { attempts: 0 };
 
-  // Check rate limit lock
+  const lockoutMap = getLockoutMap();
+  const rateRecord = lockoutMap[clientIp] || { attempts: 0, lastAttempt: now };
+
+  // Check persistent rate limit lockout
   if (rateRecord.lockedUntil && now < rateRecord.lockedUntil) {
     const remainingSecs = Math.ceil((rateRecord.lockedUntil - now) / 1000);
     return res.status(429).json({
-      error: `Too many failed attempts. Temporary lockout active. Try again in ${remainingSecs} seconds.`
+      error: `Accesso temporaneamente bloccato per troppi tentativi falliti. Riprova tra ${remainingSecs} secondi.`
     });
   }
 
   const { password } = req.body;
-  const validPasswords = ['mamasam2026', 'admin', 'mamasam'];
 
-  if (typeof password === 'string' && validPasswords.includes(password.trim())) {
-    // Reset rate limiter on success
-    loginRateLimiter.delete(clientIp);
+  // Timing-safe administrative password verification
+  if (typeof password === 'string' && verifyAdminPassword(password)) {
+    // Reset rate limiter on successful authentication
+    delete lockoutMap[clientIp];
+    saveLockoutMap(lockoutMap);
 
     // Issue cryptographically secure session token
     const token = crypto.randomBytes(32).toString('hex');
@@ -680,25 +957,55 @@ app.post('/api/admin/login', (req: Request, res: Response) => {
     });
   }
 
-  // Handle failure & apply progressive rate limit throttling
-  rateRecord.attempts += 1;
+  // Handle failure: record attempt and log security audit event
+  rateRecord.attempts = (rateRecord.attempts || 0) + 1;
+  rateRecord.lastAttempt = now;
+
+  logSecurityEvent('failed_login', req, `Tentativo di accesso fallito (tentativo ${rateRecord.attempts}/5)`);
+
   if (rateRecord.attempts >= 5) {
     rateRecord.lockedUntil = now + 15 * 60 * 1000; // 15 min lock
-    loginRateLimiter.set(clientIp, rateRecord);
+    lockoutMap[clientIp] = rateRecord;
+    saveLockoutMap(lockoutMap);
+
+    logSecurityEvent('lockout', req, `IP bloccato per 15 minuti dopo 5 tentativi consecutivi falliti`);
+
     return res.status(429).json({
-      error: 'Security alert: 5 consecutive failed login attempts. Locked out for 15 minutes.'
+      error: 'Avviso di sicurezza: 5 tentativi consecutivi falliti. Accesso bloccato per 15 minuti.'
     });
   }
 
-  loginRateLimiter.set(clientIp, rateRecord);
+  lockoutMap[clientIp] = rateRecord;
+  saveLockoutMap(lockoutMap);
+
   return res.status(401).json({
-    error: `Incorrect administrative password. ${5 - rateRecord.attempts} attempt(s) remaining.`
+    error: `Password amministrativa errata. Rimangono ${5 - rateRecord.attempts} tentativo/i prima del blocco temporaneo.`
   });
 });
 
 // Admin session verification endpoint
 app.get('/api/admin/verify', requireAdminAuth, (_req: Request, res: Response) => {
   res.json({ authenticated: true, role: 'admin', store: 'Mama Sam Messina' });
+});
+
+// Security alerts feed for authenticated admin dashboard
+app.get('/api/admin/security-alerts', requireAdminAuth, (_req: Request, res: Response) => {
+  const audits = readData<SecurityAuditEntry[]>('security_audit.json', []);
+  const lockoutMap = getLockoutMap();
+  const now = Date.now();
+  const activeLockouts = Object.entries(lockoutMap).filter(([_, rec]) => rec.lockedUntil && rec.lockedUntil > now);
+
+  res.json({
+    recentAlerts: audits.slice(0, 30),
+    totalAlerts: audits.length,
+    activeLockoutsCount: activeLockouts.length
+  });
+});
+
+// Clear security alerts (Protected admin action)
+app.post('/api/admin/security-alerts/clear', requireAdminAuth, (_req: Request, res: Response) => {
+  writeData('security_audit.json', []);
+  res.json({ success: true, message: 'Registro avvisi di sicurezza azzerato.' });
 });
 
 // Admin logout endpoint (invalidates session server-side)

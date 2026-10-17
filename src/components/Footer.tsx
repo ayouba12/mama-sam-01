@@ -1,14 +1,15 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Clock, ShieldCheck, Lock, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, ShieldCheck, MessageCircle } from 'lucide-react';
 import { StoreSettings } from '../types';
 
 interface FooterProps {
   settings: StoreSettings;
-  onOpenAdmin: () => void;
+  onOpenAdmin?: () => void;
   onSelectCategory: (cat: string) => void;
   onOpenBiometrics: () => void;
   onWhatsAppOrder: () => void;
   onOpenAllergenInfo?: () => void;
+  onOpenLegalNotice?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -17,7 +18,8 @@ export const Footer: React.FC<FooterProps> = ({
   onSelectCategory,
   onOpenBiometrics,
   onWhatsAppOrder,
-  onOpenAllergenInfo
+  onOpenAllergenInfo,
+  onOpenLegalNotice
 }) => {
   return (
     <footer className="bg-[#111827] text-slate-300 text-xs pt-12 pb-8 border-t border-slate-800">
@@ -176,7 +178,12 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Bottom Bar */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-500 text-[11px]">
-          <p>© 2026 Mama Sam Supermercato Africano &amp; Caraibico, Messina, Italia.</p>
+          <div>
+            <p>© 2026 Mama Sam Supermercato Africano &amp; Caraibico, Messina, Italia.</p>
+            <p className="text-[10px] text-slate-600 mt-0.5 font-mono">
+              P.IVA: [in attesa di inserimento] · REA Messina: [in attesa di inserimento]
+            </p>
+          </div>
           
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             <a href="#products-section" className="hover:text-slate-300 transition-colors">Prodotti</a>
@@ -196,14 +203,18 @@ export const Footer: React.FC<FooterProps> = ({
             <a href="#location-section" className="hover:text-slate-300 transition-colors">Dove Siamo</a>
             <span>·</span>
             <a href="#reviews-section" className="hover:text-slate-300 transition-colors">Recensioni</a>
-            <span>·</span>
-            <button
-              onClick={onOpenAdmin}
-              className="text-slate-400 hover:text-emerald-400 flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <Lock className="w-3 h-3" />
-              <span>Area Staff</span>
-            </button>
+            {onOpenLegalNotice && (
+              <>
+                <span>·</span>
+                <button
+                  type="button"
+                  onClick={onOpenLegalNotice}
+                  className="text-slate-400 hover:text-emerald-400 font-medium transition-colors cursor-pointer"
+                >
+                  Note Legali &amp; Privacy
+                </button>
+              </>
+            )}
           </div>
         </div>
 

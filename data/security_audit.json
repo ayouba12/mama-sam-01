@@ -1,0 +1,10 @@
+[
+  {
+    "id": "sec-1792234472334-b518c1",
+    "timestamp": "2026-10-17T10:54:32.335Z",
+    "eventType": "failed_login",
+    "ip": "127.0.0.1",
+    "userAgent": "curl/7.88.1",
+    "details": "Tentativo di accesso fallito (tentativo 1/5)"
+  }
+]

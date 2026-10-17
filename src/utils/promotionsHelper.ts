@@ -138,3 +138,57 @@ export function formatDateToItalian(dateStr?: string): string {
     return dateStr;
   }
 }
+
+export interface PriceResolution {
+  effectivePrice: number;
+  originalPrice?: number;
+  isDiscountActive: boolean;
+  savings: number;
+  discountPercentage: number;
+}
+
+/**
+ * Authoritatively resolves product price.
+ * - When a discount is active (enabled and within valid schedule), returns the discounted price and originalPrice.
+ * - When a discount is disabled, scheduled in the future, or expired, safely reverts to originalPrice (the regular full price).
+ */
+export function resolveAuthoritativePrice(product: Partial<Product>, now: Date = new Date()): PriceResolution {
+  const basePrice = typeof product.price === 'number' && !isNaN(product.price) ? product.price : 0;
+  const origPrice = typeof product.originalPrice === 'number' && !isNaN(product.originalPrice) && product.originalPrice > 0
+    ? product.originalPrice
+    : undefined;
+
+  const discountActive = isProductDiscountActive(product, now);
+
+  if (discountActive && origPrice && origPrice > basePrice) {
+    const savings = Number((origPrice - basePrice).toFixed(2));
+    const discountPercentage = Math.round((savings / origPrice) * 100);
+    return {
+      effectivePrice: basePrice,
+      originalPrice: origPrice,
+      isDiscountActive: true,
+      savings,
+      discountPercentage
+    };
+  }
+
+  // If discount is expired, scheduled for future, or disabled, but product had an originalPrice > basePrice:
+  // Revert authoritative selling price to originalPrice (the regular base price)
+  if (origPrice && origPrice > basePrice) {
+    return {
+      effectivePrice: origPrice,
+      originalPrice: undefined,
+      isDiscountActive: false,
+      savings: 0,
+      discountPercentage: 0
+    };
+  }
+
+  return {
+    effectivePrice: basePrice,
+    originalPrice: undefined,
+    isDiscountActive: false,
+    savings: 0,
+    discountPercentage: 0
+  };
+}
