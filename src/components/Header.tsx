@@ -222,57 +222,57 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* Mobile dropdown menu with fast fluid animation */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2.5 text-sm font-medium text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="lg:hidden mt-3 pt-3 border-t border-slate-100 flex flex-col gap-1 text-sm font-medium text-slate-700 animate-slide-up-mobile">
             <button 
               onClick={() => { onNavigateSection('special-offers-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 text-rose-700 font-semibold flex items-center gap-2"
+              className="text-left px-3 py-2.5 rounded-xl text-rose-700 font-semibold flex items-center gap-2 hover:bg-rose-50/60 active:bg-rose-100/60 tap-bounce"
             >
               <span className="w-2 h-2 rounded-full bg-rose-600"></span>
-              Offerte Speciali
+              <span>Offerte Speciali</span>
             </button>
             <button 
               onClick={() => { onNavigateSection('new-arrivals-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 text-emerald-800 font-semibold flex items-center gap-2"
+              className="text-left px-3 py-2.5 rounded-xl text-emerald-800 font-semibold flex items-center gap-2 hover:bg-emerald-50/60 active:bg-emerald-100/60 tap-bounce"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-              Nuovi Arrivi
+              <span>Nuovi Arrivi</span>
             </button>
             <button 
               onClick={() => { onNavigateSection('products-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 hover:text-[#124b2e]"
+              className="text-left px-3 py-2.5 rounded-xl text-slate-800 hover:bg-stone-100 active:bg-stone-200 tap-bounce"
             >
-              Alimentari
+              Alimentari Africani &amp; Caraibici
             </button>
             <button 
               onClick={() => { onNavigateSection('categories-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 hover:text-[#124b2e]"
+              className="text-left px-3 py-2.5 rounded-xl text-slate-800 hover:bg-stone-100 active:bg-stone-200 tap-bounce"
             >
-              Categorie
+              Esplora per Categoria
             </button>
             <button 
               onClick={() => { onNavigateSection('recipes-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 hover:text-[#124b2e]"
+              className="text-left px-3 py-2.5 rounded-xl text-slate-800 hover:bg-stone-100 active:bg-stone-200 tap-bounce"
             >
-              Ricette
+              Ricette Tradizionali
             </button>
             <button 
               onClick={() => { onOpenBiometrics(); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 text-[#124b2e] font-semibold flex items-center gap-1.5"
+              className="text-left px-3 py-2.5 rounded-xl text-[#124b2e] font-semibold flex items-center gap-2 hover:bg-emerald-50 active:bg-emerald-100 tap-bounce"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
-              Sportello Ufficiale NIN &amp; BVN
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+              <span>Sportello NIN &amp; BVN Messina</span>
             </button>
             <button 
               onClick={() => { onNavigateSection('location-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 hover:text-[#124b2e]"
+              className="text-left px-3 py-2.5 rounded-xl text-slate-800 hover:bg-stone-100 active:bg-stone-200 tap-bounce"
             >
-              Dove Siamo a Messina
+              Dove Siamo a Messina (Via Ugo Bassi 104)
             </button>
             <button 
               onClick={() => { onNavigateSection('reviews-section'); setMobileMenuOpen(false); }}
-              className="text-left py-1.5 hover:text-[#124b2e]"
+              className="text-left px-3 py-2.5 rounded-xl text-slate-800 hover:bg-stone-100 active:bg-stone-200 tap-bounce"
             >
               Recensioni dei Clienti
             </button>

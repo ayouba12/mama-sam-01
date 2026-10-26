@@ -1,5 +1,32 @@
 [
   {
+    "id": "ord-1792918873808-f44cdc",
+    "orderNumber": "MS-2026-2701",
+    "createdAt": "2026-10-25T09:01:13.808Z",
+    "status": "preparing",
+    "customerName": "Kofi Mensah",
+    "customerPhone": "+39 340 1234567",
+    "customerEmail": "kofi@example.com",
+    "pickupTimePreference": "Oggi pomeriggio (16:30 - 18:00)",
+    "customerNote": "Preparare in una scatola robusta",
+    "items": [
+      {
+        "productId": "prod-3",
+        "productName": "Yam Bianco Africano Fresco (Puna Yam)",
+        "packageSize": "Tubero da circa 2,5 kg",
+        "unitPrice": 6.9,
+        "quantity": 2,
+        "lineTotal": 13.8,
+        "image": "punaYam"
+      }
+    ],
+    "subtotal": 13.8,
+    "total": 13.8,
+    "paymentMethod": "Pagamento al Ritiro (Contanti / Carta / Satispay)",
+    "staffNotes": "Scatola pronta in deposito",
+    "statusUpdatedAt": "2026-10-25T09:01:23.378Z"
+  },
+  {
     "id": "ord-1001",
     "orderNumber": "MS-2026-1001",
     "createdAt": "2026-10-12T09:15:00Z",

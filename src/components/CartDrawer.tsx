@@ -31,17 +31,17 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
+      {/* Backdrop with fast smooth fade */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/50 backdrop-blur-2xs transition-opacity"
+        className="absolute inset-0 bg-black/60 backdrop-blur-2xs transition-opacity animate-fade-fast"
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-0 sm:pl-10">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col animate-slide-in-right will-change-transform">
           
           {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50/70">
+          <div className="p-4 sm:p-5 border-b border-stone-200 flex items-center justify-between bg-stone-50/80">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-[#124b2e]" />
               <h3 className="font-bold text-base text-slate-900">
@@ -50,7 +50,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-stone-200/60 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-stone-200/60 transition-colors tap-bounce cursor-pointer"
+              aria-label="Chiudi carrello"
             >
               <X className="w-5 h-5" />
             </button>
@@ -199,7 +200,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               {/* Action Buttons */}
               <button
                 onClick={onProceedToCheckout}
-                className="w-full py-3 px-4 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+                className="w-full py-3.5 px-4 bg-[#124b2e] active:bg-[#0e3b24] text-white rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all tap-bounce cursor-pointer"
               >
                 <span>Procedi all'Ordine</span>
                 <ArrowRight className="w-4 h-4 text-emerald-300" />

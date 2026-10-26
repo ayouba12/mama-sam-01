@@ -47,5 +47,12 @@
     "summary": "Burro di Karité Grezzo, Sapone Nero Dudu-Osun e Extension",
     "image": "catCosmetics",
     "itemCount": 3
+  },
+  {
+    "id": "cat-1792918858949-fb90",
+    "name": "Asian Groceries & Noodles",
+    "summary": "Instant noodles, sriracha, soy sauces & dumplings",
+    "image": "catGrains",
+    "itemCount": 0
   }
 ]

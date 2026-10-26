@@ -25,11 +25,20 @@ import {
   Flame,
   Sparkles,
   Calendar,
-  Tag
+  Tag,
+  Database,
+  Server,
+  Check,
+  Copy,
+  ExternalLink,
+  Layers,
+  Mail,
+  Key
 } from 'lucide-react';
 import { Product, Order, OrderStatus, StoreSettings, ProductCategory } from '../types';
 import { ImageUploadDropzone } from './ImageUploadDropzone';
 import { resolveImage } from '../utils/imageHelper';
+import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   isProductDiscountActive, 
   isProductNewArrival, 
@@ -61,15 +70,37 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [authToken, setAuthToken] = useState<string>(() => {
     return sessionStorage.getItem('mamasam_admin_token') || '';
   });
+  const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'settings'>('dashboard');
+  const [adminUser, setAdminUser] = useState<any>(() => {
+    try {
+      const s = sessionStorage.getItem('mamasam_admin_user');
+      return s ? JSON.parse(s) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'settings' | 'supabase'>('dashboard');
+
+  // Supabase Diagnostics
+  const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
+  const [supabaseLoading, setSupabaseLoading] = useState(false);
+  const [sqlCopied, setSqlCopied] = useState(false);
+
+  // Category Management
+  const [categoriesList, setCategoriesList] = useState<any[]>([]);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatSummary, setNewCatSummary] = useState('');
+  const [isAddingCat, setIsAddingCat] = useState(false);
+  const [catError, setCatError] = useState<string | null>(null);
 
   // Stats & Orders
   const [stats, setStats] = useState<any>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('all');
+  const [orderSearch, setOrderSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // Product Editing / Creation
@@ -84,7 +115,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [localSettings, setLocalSettings] = useState<StoreSettings>(settings);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
-  // Authenticate
+  // Authenticate (Email & Password via Supabase Auth + Admin Role Check)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
@@ -93,19 +124,26 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: passwordInput })
+        body: JSON.stringify({ 
+          email: emailInput.trim(), 
+          password: passwordInput 
+        })
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Authentication failed');
+        throw new Error(data.error || 'Credenziali di accesso non valide.');
       }
 
       setAuthToken(data.token);
+      setAdminUser(data.user || null);
       sessionStorage.setItem('mamasam_admin_token', data.token);
+      if (data.user) {
+        sessionStorage.setItem('mamasam_admin_user', JSON.stringify(data.user));
+      }
       setIsAuthenticated(true);
       fetchDashboardData(data.token);
     } catch (err: any) {
-      setAuthError(err.message || 'Incorrect password.');
+      setAuthError(err.message || 'Credenziali di accesso non valide.');
     }
   };
 
@@ -121,7 +159,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       console.warn('Logout notification error:', e);
     } finally {
       sessionStorage.removeItem('mamasam_admin_token');
+      sessionStorage.removeItem('mamasam_admin_user');
       setAuthToken('');
+      setAdminUser(null);
       setIsAuthenticated(false);
     }
   };
@@ -130,13 +170,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!token) return;
     setOrdersLoading(true);
     try {
-      const [statsRes, ordersRes] = await Promise.all([
+      const [statsRes, ordersRes, catRes, supaRes] = await Promise.all([
         fetch('/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch('/api/orders', {
           headers: { Authorization: `Bearer ${token}` }
-        })
+        }),
+        fetch('/api/categories').catch(() => null),
+        fetch('/api/admin/supabase-status').catch(() => null)
       ]);
 
       if (statsRes.status === 401 || ordersRes.status === 401) {
@@ -148,10 +190,73 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       const ordersData = await ordersRes.json();
       setStats(statsData);
       setOrders(ordersData);
+
+      if (catRes && catRes.ok) {
+        setCategoriesList(await catRes.json());
+      }
+      if (supaRes && supaRes.ok) {
+        setSupabaseStatus(await supaRes.json());
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setOrdersLoading(false);
+    }
+  };
+
+  const handleRefreshSupabaseStatus = async () => {
+    setSupabaseLoading(true);
+    try {
+      const res = await fetch('/api/admin/supabase-status');
+      if (res.ok) {
+        setSupabaseStatus(await res.json());
+      }
+    } catch (err) {
+      console.error('Failed to refresh Supabase status:', err);
+    } finally {
+      setSupabaseLoading(false);
+    }
+  };
+
+  const handleCopySql = async () => {
+    try {
+      const res = await fetch('/api/admin/schema-sql');
+      const text = await res.text();
+      await navigator.clipboard.writeText(text);
+      setSqlCopied(true);
+      setTimeout(() => setSqlCopied(false), 3000);
+    } catch (err) {
+      console.error('Copy SQL failed:', err);
+    }
+  };
+
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    setCatError(null);
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          name: newCatName.trim(),
+          summary: newCatSummary.trim()
+        })
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error || 'Errore creazione categoria');
+      }
+      const newCat = await res.json();
+      setCategoriesList(prev => [...prev, newCat]);
+      setNewCatName('');
+      setNewCatSummary('');
+      setIsAddingCat(false);
+    } catch (err: any) {
+      setCatError(err.message || 'Errore durante la creazione della categoria.');
     }
   };
 
@@ -355,7 +460,20 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // Filtered orders list
   const filteredOrders = orders.filter(o => {
-    if (orderStatusFilter !== 'all' && o.status !== orderStatusFilter) return false;
+    if (orderStatusFilter !== 'all') {
+      if (orderStatusFilter === 'completed') {
+        if (o.status !== 'completed' && o.status !== 'collected') return false;
+      } else if (o.status !== orderStatusFilter) {
+        return false;
+      }
+    }
+    if (orderSearch.trim()) {
+      const q = orderSearch.toLowerCase().trim();
+      const matchNum = o.orderNumber?.toLowerCase().includes(q);
+      const matchName = o.customerName?.toLowerCase().includes(q);
+      const matchPhone = o.customerPhone?.toLowerCase().includes(q);
+      if (!matchNum && !matchName && !matchPhone) return false;
+    }
     return true;
   });
 
@@ -373,13 +491,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <span className="text-[10px] bg-emerald-800 text-emerald-200 px-2 py-0.5 rounded-full font-mono">
               Messina Live Desk
             </span>
-            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-emerald-900/60 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-700/50">
-              <ShieldCheck className="w-3 h-3 text-emerald-300" />
-              <span>Sicurezza Attiva</span>
-            </span>
+            {supabaseStatus?.connected ? (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-emerald-900/90 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-400/40">
+                <Database className="w-3 h-3 text-emerald-400" />
+                <span>Supabase PostgreSQL Attivo</span>
+              </span>
+            ) : (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-amber-900/60 text-amber-200 px-2 py-0.5 rounded-full border border-amber-600/50">
+                <Server className="w-3 h-3 text-amber-400" />
+                <span>Supabase in Setup</span>
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
+            {isAuthenticated && adminUser?.email && (
+              <span className="hidden md:inline text-[11px] text-emerald-200 font-mono">
+                {adminUser.email}
+              </span>
+            )}
             {isAuthenticated && (
               <button
                 onClick={handleLogout}
@@ -401,39 +531,95 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         {/* Not Authenticated Screen */}
         {!isAuthenticated ? (
           <div className="flex-1 flex items-center justify-center p-6 bg-stone-50">
-            <div className="bg-white p-8 rounded-2xl border border-stone-200 shadow-md max-w-sm w-full text-center">
+            <div className="bg-white p-7 sm:p-8 rounded-2xl border border-stone-200 shadow-md max-w-md w-full text-center">
               <div className="w-12 h-12 bg-emerald-100 text-[#124b2e] rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-6 h-6 text-emerald-800" />
               </div>
               <h3 className="font-bold text-lg text-slate-900 mb-1">Accesso Gestionale Negozio</h3>
               <p className="text-xs text-slate-500 mb-5">
-                Riservato esclusivamente al personale del negozio Mama Sam. Verifica sessione sicura con protezione da tentativi ripetuti.
+                Riservato esclusivamente agli amministratori autorizzati. Autenticazione protetta con ruoli Supabase PostgreSQL.
               </p>
 
-              <form onSubmit={handleLogin} className="space-y-3">
+              <form onSubmit={handleLogin} className="space-y-3.5">
                 {authError && (
                   <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200 text-left">
                     {authError}
                   </p>
                 )}
-                <input
-                  type="password"
-                  placeholder="Inserisci password negozio (es. mamasam2026)"
-                  value={passwordInput}
-                  onChange={e => setPasswordInput(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
-                  autoFocus
-                />
+
+                <div className="text-left">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Email Amministratore
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="email"
+                      placeholder="admin@mamasam.it (oppure email Supabase)"
+                      value={emailInput}
+                      onChange={e => setEmailInput(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                    />
+                  </div>
+                </div>
+
+                <div className="text-left">
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                    Password *
+                  </label>
+                  <div className="relative">
+                    <Key className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="Inserisci password amministratore"
+                      value={passwordInput}
+                      onChange={e => setPasswordInput(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                      autoFocus
+                    />
+                  </div>
+                </div>
+
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white font-bold text-xs sm:text-sm rounded-xl cursor-pointer"
+                  className="w-full py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white font-bold text-xs sm:text-sm rounded-xl cursor-pointer shadow-xs transition-colors"
                 >
                   Accedi al Pannello
                 </button>
-                <div className="bg-stone-50 p-2 rounded-lg border border-stone-200 text-left text-[11px] text-slate-500 space-y-1">
-                  <p className="font-semibold text-slate-700">Nota di Sicurezza:</p>
-                  <p>• Blocco IP temporaneo dopo 5 tentativi errati.</p>
-                  <p>• Password predefinita: <code className="bg-stone-200 px-1 py-0.5 rounded font-mono">mamasam2026</code></p>
+
+                <div className="bg-stone-50 p-3 rounded-xl border border-stone-200 text-left text-[11px] text-slate-600 space-y-2">
+                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+                    <span>Credenziali Amministratore Backend &amp; Supabase:</span>
+                  </p>
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailInput('limnalione39@gmail.com');
+                        setPasswordInput('MamaSam2026!Admin');
+                      }}
+                      className="text-left p-1.5 rounded-lg bg-white border border-stone-200 hover:border-emerald-500 text-[11px] text-slate-700 flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <span className="truncate"><strong>Admin:</strong> limnalione39@gmail.com</span>
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">Inserisci</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailInput('admin@mamasam.it');
+                        setPasswordInput('MamaSam2026!Admin');
+                      }}
+                      className="text-left p-1.5 rounded-lg bg-white border border-stone-200 hover:border-emerald-500 text-[11px] text-slate-700 flex items-center justify-between transition-colors cursor-pointer"
+                    >
+                      <span className="truncate"><strong>Store Desk:</strong> admin@mamasam.it</span>
+                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">Inserisci</span>
+                    </button>
+                  </div>
+                  <p className="text-[10.5px] text-slate-500">
+                    • Password predefinita: <code className="bg-stone-200 px-1 py-0.2 rounded font-mono font-bold text-slate-800">MamaSam2026!Admin</code> (oppure emergenza: <code className="bg-stone-200 px-1 py-0.2 rounded font-mono">mamasam2026</code>).
+                  </p>
                 </div>
               </form>
             </div>
@@ -492,16 +678,35 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <Settings className="w-4 h-4 text-emerald-700" />
                   <span>Impostazioni Negozio</span>
                 </button>
+
+                <button
+                  onClick={() => setActiveTab('supabase')}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                    activeTab === 'supabase'
+                      ? 'bg-emerald-50 text-[#124b2e]'
+                      : 'text-slate-600 hover:bg-stone-100'
+                  }`}
+                >
+                  <Database className="w-4 h-4 text-emerald-700" />
+                  <span className="flex-1 text-left">Supabase &amp; DB</span>
+                  {supabaseStatus?.connected ? (
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" title="Supabase Connesso"></span>
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-amber-500" title="Configurazione Richiesta"></span>
+                  )}
+                </button>
               </div>
 
-              {/* Security Health status widget */}
+              {/* Supabase backend status widget */}
               <div className="hidden md:block p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-100 text-[11px] text-emerald-950 mt-4">
                 <div className="flex items-center gap-1.5 font-bold text-emerald-900 mb-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Image &amp; API Guard</span>
+                  <Database className="w-3.5 h-3.5 text-emerald-700" />
+                  <span>Backend Database</span>
                 </div>
                 <p className="text-[10px] text-emerald-800 leading-tight">
-                  Magic byte raster verification active. Stripped EXIF. Persistent disk storage.
+                  {supabaseStatus?.connected
+                    ? `PostgreSQL connesso (${supabaseStatus.tables?.products || products.length} prodotti, ${orders.length} ordini).`
+                    : 'Modalità ibrida attiva. Connetti Supabase via env per RLS cloud.'}
                 </p>
               </div>
             </div>
@@ -616,7 +821,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <p className="text-xs text-slate-500">Manage order preparation, statuses, and receipt printing</p>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative">
+                        <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search orders..."
+                          value={orderSearch}
+                          onChange={e => setOrderSearch(e.target.value)}
+                          className="pl-8 pr-2.5 py-1.5 text-xs border border-stone-300 rounded-lg bg-white outline-hidden focus:border-[#124b2e]"
+                        />
+                      </div>
                       <select
                         value={orderStatusFilter}
                         onChange={e => setOrderStatusFilter(e.target.value)}
@@ -624,9 +839,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       >
                         <option value="all">All Statuses ({orders.length})</option>
                         <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
                         <option value="preparing">Preparing</option>
                         <option value="ready">Ready for Pickup</option>
-                        <option value="collected">Collected</option>
+                        <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </div>
@@ -711,15 +927,29 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
                                 order.status === 'ready' ? 'bg-emerald-100 text-emerald-800' :
                                 order.status === 'preparing' ? 'bg-amber-100 text-amber-800' :
-                                order.status === 'collected' ? 'bg-slate-100 text-slate-700' :
-                                'bg-blue-100 text-blue-800'
+                                order.status === 'confirmed' ? 'bg-blue-100 text-blue-800' :
+                                order.status === 'completed' || order.status === 'collected' ? 'bg-slate-100 text-slate-700' :
+                                order.status === 'cancelled' ? 'bg-rose-100 text-rose-800' :
+                                'bg-purple-100 text-purple-800'
                               }`}>
-                                {order.status}
+                                {order.status === 'ready' ? 'Ready for Pickup' :
+                                 order.status === 'preparing' ? 'Preparing' :
+                                 order.status === 'confirmed' ? 'Confirmed' :
+                                 order.status === 'completed' || order.status === 'collected' ? 'Completed' :
+                                 order.status === 'cancelled' ? 'Cancelled' : 'Pending'}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               {order.status === 'pending' && (
+                                <button
+                                  onClick={() => handleUpdateOrderStatus(order.id, 'confirmed')}
+                                  className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
+                                >
+                                  Confirm Order
+                                </button>
+                              )}
+                              {(order.status === 'pending' || order.status === 'confirmed') && (
                                 <button
                                   onClick={() => handleUpdateOrderStatus(order.id, 'preparing')}
                                   className="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-semibold cursor-pointer"
@@ -727,7 +957,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                   Mark Preparing
                                 </button>
                               )}
-                              {(order.status === 'pending' || order.status === 'preparing') && (
+                              {(order.status === 'pending' || order.status === 'confirmed' || order.status === 'preparing') && (
                                 <button
                                   onClick={() => handleUpdateOrderStatus(order.id, 'ready')}
                                   className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold cursor-pointer"
@@ -737,13 +967,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                               )}
                               {order.status === 'ready' && (
                                 <button
-                                  onClick={() => handleUpdateOrderStatus(order.id, 'collected')}
+                                  onClick={() => handleUpdateOrderStatus(order.id, 'completed')}
                                   className="px-2.5 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold cursor-pointer"
                                 >
-                                  Mark Collected
+                                  Mark Completed
                                 </button>
                               )}
-                              {order.status !== 'cancelled' && order.status !== 'collected' && (
+                              {order.status !== 'cancelled' && order.status !== 'completed' && order.status !== 'collected' && (
                                 <button
                                   onClick={() => handleUpdateOrderStatus(order.id, 'cancelled')}
                                   className="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded-lg text-xs font-semibold cursor-pointer"
@@ -771,39 +1001,134 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </p>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        setIsCreatingProduct(true);
-                        setEditingProduct(null);
-                        setProductSaveError(null);
-                        setProductForm({
-                          name: '',
-                          category: 'Tuberi e Verdure Fresche',
-                          origin: 'Importato',
-                          price: 5.00,
-                          originalPrice: undefined,
-                          packageSize: '1 pezzo / conf.',
-                          stock: 20,
-                          description: '',
-                          isAvailable: true,
-                          image: 'catTubers',
-                          imageStatus: 'needs_review',
-                          ingredients: '',
-                          allergenInfo: '',
-                          sku: `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
-                          isNewArrival: false,
-                          isDiscounted: false,
-                          discountActive: true,
-                          discountStartDate: '',
-                          discountEndDate: ''
-                        });
-                      }}
-                      className="px-3.5 py-2 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Aggiungi Nuovo Prodotto</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => setIsAddingCat(prev => !prev)}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors ${
+                          isAddingCat
+                            ? 'bg-emerald-700 text-white'
+                            : 'bg-emerald-50 hover:bg-emerald-100 text-[#124b2e] border border-emerald-300'
+                        }`}
+                      >
+                        <Layers className="w-4 h-4" />
+                        <span>Gestisci Categorie ({categoriesList.length})</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setIsCreatingProduct(true);
+                          setEditingProduct(null);
+                          setProductSaveError(null);
+                          setProductForm({
+                            name: '',
+                            category: categoriesList[0]?.name || 'Tuberi e Verdure Fresche',
+                            origin: 'Importato',
+                            price: 5.00,
+                            originalPrice: undefined,
+                            packageSize: '1 pezzo / conf.',
+                            stock: 20,
+                            description: '',
+                            isAvailable: true,
+                            image: 'catTubers',
+                            imageStatus: 'needs_review',
+                            ingredients: '',
+                            allergenInfo: '',
+                            sku: `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
+                            isNewArrival: false,
+                            isDiscounted: false,
+                            discountActive: true,
+                            discountStartDate: '',
+                            discountEndDate: ''
+                          });
+                        }}
+                        className="px-3.5 py-2 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Aggiungi Nuovo Prodotto</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {/* Inline Category Management Panel */}
+                  {isAddingCat && (
+                    <div className="p-4 bg-white rounded-xl border border-emerald-300 shadow-sm space-y-3">
+                      <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                        <div className="flex items-center gap-2">
+                          <Layers className="w-4 h-4 text-emerald-700" />
+                          <h4 className="font-bold text-xs sm:text-sm text-slate-900">
+                            Gestione Categorie Reparto
+                          </h4>
+                          <span className="text-[11px] text-slate-400">
+                            (African &amp; Asian Groceries, Drinks, Alcohol, Noodles, Hair Products, Oils...)
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => setIsAddingCat(false)}
+                          className="p-1 hover:bg-stone-100 rounded-lg text-slate-400 cursor-pointer"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {catError && (
+                        <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200">
+                          {catError}
+                        </p>
+                      )}
+
+                      <form onSubmit={handleCreateCategory} className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+                        <div className="sm:col-span-5">
+                          <input
+                            type="text"
+                            required
+                            placeholder="Nuova categoria (es. Asian groceries, Noodles, Alcohol, Hair Products)"
+                            value={newCatName}
+                            onChange={e => setNewCatName(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs border border-stone-300 rounded-lg outline-hidden focus:border-[#124b2e]"
+                          />
+                        </div>
+                        <div className="sm:col-span-5">
+                          <input
+                            type="text"
+                            placeholder="Descrizione / sottotitolo (opzionale)"
+                            value={newCatSummary}
+                            onChange={e => setNewCatSummary(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs border border-stone-300 rounded-lg outline-hidden focus:border-[#124b2e]"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <button
+                            type="submit"
+                            className="w-full py-1.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white text-xs font-bold rounded-lg cursor-pointer"
+                          >
+                            + Aggiungi
+                          </button>
+                        </div>
+                      </form>
+
+                      {/* Active Categories Chips */}
+                      <div className="pt-2 border-t border-stone-100">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1.5">
+                          Categorie nel Database ({categoriesList.length})
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {categoriesList.map(cat => (
+                            <span
+                              key={cat.id || cat.name}
+                              className="px-2.5 py-1 bg-stone-100 text-slate-800 rounded-lg text-[11px] font-medium border border-stone-200 flex items-center gap-1.5"
+                            >
+                              <span>{cat.name}</span>
+                              {cat.itemCount !== undefined && (
+                                <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded-full">
+                                  {cat.itemCount} prod.
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Search and Promotion Filters */}
                   <div className="space-y-2.5">
@@ -945,19 +1270,46 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Categoria</label>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block font-bold text-slate-700">Categoria *</label>
+                            <button
+                              type="button"
+                              onClick={() => setIsAddingCat(true)}
+                              className="text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
+                            >
+                              + Nuova Categoria
+                            </button>
+                          </div>
                           <select
-                            value={productForm.category || 'Tuberi e Verdure Fresche'}
-                            onChange={e => setProductForm({ ...productForm, category: e.target.value as any })}
+                            value={productForm.category || (categoriesList[0]?.name || 'Tuberi e Verdure Fresche')}
+                            onChange={e => setProductForm({ ...productForm, category: e.target.value })}
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg bg-white"
                           >
-                            <option value="Tuberi e Verdure Fresche">Tuberi e Verdure Fresche</option>
-                            <option value="Cereali e Farine Tradizionali">Cereali e Farine Tradizionali</option>
-                            <option value="Pesce Affumicato e Carni">Pesce Affumicato e Carni</option>
-                            <option value="Spezie e Olio di Palma">Spezie e Olio di Palma</option>
-                            <option value="Bevande al Malto e Ibisco">Bevande al Malto e Ibisco</option>
-                            <option value="Snack e Dolci Caraibici">Snack e Dolci Caraibici</option>
-                            <option value="Cura Afro e Cosmetici">Cura Afro e Cosmetici</option>
+                            {(() => {
+                              const standardCats = [
+                                'Tuberi e Verdure Fresche',
+                                'Cereali e Farine Tradizionali',
+                                'Pesce Affumicato e Carni',
+                                'Spezie e Olio di Palma',
+                                'Bevande al Malto e Ibisco',
+                                'Snack e Dolci Caraibici',
+                                'Cura Afro e Cosmetici',
+                                'African groceries',
+                                'Asian groceries',
+                                'Drinks',
+                                'Alcohol',
+                                'Noodles',
+                                'Hair Products',
+                                'Oils'
+                              ];
+                              const listNames = categoriesList.map(c => c.name);
+                              const combined = Array.from(new Set([...listNames, ...standardCats]));
+                              return combined.map(catName => (
+                                <option key={catName} value={catName}>
+                                  {catName}
+                                </option>
+                              ));
+                            })()}
                           </select>
                         </div>
 
@@ -1586,6 +1938,267 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <span>Save &amp; Update Live Storefront</span>
                     </button>
                   </form>
+                </div>
+              )}
+
+              {/* TAB 5: SUPABASE BACKEND MANAGEMENT */}
+              {activeTab === 'supabase' && (
+                <div className="space-y-6 max-w-4xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+                        <Database className="w-5 h-5 text-emerald-700" />
+                        <span>Integrazione Backend Supabase (PostgreSQL &amp; Storage)</span>
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Stato connessione, migrazioni database con Row Level Security (RLS) e policy storage
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleRefreshSupabaseStatus}
+                        disabled={supabaseLoading}
+                        className="px-3 py-1.5 bg-white border border-stone-300 hover:border-emerald-600 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors disabled:opacity-50"
+                      >
+                        <Server className={`w-3.5 h-3.5 text-emerald-700 ${supabaseLoading ? 'animate-spin' : ''}`} />
+                        <span>{supabaseLoading ? 'Verifica in corso...' : 'Testa Connessione Ora'}</span>
+                      </button>
+
+                      <a
+                        href="https://supabase.com/dashboard"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
+                      >
+                        <span>Dashboard Supabase</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Connection Status Banner */}
+                  {supabaseStatus?.connected ? (
+                    <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                          <CheckCircle className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-emerald-950 text-sm">Supabase PostgreSQL Connesso e Operativo</h4>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-200 text-emerald-900 uppercase">
+                              Cloud Live
+                            </span>
+                          </div>
+                          <p className="text-xs text-emerald-800 mt-0.5">
+                            Istanza: <code className="bg-emerald-100/80 px-1 py-0.5 rounded font-mono text-[11px]">{supabaseStatus.url}</code>
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between text-xs text-emerald-900 border-t sm:border-t-0 pt-2 sm:pt-0 border-emerald-200">
+                        <span className="font-semibold">Storage: Bucket 'product-images'</span>
+                        <span className="text-[11px] text-emerald-700 font-mono">
+                          {supabaseStatus.tables?.products || products.length} Prodotti · {orders.length} Ordini
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                          <AlertTriangle className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-amber-950 text-sm">Configurazione Supabase in Attesa</h4>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-900 uppercase">
+                              Zero-Downtime Attivo
+                            </span>
+                          </div>
+                          <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
+                            {supabaseStatus?.reason || 'Credenziali Supabase non ancora rilevate nelle variabili d\'ambiente.'}
+                          </p>
+                          <p className="text-[11px] text-amber-800 mt-1">
+                            Il negozio è attualmente <strong>100% operativo</strong> tramite fallback duraturo. Non appena configuri le chiavi in <code className="font-mono bg-amber-100 px-1 py-0.2 rounded">.env</code>, il server passerà automaticamente a PostgreSQL.
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleCopySql}
+                        className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
+                      >
+                        {sqlCopied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
+                        <span>{sqlCopied ? 'SQL Copiato!' : 'Copia Script SQL'}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* 1-Click SQL & Migration Box */}
+                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-stone-100">
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                          <Database className="w-4 h-4 text-[#124b2e]" />
+                          <span>Script SQL di Migrazione Completo (`supabase/schema.sql`)</span>
+                        </h4>
+                        <p className="text-xs text-slate-500">
+                          Crea le tabelle, chiavi esterne, policy RLS, trigger e bucket Storage `product-images` con 1 clic.
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleCopySql}
+                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#124b2e] border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                      >
+                        {sqlCopied ? <Check className="w-4 h-4 text-emerald-700" /> : <Copy className="w-4 h-4 text-emerald-700" />}
+                        <span>{sqlCopied ? 'Copiato negli Appunti!' : 'Copia Tutto lo Script SQL'}</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-stone-900 text-stone-100 p-3.5 rounded-xl font-mono text-[11px] overflow-x-auto max-h-40 leading-relaxed border border-stone-800">
+                      <p className="text-emerald-400 font-bold mb-1">-- Anteprima DDL Supabase PostgreSQL con RLS --</p>
+                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.products (id TEXT PRIMARY KEY, name TEXT NOT NULL, ...);</p>
+                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.orders (id TEXT PRIMARY KEY, order_number TEXT UNIQUE, ...);</p>
+                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.user_roles (user_id UUID REFERENCES auth.users, role TEXT);</p>
+                      <p className="text-stone-400">ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;</p>
+                      <p className="text-stone-400">CREATE POLICY "products_public_select" ON public.products FOR SELECT USING (true);</p>
+                      <p className="text-stone-400">CREATE POLICY "products_admin_all" ON public.products FOR ALL USING (public.is_admin());</p>
+                    </div>
+                  </div>
+
+                  {/* Schema & RLS Matrix */}
+                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
+                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4 text-emerald-700" />
+                      <span>Tabelle Database &amp; Regole di Sicurezza Row Level Security (RLS)</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Ogni tabella applica il principio del minimo privilegio. I clienti non possono vedere ordini altrui né modificare prodotti.
+                    </p>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">products</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Lettura pubblica di catalogo, disponibilità e promozioni. Modifica/eliminazione riservata agli admin.</p>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">categories</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">African &amp; Asian groceries, bevande, noodles, oli, cosmetici afro. Gestione dinamica admin.</p>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">orders</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Inserimento ordini dal carrello (solo ritiro in negozio). Visualizzazione e cambio stato solo admin.</p>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">order_items</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Snapshot immutabile di prezzi calcolati dal server e quantità ordinate al momento del checkout.</p>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">user_roles</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RBAC Protetto</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Ruolo admin collegato ad auth.users. Auto-promozione bloccata da security definer `is_admin()`.</p>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="font-mono font-bold text-slate-900">product-images</span>
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">Storage Bucket</span>
+                        </div>
+                        <p className="text-slate-500 text-[11px]">Bucket pubblico per servire foto con CDN. Upload e cancellazione consentiti solo agli admin.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Admin User Provisioning Guide */}
+                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
+                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                      <Lock className="w-4 h-4 text-[#124b2e]" />
+                      <span>Istruzioni per la Creazione di Account Amministratore Sicuri</span>
+                    </h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Per garantire la massima sicurezza, non esiste alcuna registrazione admin pubblica sul sito web. Tutti gli amministratori vengono creati tramite il processo controllato di Supabase:
+                    </p>
+
+                    <ol className="space-y-2 text-xs text-slate-700 list-decimal list-inside bg-stone-50 p-4 rounded-xl border border-stone-200">
+                      <li>
+                        <strong>Crea l'utente:</strong> Vai nella tua console Supabase su <em>Authentication &gt; Users &gt; Add User &gt; Create User</em> (es. <code className="bg-stone-200 px-1 py-0.2 rounded">admin@mamasam.it</code> con una password sicura).
+                      </li>
+                      <li>
+                        <strong>Copia lo User UID:</strong> Dalla lista utenti di Supabase, copia l'UUID dell'utente appena creato.
+                      </li>
+                      <li>
+                        <strong>Assegna il Ruolo Admin:</strong> Apri il <em>SQL Editor</em> in Supabase ed esegui la query:
+                        <div className="bg-stone-900 text-emerald-400 p-2.5 rounded-lg mt-1 font-mono text-[11px]">
+                          INSERT INTO public.user_roles (user_id, role) VALUES ('&lt;INCOLLA_USER_UUID&gt;', 'admin') ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
+                        </div>
+                      </li>
+                      <li>
+                        <strong>Accedi al Pannello:</strong> Ora puoi accedere immediatamente a questo gestionale inserendo la tua email e la password configurata.
+                      </li>
+                    </ol>
+                  </div>
+
+                  {/* Required Environment Variables Checklist */}
+                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
+                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                      <Key className="w-4 h-4 text-emerald-700" />
+                      <span>Variabili d'Ambiente Richieste (`.env`)</span>
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      Aggiungi queste variabili al tuo file di ambiente o impostazioni del server:
+                    </p>
+
+                    <div className="space-y-2 font-mono text-xs">
+                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="font-bold text-slate-900">VITE_SUPABASE_URL</span>
+                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">L'URL del tuo progetto Supabase (es. https://xyz.supabase.co)</p>
+                        </div>
+                        <span className="text-[10px] bg-stone-200 text-slate-700 font-bold px-2 py-0.5 rounded">Client &amp; Server</span>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="font-bold text-slate-900">VITE_SUPABASE_ANON_KEY</span>
+                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">La chiave pubblica anonima per le query frontend protette da RLS</p>
+                        </div>
+                        <span className="text-[10px] bg-stone-200 text-slate-700 font-bold px-2 py-0.5 rounded">Client &amp; Server</span>
+                      </div>
+
+                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="font-bold text-slate-900">SUPABASE_SERVICE_ROLE_KEY</span>
+                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">La chiave con privilegi elevati (usata SOLO lato server, mai esposta nel frontend)</p>
+                        </div>
+                        <span className="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded">Server-Only</span>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               )}
 

@@ -21,6 +21,7 @@ import { AllergenInfoModal } from './components/AllergenInfoModal';
 import { LegalNoticeModal } from './components/LegalNoticeModal';
 import { PromotionsSection } from './components/PromotionsSection';
 
+import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { Product, Recipe, Review, StoreSettings, CartItem, Order } from './types';
 
 // Default initial settings fallback
@@ -199,6 +200,9 @@ export default function App() {
   };
 
   const totalCartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+  const cartTotal = Number(
+    cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0).toFixed(2)
+  );
 
   return (
     <div className="min-h-screen bg-[#fbfbf9] text-slate-900 flex flex-col font-sans">
@@ -372,12 +376,37 @@ export default function App() {
         />
       )}
 
-      {/* Legal Notice & Privacy Modal */}
-      {isLegalNoticeOpen && (
-        <LegalNoticeModal
-          isOpen={isLegalNoticeOpen}
-          onClose={() => setIsLegalNoticeOpen(false)}
-        />
+      {/* Sticky Mobile Floating Order Bar */}
+      {totalCartCount > 0 && !isCartOpen && !isCheckoutOpen && (
+        <aside aria-label="Riepilogo carrello rapido" className="fixed bottom-3 inset-x-3 sm:hidden z-40 animate-slide-up-mobile">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="w-full bg-[#124b2e] active:bg-[#0e3b24] text-white p-3 rounded-2xl shadow-xl flex items-center justify-between border border-emerald-500/40 tap-bounce"
+            aria-label={`Visualizza carrello con ${totalCartCount} articoli per un totale di ${cartTotal.toFixed(2)} euro`}
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="relative w-9 h-9 rounded-xl bg-emerald-800 flex items-center justify-center text-white shrink-0">
+                <ShoppingBag className="w-5 h-5 text-emerald-300" />
+                <span className="absolute -top-1 -right-1 bg-amber-400 text-stone-900 font-extrabold text-[10px] w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  {totalCartCount}
+                </span>
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">
+                  Ritiro in Negozio (~30 min)
+                </p>
+                <p className="text-sm font-extrabold text-white leading-none mt-0.5">
+                  €{cartTotal.toFixed(2)}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 bg-emerald-600/90 active:bg-emerald-700 px-3 py-1.5 rounded-xl text-xs font-bold text-white shadow-xs">
+              <span>Vedi Carrello</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </button>
+        </aside>
       )}
 
     </div>

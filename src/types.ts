@@ -1,11 +1,4 @@
-export type ProductCategory = 
-  | 'Tuberi e Verdure Fresche'
-  | 'Cereali e Farine Tradizionali'
-  | 'Pesce Affumicato e Carni'
-  | 'Spezie e Olio di Palma'
-  | 'Bevande al Malto e Ibisco'
-  | 'Snack e Dolci Caraibici'
-  | 'Cura Afro e Cosmetici';
+export type ProductCategory = string;
 
 export interface Product {
   id: string;
@@ -105,7 +98,7 @@ export interface Recipe {
   cookingMethod: string[];
 }
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'collected' | 'cancelled';
+export type OrderStatus = 'pending' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'collected' | 'cancelled';
 
 export interface OrderItem {
   productId: string;

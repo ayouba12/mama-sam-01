@@ -38,8 +38,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const [sortBy, setSortBy] = useState<'bestsellers' | 'price-low' | 'price-high' | 'name'>('bestsellers');
 
-  const categories = [
-    'Tutti i Prodotti',
+  // Dynamic categories list from existing products and standard departments
+  const defaultCats = [
     'Tuberi e Verdure Fresche',
     'Cereali e Farine Tradizionali',
     'Pesce Affumicato e Carni',
@@ -48,6 +48,8 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
     'Snack e Dolci Caraibici',
     'Cura Afro e Cosmetici'
   ];
+  const allKnownCats = Array.from(new Set([...defaultCats, ...products.map(p => p.category).filter(Boolean)]));
+  const categories = ['Tutti i Prodotti', ...allKnownCats];
 
   // Adjust card quantity
   const handleQtyChange = (productId: string, delta: number) => {
@@ -135,18 +137,18 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
           </div>
         </div>
 
-        {/* Category Filter Pills / Segmented Controls */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 no-scrollbar scroll-smooth">
+        {/* Category Filter Pills / Segmented Controls with Smooth Horizontal Snap */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2.5 mb-6 no-scrollbar scroll-smooth snap-x snap-mandatory">
           {categories.map((cat) => {
             const isSelected = selectedCategory === cat;
             return (
               <button
                 key={cat}
                 onClick={() => onSelectCategory(cat)}
-                className={`px-3.5 py-2 rounded-xl text-xs sm:text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer ${
+                className={`snap-start px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs sm:text-[13px] font-medium whitespace-nowrap transition-all cursor-pointer tap-bounce ${
                   isSelected
-                    ? 'bg-[#124b2e] text-white shadow-2xs'
-                    : 'bg-stone-100/80 hover:bg-stone-200/70 text-slate-700 border border-stone-200/50'
+                    ? 'bg-[#124b2e] text-white shadow-2xs font-semibold'
+                    : 'bg-stone-100/90 hover:bg-stone-200/70 text-slate-700 border border-stone-200/60 active:bg-stone-200'
                 }`}
               >
                 {cat}
@@ -157,11 +159,11 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
         {/* Search filter indicator */}
         {searchQuery && (
-          <div className="mb-6 p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900">
+          <div className="mb-6 p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center justify-between text-xs text-amber-900 animate-fade-fast">
             <span>Risultati per: <strong>"{searchQuery}"</strong> ({filtered.length} prodotti trovati)</span>
             <button
               onClick={onClearSearch}
-              className="text-xs font-bold text-amber-800 underline hover:text-amber-950 cursor-pointer"
+              className="text-xs font-bold text-amber-800 underline hover:text-amber-950 cursor-pointer tap-bounce"
             >
               Azzera Ricerca
             </button>
@@ -170,7 +172,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
         {/* Empty state */}
         {filtered.length === 0 && (
-          <div className="text-center py-16 bg-stone-50 rounded-2xl border border-dashed border-stone-200 p-8">
+          <div className="text-center py-16 bg-stone-50 rounded-2xl border border-dashed border-stone-200 p-8 animate-fade-fast">
             <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <h3 className="font-bold text-slate-800 text-base mb-1">Nessun prodotto corrisponde ai criteri</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
@@ -178,15 +180,15 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             </p>
             <button
               onClick={() => { onSelectCategory('Tutti i Prodotti'); onClearSearch(); }}
-              className="px-4 py-2 bg-[#124b2e] text-white text-xs font-semibold rounded-lg cursor-pointer"
+              className="px-4 py-2 bg-[#124b2e] text-white text-xs font-semibold rounded-lg cursor-pointer tap-bounce"
             >
               Mostra Tutti i Prodotti
             </button>
           </div>
         )}
 
-        {/* 4-column Product Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Responsive Product Grid: 2-column mobile for fast browsing, 4-column desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-5">
           {filtered.map((product) => {
             const qty = quantities[product.id] || 1;
             const isAdded = addedIds[product.id] || false;
@@ -195,15 +197,15 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-500/70 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col overflow-hidden group"
+                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-500/70 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col overflow-hidden group"
               >
                 {/* Product Card Top: Subcategory & Origin */}
-                <div className="px-3.5 pt-3 pb-1 flex items-center justify-between text-[11px] text-slate-500 font-medium">
-                  <span className="truncate">
+                <div className="px-2.5 sm:px-3.5 pt-2.5 sm:pt-3 pb-1 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 font-medium">
+                  <span className="truncate max-w-[65%]">
                     {product.subCategory || product.category}
                   </span>
-                  <span className="text-slate-300">·</span>
-                  <span className="text-slate-600 font-semibold truncate ml-1">
+                  <span className="text-slate-300 hidden sm:inline">·</span>
+                  <span className="text-slate-600 font-semibold truncate ml-1 text-right">
                     {product.origin}
                   </span>
                 </div>
@@ -243,23 +245,23 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                   )}
                 </div>
 
-                {/* Product Details */}
-                <div className="p-3.5 flex-1 flex flex-col justify-between">
+                {/* Product Details with Mobile Compact Padding & Tap Feedback */}
+                <div className="p-2.5 sm:p-3.5 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 
                       onClick={() => onOpenProductDetail(product)}
-                      className="font-bold text-[14px] text-slate-900 group-hover:text-[#124b2e] transition-colors leading-snug cursor-pointer line-clamp-2 min-h-[40px]"
+                      className="font-bold text-[13px] sm:text-[14px] text-slate-900 group-hover:text-[#124b2e] transition-colors leading-snug cursor-pointer line-clamp-2 min-h-[36px] sm:min-h-[40px]"
                       title={product.name}
                     >
                       {product.name}
                     </h3>
                     
-                    <p className="text-[11.5px] text-slate-500 mt-1 mb-1.5">
+                    <p className="text-[11px] sm:text-[11.5px] text-slate-500 mt-0.5 mb-1.5 truncate">
                       {product.packageSize}
                     </p>
 
                     {/* Compact Allergen & Dietary Warning Indicator */}
-                    <div className="flex flex-wrap items-center gap-1 mb-2.5 min-h-[18px]">
+                    <div className="flex flex-wrap items-center gap-1 mb-2 min-h-[16px]">
                       {(() => {
                         const contains = getContainsList(product.dietaryInfo);
                         const mayContain = getMayContainList(product.dietaryInfo);
@@ -269,23 +271,23 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                           <>
                             {contains.length > 0 ? (
                               <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[9.5px] sm:text-[10px] font-bold"
                                 title={`Contiene: ${contains.map(c => c.displayLabel).join(', ')}`}
                               >
                                 <AlertTriangle className="w-2.5 h-2.5 text-rose-600 shrink-0" />
-                                <span className="truncate max-w-[150px]">Contiene: {contains.map(c => c.meta.shortLabel).join(', ')}</span>
+                                <span className="truncate max-w-[120px] sm:max-w-[150px]">Contiene: {contains.map(c => c.meta.shortLabel).join(', ')}</span>
                               </span>
                             ) : mayContain.length > 0 ? (
                               <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-semibold"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[9.5px] sm:text-[10px] font-semibold"
                                 title={`Può contenere: ${mayContain.map(c => c.displayLabel).join(', ')}`}
                               >
                                 <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
-                                <span className="truncate max-w-[150px]">Può contenere: {mayContain.map(c => c.meta.shortLabel).join(', ')}</span>
+                                <span className="truncate max-w-[120px] sm:max-w-[150px]">Può contenere: {mayContain.map(c => c.meta.shortLabel).join(', ')}</span>
                               </span>
                             ) : product.allergenInfo ? (
                               <span
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-medium"
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[9.5px] sm:text-[10px] font-medium"
                                 title={product.allergenInfo}
                               >
                                 <AlertTriangle className="w-2.5 h-2.5 text-amber-600 shrink-0" />
@@ -296,7 +298,7 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                             {dietaryBadges.slice(0, 1).map(badge => (
                               <span
                                 key={badge.label}
-                                className="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-[#124b2e] text-[10px] font-semibold"
+                                className="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-[#124b2e] text-[9.5px] sm:text-[10px] font-semibold"
                               >
                                 {badge.label}
                               </span>
@@ -309,35 +311,35 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
 
                   {/* Pricing & Add Controls */}
                   <div className="pt-2 border-t border-stone-100">
-                    <div className="flex items-baseline gap-1.5 mb-3">
-                      <span className="font-extrabold text-base text-slate-900">
+                    <div className="flex items-baseline gap-1.5 mb-2 sm:mb-2.5">
+                      <span className="font-extrabold text-[15px] sm:text-base text-slate-900">
                         €{product.price.toFixed(2)}
                       </span>
                       {isProductDiscountActive(product) && product.originalPrice && product.originalPrice > product.price && (
-                        <span className="text-xs text-slate-400 line-through">
+                        <span className="text-[11px] sm:text-xs text-slate-400 line-through">
                           €{product.originalPrice.toFixed(2)}
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
                       {/* Quantity Stepper [- 1 +] */}
-                      <div className="flex items-center border border-stone-200 rounded-lg bg-stone-50 overflow-hidden">
+                      <div className="flex items-center border border-stone-200 rounded-lg bg-stone-50 overflow-hidden shrink-0">
                         <button
                           type="button"
                           onClick={() => handleQtyChange(product.id, -1)}
-                          className="px-2 py-1 text-slate-600 hover:bg-stone-200 text-xs transition-colors cursor-pointer"
+                          className="px-1.5 sm:px-2 py-1 text-slate-600 hover:bg-stone-200 text-xs transition-colors cursor-pointer tap-bounce"
                           aria-label="Riduci quantità"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="px-2 py-1 text-xs font-semibold text-slate-800 select-none min-w-[20px] text-center">
+                        <span className="px-1.5 sm:px-2 py-1 text-[11px] sm:text-xs font-semibold text-slate-800 select-none min-w-[18px] text-center">
                           {qty}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleQtyChange(product.id, 1)}
-                          className="px-2 py-1 text-slate-600 hover:bg-stone-200 text-xs transition-colors cursor-pointer"
+                          className="px-1.5 sm:px-2 py-1 text-slate-600 hover:bg-stone-200 text-xs transition-colors cursor-pointer tap-bounce"
                           aria-label="Aumenta quantità"
                         >
                           <Plus className="w-3 h-3" />
@@ -348,10 +350,10 @@ export const ProductCatalog: React.FC<ProductCatalogProps> = ({
                       <button
                         type="button"
                         onClick={() => handleAdd(product)}
-                        className={`flex-1 py-1.5 px-3 rounded-lg font-semibold text-xs flex items-center justify-center gap-1 transition-all active:scale-[0.98] cursor-pointer ${
+                        className={`flex-1 py-1.5 px-2 sm:px-3 rounded-lg font-semibold text-xs flex items-center justify-center gap-1 transition-all cursor-pointer tap-bounce ${
                           isAdded
                             ? 'bg-emerald-600 text-white'
-                            : 'bg-[#124b2e] hover:bg-[#0e3b24] text-white shadow-2xs'
+                            : 'bg-[#124b2e] active:bg-[#0e3b24] text-white shadow-2xs'
                         }`}
                       >
                         {isAdded ? (

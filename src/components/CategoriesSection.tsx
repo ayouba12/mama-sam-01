@@ -43,15 +43,15 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
           </button>
         </div>
 
-        {/* Categories Grid (4 cols on lg, 2 on sm) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Categories Grid (4 cols on lg, 2 on mobile for quick scanning) */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {categories.map((cat) => {
             const imgSrc = resolveImage(cat.image);
             return (
               <div
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.name)}
-                className="group cursor-pointer rounded-2xl bg-white border border-stone-200/90 hover:border-emerald-500/80 shadow-2xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col"
+                className="group cursor-pointer rounded-2xl bg-white border border-stone-200/90 hover:border-emerald-500/80 shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col tap-bounce"
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/2.8] w-full overflow-hidden bg-stone-100">

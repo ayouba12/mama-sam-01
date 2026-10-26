@@ -1,11 +1,100 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  button, a, input, select {
+    touch-action: manipulation;
   }
 }
 
 .font-serif-display {
   font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Custom smooth scrollbar behavior */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Mobile-first performance and animation utilities */
+@keyframes slideUpMobile {
+  from {
+    transform: translate3d(0, 100%, 0);
+    opacity: 0;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRightMobile {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInFast {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.animate-slide-up-mobile {
+  animation: slideUpMobile 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+.animate-slide-in-right {
+  animation: slideInRightMobile 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform;
+}
+
+.animate-fade-fast {
+  animation: fadeInFast 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s ease-in-out infinite;
+}
+
+/* Touch feedback helper */
+.tap-bounce {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.tap-bounce:active {
+  transform: scale(0.95);
 }
