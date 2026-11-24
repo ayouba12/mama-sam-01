@@ -54,15 +54,16 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
                 className="group cursor-pointer rounded-2xl bg-white border border-stone-200/90 hover:border-emerald-500/80 shadow-2xs hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col tap-bounce"
               >
                 {/* Image Container */}
-                <div className="relative aspect-[4/2.8] w-full overflow-hidden bg-stone-100">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f2f1eb]">
                   <img
                     src={imgSrc}
                     alt={cat.name}
                     width={400}
-                    height={280}
+                    height={300}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
+                    referrerPolicy="no-referrer"
                   />
                   {/* Item count tag */}
                   <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[11px] font-semibold rounded-md shadow-xs">

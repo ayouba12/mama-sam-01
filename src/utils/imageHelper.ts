@@ -177,6 +177,9 @@ export function resolveImage(
   if (imageKey === 'catMaltDrinks') return IMAGES.categories.maltDrinks;
   if (imageKey === 'catSnacks') return IMAGES.categories.snacks;
   if (imageKey === 'catCosmetics') return IMAGES.categories.cosmetics;
+  if (imageKey in IMAGES.categories) {
+    return IMAGES.categories[imageKey as keyof typeof IMAGES.categories];
+  }
 
   // Recipe images
   if (imageKey === 'jollofRice') return IMAGES.jollofRice;

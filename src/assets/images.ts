@@ -3,12 +3,12 @@ import heroShopkeeper from './images/hero_shopkeeper_1791804624580.jpg';
 import storefrontShop from './images/storefront_shop_1791804645259.jpg';
 
 // Recipes
-import jollofRiceImg from './images/jollof_plantains_1791804667025.jpg';
-import egusiSoupImg from './images/egusi_soup_1791804688467.jpg';
-import pepperSoupImg from './images/pepper_soup_1791804709483.jpg';
-import okraSoupImg from './images/okra_soup_1791804733074.jpg';
+import jollofRiceImg from './images/recipe_jollof_studio_1795548608351.jpg';
+import egusiSoupImg from './images/recipe_egusi_studio_v8.jpg';
+import pepperSoupImg from './images/recipe_pepper_studio_v3.jpg';
+import okraSoupImg from './images/recipe_okra_studio_v9.jpg';
 
-// Category Banners
+// Category Banners (Clean Studio)
 import catTubersImg from './images/cat_tubers_1791804768065.jpg';
 import catGrainsImg from './images/cat_grains_1791804791863.jpg';
 import catFishMeatsImg from './images/cat_fish_meats_1791804816476.jpg';
@@ -16,6 +16,21 @@ import catSpicesOilImg from './images/cat_spices_oil_1791804839800.jpg';
 import catMaltDrinksImg from './images/cat_malt_drinks_1791804864284.jpg';
 import catSnacksImg from './images/cat_snacks_1791804892806.jpg';
 import catCosmeticsImg from './images/cat_cosmetics_1791804925346.jpg';
+import catFarineAmidiImg from './images/cat_farine_amidi_1795547804718.jpg';
+import catLatteDerivatiImg from './images/cat_latte_derivati_1795547805736.jpg';
+import catCondimentiDadiImg from './images/cat_condimenti_dadi_1795547806909.jpg';
+import catNoodlesPastaImg from './images/cat_noodles_pasta_1795547806191.jpg';
+import catCarnePesceImg from './images/cat_carne_pesce_1795547806489.jpg';
+import catOliGrassiImg from './images/cat_oli_grassi_1795547807964.jpg';
+import catRisoCerealiImg from './images/cat_riso_cereali_1795547807846.jpg';
+import catLegumiNociImg from './images/cat_legumi_noci_v3.jpg';
+import catSnackCerealiImg from './images/cat_snack_cereali_v2.jpg';
+import catConservePomodoroImg from './images/cat_conserve_pomodoro_v5.jpg';
+import catSpezieAromiImg from './images/cat_spezie_aromi_v3.jpg';
+import catCapelliBellezzaImg from './images/cat_capelli_bellezza_v3.jpg';
+import catCuraPelleImg from './images/cat_cura_pelle_v2.jpg';
+import catSaponiIgieneImg from './images/cat_saponi_igiene_v2.jpg';
+import catProfumiImg from './images/cat_profumi_v5.jpg';
 
 // Dedicated Authentic Product Images
 import prodSheaButter from './images/prod_shea_butter_1791807803354.jpg';
@@ -108,6 +123,21 @@ export const IMAGES = {
     maltDrinks: catMaltDrinksImg,
     snacks: catSnacksImg,
     cosmetics: catCosmeticsImg,
+    catFarineAmidi: catFarineAmidiImg,
+    catLatteDerivati: catLatteDerivatiImg,
+    catCondimentiDadi: catCondimentiDadiImg,
+    catNoodlesPasta: catNoodlesPastaImg,
+    catCarnePesce: catCarnePesceImg,
+    catOliGrassi: catOliGrassiImg,
+    catRisoCereali: catRisoCerealiImg,
+    catLegumiNoci: catLegumiNociImg,
+    catSnackCereali: catSnackCerealiImg,
+    catConservePomodoro: catConservePomodoroImg,
+    catSpezieAromi: catSpezieAromiImg,
+    catCapelliBellezza: catCapelliBellezzaImg,
+    catCuraPelle: catCuraPelleImg,
+    catSaponiIgiene: catSaponiIgieneImg,
+    catProfumi: catProfumiImg,
   },
   products: {
     sheaButter: prodSheaButter,

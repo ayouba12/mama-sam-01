@@ -3,105 +3,105 @@
     "id": "cat-farine-amidi",
     "name": "Farine e amidi",
     "summary": "Maizena amido di mais, Eagle Brand Yam Flour, Pronto Rice Flour, Unifresh Kokonte & Yellow Gari, Ca Bianca",
-    "image": "catGrains",
+    "image": "catFarineAmidi",
     "itemCount": 6
   },
   {
     "id": "cat-latte-derivati",
     "name": "Latte e derivati",
     "summary": "Peak Full Cream Milk Powder in polvere intero",
-    "image": "catMaltDrinks",
+    "image": "catLatteDerivati",
     "itemCount": 1
   },
   {
     "id": "cat-condimenti-dadi",
     "name": "Condimenti e dadi",
     "summary": "UFC White Vinegar & Soy Sauce, Jumbo Seasoning Powder & Cubes, Star Seasoning",
-    "image": "catSpicesOil",
+    "image": "catCondimentiDadi",
     "itemCount": 6
   },
   {
     "id": "cat-noodles-pasta",
     "name": "Noodles e pasta",
     "summary": "Samyang Buldak Carbonara Ramen (busta & cup rosa), Samyang Buldak Cheese Ramen",
-    "image": "catGrains",
+    "image": "catNoodlesPasta",
     "itemCount": 3
   },
   {
     "id": "cat-carne-pesce",
     "name": "Carne e pesce in scatola",
     "summary": "Exeter Corned Beef in scatola e AdiBaba Dried Fish essiccato",
-    "image": "catFishMeats",
+    "image": "catCarnePesce",
     "itemCount": 2
   },
   {
     "id": "cat-oli-grassi",
     "name": "Oli e grassi",
     "summary": "Pure Coconut Oil in barattoli",
-    "image": "catSpicesOil",
+    "image": "catOliGrassi",
     "itemCount": 1
   },
   {
     "id": "cat-riso-cereali",
     "name": "Riso e cereali",
     "summary": "Dari Couscous semola di grano duro, Easy Cook Rice e riso/grani in confezione nera",
-    "image": "catGrains",
+    "image": "catRisoCereali",
     "itemCount": 3
   },
   {
     "id": "cat-legumi-noci",
     "name": "Legumi e frutta a guscio",
     "summary": "AdiBaba Groundnuts / Peanuts arachidi e AdiBaba Sweet Beans fagioli",
-    "image": "catTubers",
+    "image": "catLegumiNoci",
     "itemCount": 2
   },
   {
     "id": "cat-snack-cereali",
     "name": "Snack e cereali",
     "summary": "AdiBaba Popcorn Kernels mais per popcorn",
-    "image": "catSnacks",
+    "image": "catSnackCereali",
     "itemCount": 1
   },
   {
     "id": "cat-conserve-pomodoro",
     "name": "Conserve e pomodoro",
     "summary": "Gino Tomato Paste, De Rica Double Concentrated Tomato Paste e Petti Passata Extra Fine",
-    "image": "catSpicesOil",
+    "image": "catConservePomodoro",
     "itemCount": 3
   },
   {
     "id": "cat-spezie-aromi",
     "name": "Spezie e aromi",
     "summary": "Ducros Curry Powder e miscele di spezie/condimenti tradizionali",
-    "image": "catSpicesOil",
+    "image": "catSpezieAromi",
     "itemCount": 2
   },
   {
     "id": "cat-capelli-bellezza",
     "name": "Capelli e bellezza",
     "summary": "Dark & Lovely Relaxer & Hair Treatment, Olive Oil Hair, Naomi, oli e creme per capelli",
-    "image": "catCosmetics",
+    "image": "catCapelliBellezza",
     "itemCount": 6
   },
   {
     "id": "cat-cura-pelle",
     "name": "Cura della pelle",
     "summary": "B.B. Clear Cream, Clairmen Products e Caro White Lotion",
-    "image": "catCosmetics",
+    "image": "catCuraPelle",
     "itemCount": 3
   },
   {
     "id": "cat-saponi-igiene",
     "name": "Saponi e igiene",
     "summary": "Dettol Antiseptic liquido e Tura Soap",
-    "image": "catCosmetics",
+    "image": "catSaponiIgiene",
     "itemCount": 2
   },
   {
     "id": "cat-profumi",
     "name": "Profumi",
     "summary": "212 Perfume e fragranze corpo",
-    "image": "catCosmetics",
+    "image": "catProfumi",
     "itemCount": 1
   }
 ]

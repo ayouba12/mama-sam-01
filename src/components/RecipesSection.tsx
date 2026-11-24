@@ -55,7 +55,7 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                 {/* Recipe Hero Photo */}
                 <div 
                   onClick={() => onViewRecipe(recipe)}
-                  className="relative aspect-[4/3] w-full overflow-hidden bg-stone-100 cursor-pointer"
+                  className="relative aspect-[4/3] w-full overflow-hidden bg-[#ede9dd] cursor-pointer"
                   title="Clicca per visualizzare la ricetta"
                 >
                   <img
@@ -66,6 +66,7 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
                     decoding="async"
+                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[10px] font-bold rounded-md">
                     {recipe.region}

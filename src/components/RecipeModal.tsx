@@ -50,7 +50,7 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
 
         {/* Body */}
         <div className="p-5 max-h-[75vh] overflow-y-auto space-y-5">
-          <div className="aspect-[16/9] w-full rounded-xl overflow-hidden bg-stone-100">
+          <div className="aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#ede9dd]">
             <img
               src={resolveImage(recipe.image)}
               alt={recipe.title}
@@ -58,7 +58,8 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
               height={360}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover"
+              referrerPolicy="no-referrer"
+              className="w-full h-full object-contain"
             />
           </div>
 

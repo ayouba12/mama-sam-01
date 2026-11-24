@@ -628,7 +628,7 @@ app.post('/api/categories', requireAdminAuth, async (req: Request, res: Response
     id: `cat-${Date.now()}-${crypto.randomBytes(2).toString('hex')}`,
     name: name.trim(),
     summary: summary ? String(summary).trim() : '',
-    image: image || 'catGrains',
+    image: image || 'catFarineAmidi',
     itemCount: 0
   };
 

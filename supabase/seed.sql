@@ -27,50 +27,50 @@ ON CONFLICT (id) DO UPDATE SET
 
 -- 2. Categories (15 Clean Departments)
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-farine-amidi', 'Farine e amidi', 'Maizena amido di mais, Eagle Brand Yam Flour, Pronto Rice Flour, Unifresh Kokonte & Yellow Gari, Ca Bianca', 'catGrains', 6)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-farine-amidi', 'Farine e amidi', 'Maizena amido di mais, Eagle Brand Yam Flour, Pronto Rice Flour, Unifresh Kokonte & Yellow Gari, Ca Bianca', 'catFarineAmidi', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-latte-derivati', 'Latte e derivati', 'Peak Full Cream Milk Powder in polvere intero', 'catMaltDrinks', 1)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-latte-derivati', 'Latte e derivati', 'Peak Full Cream Milk Powder in polvere intero', 'catLatteDerivati', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-condimenti-dadi', 'Condimenti e dadi', 'UFC White Vinegar & Soy Sauce, Jumbo Seasoning Powder & Cubes, Star Seasoning', 'catSpicesOil', 6)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-condimenti-dadi', 'Condimenti e dadi', 'UFC White Vinegar & Soy Sauce, Jumbo Seasoning Powder & Cubes, Star Seasoning', 'catCondimentiDadi', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-noodles-pasta', 'Noodles e pasta', 'Samyang Buldak Carbonara Ramen (busta & cup rosa), Samyang Buldak Cheese Ramen', 'catGrains', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-noodles-pasta', 'Noodles e pasta', 'Samyang Buldak Carbonara Ramen (busta & cup rosa), Samyang Buldak Cheese Ramen', 'catNoodlesPasta', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-carne-pesce', 'Carne e pesce in scatola', 'Exeter Corned Beef in scatola e AdiBaba Dried Fish essiccato', 'catFishMeats', 2)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-carne-pesce', 'Carne e pesce in scatola', 'Exeter Corned Beef in scatola e AdiBaba Dried Fish essiccato', 'catCarnePesce', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-oli-grassi', 'Oli e grassi', 'Pure Coconut Oil in barattoli', 'catSpicesOil', 1)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-oli-grassi', 'Oli e grassi', 'Pure Coconut Oil in barattoli', 'catOliGrassi', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-riso-cereali', 'Riso e cereali', 'Dari Couscous semola di grano duro, Easy Cook Rice e riso/grani in confezione nera', 'catGrains', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-riso-cereali', 'Riso e cereali', 'Dari Couscous semola di grano duro, Easy Cook Rice e riso/grani in confezione nera', 'catRisoCereali', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-legumi-noci', 'Legumi e frutta a guscio', 'AdiBaba Groundnuts / Peanuts arachidi e AdiBaba Sweet Beans fagioli', 'catTubers', 2)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-legumi-noci', 'Legumi e frutta a guscio', 'AdiBaba Groundnuts / Peanuts arachidi e AdiBaba Sweet Beans fagioli', 'catLegumiNoci', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-snack-cereali', 'Snack e cereali', 'AdiBaba Popcorn Kernels mais per popcorn', 'catSnacks', 1)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-snack-cereali', 'Snack e cereali', 'AdiBaba Popcorn Kernels mais per popcorn', 'catSnackCereali', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-conserve-pomodoro', 'Conserve e pomodoro', 'Gino Tomato Paste, De Rica Double Concentrated Tomato Paste e Petti Passata Extra Fine', 'catSpicesOil', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-conserve-pomodoro', 'Conserve e pomodoro', 'Gino Tomato Paste, De Rica Double Concentrated Tomato Paste e Petti Passata Extra Fine', 'catConservePomodoro', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-spezie-aromi', 'Spezie e aromi', 'Ducros Curry Powder e miscele di spezie/condimenti tradizionali', 'catSpicesOil', 2)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-spezie-aromi', 'Spezie e aromi', 'Ducros Curry Powder e miscele di spezie/condimenti tradizionali', 'catSpezieAromi', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-capelli-bellezza', 'Capelli e bellezza', 'Dark & Lovely Relaxer & Hair Treatment, Olive Oil Hair, Naomi, oli e creme per capelli', 'catCosmetics', 6)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-capelli-bellezza', 'Capelli e bellezza', 'Dark & Lovely Relaxer & Hair Treatment, Olive Oil Hair, Naomi, oli e creme per capelli', 'catCapelliBellezza', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-cura-pelle', 'Cura della pelle', 'B.B. Clear Cream, Clairmen Products e Caro White Lotion', 'catCosmetics', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-cura-pelle', 'Cura della pelle', 'B.B. Clear Cream, Clairmen Products e Caro White Lotion', 'catCuraPelle', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-saponi-igiene', 'Saponi e igiene', 'Dettol Antiseptic liquido e Tura Soap', 'catCosmetics', 2)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-saponi-igiene', 'Saponi e igiene', 'Dettol Antiseptic liquido e Tura Soap', 'catSaponiIgiene', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-profumi', 'Profumi', '212 Perfume e fragranze corpo', 'catCosmetics', 1)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+VALUES ('cat-profumi', 'Profumi', '212 Perfume e fragranze corpo', 'catProfumi', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image, item_count = EXCLUDED.item_count;
 
 -- 3. Products (42 Real Inventory Items)
 INSERT INTO public.products (
