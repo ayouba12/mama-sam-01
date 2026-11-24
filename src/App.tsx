@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { TrustStrip } from './components/TrustStrip';
@@ -12,19 +12,20 @@ import { FaqSection } from './components/FaqSection';
 import { AssistanceStrip } from './components/AssistanceStrip';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
-import { CheckoutModal } from './components/CheckoutModal';
 import { ProductDetailModal } from './components/ProductDetailModal';
-import { RecipeModal } from './components/RecipeModal';
-import { BiometricsModal } from './components/BiometricsModal';
-import { AdminPortal } from './components/AdminPortal';
-import { AllergenInfoModal } from './components/AllergenInfoModal';
-import { LegalNoticeModal } from './components/LegalNoticeModal';
 import { PromotionsSection } from './components/PromotionsSection';
 
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { Product, Recipe, Review, StoreSettings, CartItem, Order } from './types';
 
-// Default initial settings fallback
+// Lazy-load secondary modals & admin dashboard to keep initial bundle lean and fast
+const CheckoutModal = lazy(() => import('./components/CheckoutModal').then(m => ({ default: m.CheckoutModal })));
+const RecipeModal = lazy(() => import('./components/RecipeModal').then(m => ({ default: m.RecipeModal })));
+const BiometricsModal = lazy(() => import('./components/BiometricsModal').then(m => ({ default: m.BiometricsModal })));
+const AdminPortal = lazy(() => import('./components/AdminPortal').then(m => ({ default: m.AdminPortal })));
+const AllergenInfoModal = lazy(() => import('./components/AllergenInfoModal').then(m => ({ default: m.AllergenInfoModal })));
+const LegalNoticeModal = lazy(() => import('./components/LegalNoticeModal').then(m => ({ default: m.LegalNoticeModal })));
+
 const DEFAULT_SETTINGS: StoreSettings = {
   announcement: 'Ordina online e ritira comodamente in negozio in Via Ugo Bassi 104, Messina (~30 min)',
   announcementActive: true,
@@ -51,7 +52,7 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string>('Tutti i Prodotti');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Cart state (retained in localStorage for customer convenience)
+  // Cart state
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('mamasam_cart');
@@ -71,7 +72,7 @@ export default function App() {
   const [isAllergenInfoOpen, setIsAllergenInfoOpen] = useState(false);
   const [isLegalNoticeOpen, setIsLegalNoticeOpen] = useState(false);
 
-  // Allow direct access to Admin via URL hash (#admin) or query (?admin=true)
+  // Direct access to Admin via URL hash (#admin) or query (?admin=true)
   useEffect(() => {
     const handleUrlRoute = () => {
       const hash = window.location.hash.toLowerCase();
@@ -94,8 +95,8 @@ export default function App() {
     }
   }, [cart]);
 
-  // Fetch initial data from server
-  const loadInitialData = async () => {
+  // Fetch initial storefront data in parallel
+  const loadInitialData = useCallback(async () => {
     try {
       const [setRes, catRes, recRes, revRes, prodRes] = await Promise.all([
         fetch('/api/settings').catch(() => null),
@@ -113,14 +114,14 @@ export default function App() {
     } catch (err) {
       console.error('Error fetching storefront data:', err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadInitialData();
-  }, []);
+  }, [loadInitialData]);
 
-  // Cart Handlers
-  const handleAddToCart = (product: Product, quantity: number) => {
+  // Stable Cart Handlers
+  const handleAddToCart = useCallback((product: Product, quantity: number) => {
     setCart(prev => {
       const existing = prev.find(item => item.product.id === product.id);
       if (existing) {
@@ -132,9 +133,13 @@ export default function App() {
       }
       return [...prev, { product, quantity }];
     });
-  };
+  }, []);
 
-  const handleUpdateCartQuantity = (productId: string, quantity: number) => {
+  const handleRemoveFromCart = useCallback((productId: string) => {
+    setCart(prev => prev.filter(item => item.product.id !== productId));
+  }, []);
+
+  const handleUpdateCartQuantity = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) {
       handleRemoveFromCart(productId);
       return;
@@ -144,49 +149,52 @@ export default function App() {
         item.product.id === productId ? { ...item, quantity } : item
       )
     );
-  };
+  }, [handleRemoveFromCart]);
 
-  const handleRemoveFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
-  };
-
-  const handleClearCart = () => {
+  const handleClearCart = useCallback(() => {
     setCart([]);
-  };
+  }, []);
 
-  // Add 4 recipe bundle items
-  const handleAddBundleToCart = (recipe: Recipe) => {
+  const handleAddBundleToCart = useCallback((recipe: Recipe) => {
     recipe.ingredients.forEach(ing => {
       const foundProduct = products.find(p => p.id === ing.productId);
       if (foundProduct) {
         handleAddToCart(foundProduct, 1);
       }
     });
-  };
+  }, [products, handleAddToCart]);
 
-  // Smooth scroll
-  const handleNavigateSection = (sectionId: string) => {
+  const handleNavigateSection = useCallback((sectionId: string) => {
     const el = document.getElementById(sectionId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  const handleSelectCategory = (categoryName: string) => {
+  const handleSelectCategory = useCallback((categoryName: string) => {
     setSelectedCategory(categoryName);
     const catalogSection = document.getElementById('products-section');
     if (catalogSection) {
       catalogSection.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  // WhatsApp Order helper
-  const handleWhatsAppOrder = () => {
+  const handleClearSearch = useCallback(() => {
+    setSearchQuery('');
+  }, []);
+
+  const handleWhatsAppOrder = useCallback(() => {
     if (cart.length > 0) {
       const itemList = cart
-        .map(i => `• ${i.quantity}x ${i.product.name} (${i.product.packageSize}) - €${(i.product.price * i.quantity).toFixed(2)}`)
+        .map(i => {
+          const itemPrice = i.product.price ?? 0;
+          const priceDisplay = i.product.price !== null
+            ? `€${(itemPrice * i.quantity).toFixed(2)}`
+            : (i.product.observedPrice ? `~${i.product.observedPrice}` : 'Prezzo al banco');
+          return `• ${i.quantity}x ${i.product.name} (${i.product.packageSize}) - ${priceDisplay}`;
+        })
         .join('\n');
-      const total = cart.reduce((s, i) => s + i.product.price * i.quantity, 0).toFixed(2);
+      const total = cart.reduce((s, i) => s + (i.product.price ?? 0) * i.quantity, 0).toFixed(2);
       const text = encodeURIComponent(
         `Ciao Mama Sam! Vorrei effettuare questo ordine per il ritiro in negozio:\n\n${itemList}\n\n*Totale Stimato:* €${total}\n*Punto di Ritiro:* Via Ugo Bassi 104, Messina.`
       );
@@ -197,17 +205,22 @@ export default function App() {
       );
       window.open(`https://wa.me/${settings.whatsappNumber}?text=${text}`, '_blank');
     }
-  };
+  }, [cart, settings.whatsappNumber]);
 
-  const totalCartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
-  const cartTotal = Number(
-    cart.reduce((sum, i) => sum + i.product.price * i.quantity, 0).toFixed(2)
+  const totalCartCount = useMemo(
+    () => cart.reduce((sum, i) => sum + i.quantity, 0),
+    [cart]
+  );
+
+  const cartTotal = useMemo(
+    () => Number(cart.reduce((sum, i) => sum + (i.product.price ?? 0) * i.quantity, 0).toFixed(2)),
+    [cart]
   );
 
   return (
     <div className="min-h-screen bg-[#fbfbf9] text-slate-900 flex flex-col font-sans">
       
-      {/* 1. Header (Top banner, pickup sub-strip, logo, nav, search) */}
+      {/* 1. Header */}
       <Header
         settings={settings}
         cartCount={totalCartCount}
@@ -229,14 +242,14 @@ export default function App() {
           onWhatsAppClick={handleWhatsAppOrder}
         />
 
-        {/* 3. Trust Strip (4 informational cards) */}
+        {/* 3. Trust Strip */}
         <TrustStrip />
 
-        {/* 3.5. Special Offers & New Arrivals Showcases */}
+        {/* 3.5. Special Offers & New Arrivals */}
         <PromotionsSection
           products={products}
           onAddToCart={handleAddToCart}
-          onOpenProductDetail={(prod) => setSelectedProduct(prod)}
+          onOpenProductDetail={setSelectedProduct}
           onNavigateSection={handleNavigateSection}
         />
 
@@ -246,43 +259,43 @@ export default function App() {
           onSelectCategory={handleSelectCategory}
         />
 
-        {/* 5. Traditional Dishes (Cook Traditional Dishes at Home) */}
+        {/* 5. Traditional Dishes */}
         <RecipesSection
           recipes={recipes}
           onAddBundleToCart={handleAddBundleToCart}
-          onViewRecipe={(recipe) => setSelectedRecipe(recipe)}
+          onViewRecipe={setSelectedRecipe}
         />
 
-        {/* 6. Biometrics Banner (Official Nigerian NIN & BVN Enrollment Desk) */}
+        {/* 6. Biometrics Banner */}
         <BiometricsBanner
           onOpenBiometrics={() => setIsBiometricsOpen(true)}
         />
 
-        {/* 7. Product Catalog (All African & Caribbean Groceries) */}
+        {/* 7. Product Catalog */}
         <ProductCatalog
           products={products}
           selectedCategory={selectedCategory}
           onSelectCategory={setSelectedCategory}
           onAddToCart={handleAddToCart}
-          onOpenProductDetail={(prod) => setSelectedProduct(prod)}
+          onOpenProductDetail={setSelectedProduct}
           searchQuery={searchQuery}
-          onClearSearch={() => setSearchQuery('')}
+          onClearSearch={handleClearSearch}
         />
 
-        {/* 8. Google Verified Reviews · Messina Community */}
+        {/* 8. Google Verified Reviews */}
         <ReviewsSection reviews={reviews} />
 
-        {/* 9. Store Collection Point & Physical Supermarket in Messina */}
+        {/* 9. Store Location */}
         <StoreLocationSection settings={settings} />
 
-        {/* 10. Frequently Asked Questions Accordion */}
+        {/* 10. FAQ */}
         <FaqSection />
 
-        {/* 11. Need Assistance in Messina Strip */}
+        {/* 11. Assistance Strip */}
         <AssistanceStrip settings={settings} />
       </main>
 
-      {/* 12. Multi-column Dark Footer */}
+      {/* 12. Footer */}
       <Footer
         settings={settings}
         onOpenAdmin={() => setIsAdminOpen(true)}
@@ -309,19 +322,6 @@ export default function App() {
         />
       )}
 
-      {/* Checkout Modal */}
-      {isCheckoutOpen && (
-        <CheckoutModal
-          isOpen={isCheckoutOpen}
-          onClose={() => setIsCheckoutOpen(false)}
-          items={cart}
-          settings={settings}
-          onOrderSuccess={(_order: Order) => {
-            setCart([]);
-          }}
-        />
-      )}
-
       {/* Product Details Modal */}
       {selectedProduct && (
         <ProductDetailModal
@@ -332,49 +332,67 @@ export default function App() {
         />
       )}
 
-      {/* Allergen & Dietary Information Modal */}
-      {isAllergenInfoOpen && (
-        <AllergenInfoModal
-          isOpen={isAllergenInfoOpen}
-          onClose={() => setIsAllergenInfoOpen(false)}
-          settings={settings}
-        />
-      )}
+      {/* Lazy-Loaded Modals */}
+      <Suspense fallback={null}>
+        {isCheckoutOpen && (
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+            items={cart}
+            settings={settings}
+            onOrderSuccess={(_order: Order) => {
+              setCart([]);
+            }}
+          />
+        )}
 
-      {/* Recipe Modal */}
-      {selectedRecipe && (
-        <RecipeModal
-          recipe={selectedRecipe}
-          onClose={() => setSelectedRecipe(null)}
-          onAddBundleToCart={handleAddBundleToCart}
-        />
-      )}
+        {isAllergenInfoOpen && (
+          <AllergenInfoModal
+            isOpen={isAllergenInfoOpen}
+            onClose={() => setIsAllergenInfoOpen(false)}
+            settings={settings}
+          />
+        )}
 
-      {/* Biometrics Appointment Modal */}
-      {isBiometricsOpen && (
-        <BiometricsModal
-          isOpen={isBiometricsOpen}
-          onClose={() => setIsBiometricsOpen(false)}
-          settings={settings}
-        />
-      )}
+        {isLegalNoticeOpen && (
+          <LegalNoticeModal
+            isOpen={isLegalNoticeOpen}
+            onClose={() => setIsLegalNoticeOpen(false)}
+          />
+        )}
 
-      {/* Protected Admin Portal */}
-      {isAdminOpen && (
-        <AdminPortal
-          isOpen={isAdminOpen}
-          onClose={() => {
-            setIsAdminOpen(false);
-            if (window.location.hash.toLowerCase() === '#admin' || window.location.hash.toLowerCase() === '#portal') {
-              history.replaceState(null, '', window.location.pathname + window.location.search);
-            }
-          }}
-          products={products}
-          onRefreshProducts={loadInitialData}
-          settings={settings}
-          onUpdateSettings={setSettings}
-        />
-      )}
+        {selectedRecipe && (
+          <RecipeModal
+            recipe={selectedRecipe}
+            onClose={() => setSelectedRecipe(null)}
+            onAddBundleToCart={handleAddBundleToCart}
+          />
+        )}
+
+        {isBiometricsOpen && (
+          <BiometricsModal
+            isOpen={isBiometricsOpen}
+            onClose={() => setIsBiometricsOpen(false)}
+            settings={settings}
+          />
+        )}
+
+        {isAdminOpen && (
+          <AdminPortal
+            isOpen={isAdminOpen}
+            onClose={() => {
+              setIsAdminOpen(false);
+              if (window.location.hash.toLowerCase() === '#admin' || window.location.hash.toLowerCase() === '#portal') {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+              }
+            }}
+            products={products}
+            onRefreshProducts={loadInitialData}
+            settings={settings}
+            onUpdateSettings={setSettings}
+          />
+        )}
+      </Suspense>
 
       {/* Sticky Mobile Floating Order Bar */}
       {totalCartCount > 0 && !isCartOpen && !isCheckoutOpen && (

@@ -54,6 +54,10 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
             <img
               src={resolveImage(recipe.image)}
               alt={recipe.title}
+              width={640}
+              height={360}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover"
             />
           </div>
@@ -75,8 +79,12 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
                   className="flex items-center gap-2.5 p-2.5 bg-stone-50 rounded-xl border border-stone-200"
                 >
                   <img
-                    src={resolveImage(ing.image)}
+                    src={resolveImage(ing.image, 'Ingrediente', ing.name)}
                     alt={ing.name}
+                    width={40}
+                    height={40}
+                    loading="lazy"
+                    decoding="async"
                     className="w-10 h-10 rounded-lg object-cover border border-stone-200"
                   />
                   <div className="text-xs">

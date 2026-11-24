@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 import { Product, Order, OrderStatus, StoreSettings, ProductCategory } from '../types';
 import { ImageUploadDropzone } from './ImageUploadDropzone';
-import { resolveImage } from '../utils/imageHelper';
+import { resolveImage, resolveProductImage } from '../utils/imageHelper';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   isProductDiscountActive, 
@@ -108,8 +108,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [productForm, setProductForm] = useState<Partial<Product>>({});
   const [productSearch, setProductSearch] = useState('');
-  const [productPromoFilter, setProductPromoFilter] = useState<'all' | 'offers' | 'new' | 'lowstock'>('all');
+  const [productPromoFilter, setProductPromoFilter] = useState<'all' | 'da_verificare' | 'in_revisione' | 'verificato_etichetta' | 'da_identificare' | 'offers' | 'new' | 'lowstock'>('all');
   const [productSaveError, setProductSaveError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   // Settings form
   const [localSettings, setLocalSettings] = useState<StoreSettings>(settings);
@@ -218,6 +219,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     }
   };
 
+  const handleQuickVerify = async (prod: Product, nextStatus: 'da_verificare' | 'in_revisione' | 'verificato_etichetta') => {
+    try {
+      const res = await fetch(`/api/products/${prod.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ verificationStatus: nextStatus })
+      });
+      if (res.ok) {
+        onRefreshProducts();
+        fetchDashboardData();
+      }
+    } catch (e) {
+      console.error('Quick verification error:', e);
+    }
+  };
+
   const handleCopySql = async () => {
     try {
       const res = await fetch('/api/admin/schema-sql');
@@ -293,20 +313,28 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     e.preventDefault();
     setProductSaveError(null);
 
-    const price = Number(productForm.price);
-    if (isNaN(price) || price < 0) {
-      setProductSaveError('Inserisci un prezzo valido.');
-      return;
+    let priceVal: number | null = null;
+    if (productForm.price !== undefined && productForm.price !== null && String(productForm.price).trim() !== '') {
+      const parsedP = Number(productForm.price);
+      if (isNaN(parsedP) || parsedP < 0) {
+        setProductSaveError('Inserisci un prezzo valido (oppure lascia vuoto se il prezzo è in verifica al banco).');
+        return;
+      }
+      priceVal = Number(parsedP.toFixed(2));
     }
 
     if (productForm.isDiscounted) {
+      if (priceVal === null) {
+        setProductSaveError('Per abilitare lo sconto, imposta prima un prezzo di vendita confermato.');
+        return;
+      }
       const orig = Number(productForm.originalPrice);
       if (isNaN(orig) || orig <= 0) {
         setProductSaveError('Per abilitare lo sconto, inserisci un prezzo originale valido maggiore di zero.');
         return;
       }
-      if (orig <= price) {
-        setProductSaveError(`Il prezzo originale (€${orig.toFixed(2)}) deve essere superiore al prezzo scontato (€${price.toFixed(2)}).`);
+      if (orig <= priceVal) {
+        setProductSaveError(`Il prezzo originale (€${orig.toFixed(2)}) deve essere superiore al prezzo scontato (€${priceVal.toFixed(2)}).`);
         return;
       }
     }
@@ -320,6 +348,17 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       }
     }
 
+    const payload = {
+      ...productForm,
+      price: priceVal,
+      stock: (productForm.stock !== undefined && productForm.stock !== null && String(productForm.stock).trim() !== '')
+        ? Number(productForm.stock)
+        : null,
+      purchasePrice: (productForm.purchasePrice !== undefined && productForm.purchasePrice !== null && String(productForm.purchasePrice).trim() !== '')
+        ? Number(productForm.purchasePrice)
+        : null
+    };
+
     try {
       if (isCreatingProduct) {
         const res = await fetch('/api/products', {
@@ -328,7 +367,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`
           },
-          body: JSON.stringify(productForm)
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (!res.ok) {
@@ -346,7 +385,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`
           },
-          body: JSON.stringify(productForm)
+          body: JSON.stringify(payload)
         });
         const data = await res.json();
         if (!res.ok) {
@@ -366,13 +405,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   // Delete product
   const handleDeleteProduct = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this product from the catalog?')) return;
     try {
       const res = await fetch(`/api/products/${id}`, { 
         method: 'DELETE',
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.ok) {
+        setConfirmDeleteId(null);
         onRefreshProducts();
         fetchDashboardData();
       }
@@ -1029,8 +1068,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             stock: 20,
                             description: '',
                             isAvailable: true,
-                            image: 'catTubers',
-                            imageStatus: 'needs_review',
+                            image: '',
+                            imageStatus: 'missing',
                             ingredients: '',
                             allergenInfo: '',
                             sku: `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -1147,6 +1186,50 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </button>
                       <button
                         type="button"
+                        onClick={() => setProductPromoFilter('da_verificare')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'da_verificare'
+                            ? 'bg-amber-600 text-white shadow-2xs'
+                            : 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300'
+                        }`}
+                      >
+                        Pending Verification ({products.filter(p => p.verificationStatus === 'da_verificare' || !p.verificationStatus).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('da_identificare')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'da_identificare'
+                            ? 'bg-rose-600 text-white shadow-2xs'
+                            : 'bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-300'
+                        }`}
+                      >
+                        Da Identificare ({products.filter(p => p.verificationStatus === 'da_identificare').length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('in_revisione')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'in_revisione'
+                            ? 'bg-blue-600 text-white shadow-2xs'
+                            : 'bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200'
+                        }`}
+                      >
+                        In Revisione ({products.filter(p => p.verificationStatus === 'in_revisione').length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setProductPromoFilter('verificato_etichetta')}
+                        className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                          productPromoFilter === 'verificato_etichetta'
+                            ? 'bg-emerald-700 text-white shadow-2xs'
+                            : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        }`}
+                      >
+                        ✓ Verificati ({products.filter(p => p.verificationStatus === 'verificato_etichetta').length})
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setProductPromoFilter('offers')}
                         className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer flex items-center gap-1 ${
                           productPromoFilter === 'offers'
@@ -1174,11 +1257,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         onClick={() => setProductPromoFilter('lowstock')}
                         className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
                           productPromoFilter === 'lowstock'
-                            ? 'bg-amber-600 text-white shadow-2xs'
-                            : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
+                            ? 'bg-stone-800 text-white shadow-2xs'
+                            : 'bg-stone-100 hover:bg-stone-200 text-slate-800 border border-stone-200'
                         }`}
                       >
-                        Scorte Basse ({products.filter(p => p.stock <= 5).length})
+                        Scorte Basse ({products.filter(p => p.stock !== null && p.stock !== undefined && p.stock <= 5).length})
                       </button>
                     </div>
 
@@ -1231,13 +1314,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             setProductForm(prev => ({
                               ...prev,
                               image: url,
-                              imageStatus: 'needs_review'
+                              imageStatus: 'verified'
                             }));
                           }}
                           onRemoveImage={() => {
                             setProductForm(prev => ({
                               ...prev,
-                              image: 'catTubers',
+                              image: '',
                               imageStatus: 'missing'
                             }));
                           }}
@@ -1281,35 +1364,61 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             </button>
                           </div>
                           <select
-                            value={productForm.category || (categoriesList[0]?.name || 'Tuberi e Verdure Fresche')}
+                            value={productForm.category || (categoriesList[0]?.name || 'Farine e amidi')}
                             onChange={e => setProductForm({ ...productForm, category: e.target.value })}
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg bg-white"
                           >
                             {(() => {
                               const standardCats = [
-                                'Tuberi e Verdure Fresche',
-                                'Cereali e Farine Tradizionali',
-                                'Pesce Affumicato e Carni',
-                                'Spezie e Olio di Palma',
-                                'Bevande al Malto e Ibisco',
-                                'Snack e Dolci Caraibici',
-                                'Cura Afro e Cosmetici',
-                                'African groceries',
-                                'Asian groceries',
-                                'Drinks',
-                                'Alcohol',
-                                'Noodles',
-                                'Hair Products',
-                                'Oils'
+                                'Farine e amidi',
+                                'Latte e derivati',
+                                'Condimenti e dadi',
+                                'Noodles e pasta',
+                                'Carne e pesce in scatola',
+                                'Oli e grassi',
+                                'Riso e cereali',
+                                'Legumi e frutta a guscio',
+                                'Snack e cereali',
+                                'Conserve e pomodoro',
+                                'Spezie e aromi',
+                                'Capelli e bellezza',
+                                'Cura della pelle',
+                                'Saponi e igiene',
+                                'Profumi'
                               ];
                               const listNames = categoriesList.map(c => c.name);
-                              const combined = Array.from(new Set([...listNames, ...standardCats]));
+                              const combined = Array.from(new Set([...standardCats, ...listNames]));
                               return combined.map(catName => (
                                 <option key={catName} value={catName}>
                                   {catName}
                                 </option>
                               ));
                             })()}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Marca / Brand</label>
+                          <input
+                            type="text"
+                            value={productForm.brand || ''}
+                            onChange={e => setProductForm({ ...productForm, brand: e.target.value })}
+                            placeholder="es. Mama Africa, Lion, Indomie..."
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">Stato Verifica Etichetta &amp; Prezzo</label>
+                          <select
+                            value={productForm.verificationStatus || 'da_verificare'}
+                            onChange={e => setProductForm({ ...productForm, verificationStatus: e.target.value as any })}
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg bg-white font-medium"
+                          >
+                            <option value="da_verificare">⏳ Pending Verification (Da verificare)</option>
+                            <option value="in_revisione">🔍 In revisione</option>
+                            <option value="verificato_etichetta">✓ Verificato con etichetta fisica</option>
+                            <option value="da_identificare">❓ Da identificare (foto/dati incerti)</option>
                           </select>
                         </div>
 
@@ -1336,25 +1445,96 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Price (€) *</label>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            Prezzo di Vendita (€)
+                            <span className="text-[10px] text-slate-400 font-normal ml-1">
+                              (lascia vuoto se ancora da confermare)
+                            </span>
+                          </label>
                           <input
                             type="number"
                             step="0.01"
-                            required
-                            value={productForm.price !== undefined ? productForm.price : ''}
-                            onChange={e => setProductForm({ ...productForm, price: parseFloat(e.target.value) })}
+                            value={productForm.price !== undefined && productForm.price !== null ? productForm.price : ''}
+                            onChange={e => {
+                              const val = e.target.value.trim() === '' ? null : parseFloat(e.target.value);
+                              setProductForm({ ...productForm, price: val });
+                            }}
+                            placeholder="es. 3.50 (o vuoto)"
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
+                          />
+                          {productForm.observedPrice && (
+                            <div className="mt-1 flex items-center justify-between text-[11px] bg-amber-50 text-amber-900 px-2 py-1 rounded border border-amber-200">
+                              <span>Rilevato nel PDF: <strong>{productForm.observedPrice}</strong></span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const match = productForm.observedPrice?.match(/[\d]+([.,][\d]{1,2})?/);
+                                  if (match) {
+                                    const num = parseFloat(match[0].replace(',', '.'));
+                                    if (!isNaN(num)) {
+                                      setProductForm(prev => ({
+                                        ...prev,
+                                        price: num,
+                                        verificationStatus: 'verificato_etichetta'
+                                      }));
+                                    }
+                                  }
+                                }}
+                                className="ml-2 font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
+                              >
+                                Applica e conferma
+                              </button>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            Prezzo d'Acquisto (€)
+                            <span className="text-[10px] text-emerald-800 font-normal ml-1">
+                              (Riservato Admin - MAI visibile ai clienti)
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={productForm.purchasePrice !== undefined && productForm.purchasePrice !== null ? productForm.purchasePrice : ''}
+                            onChange={e => {
+                              const val = e.target.value.trim() === '' ? null : parseFloat(e.target.value);
+                              setProductForm({ ...productForm, purchasePrice: val });
+                            }}
+                            placeholder="es. 1.80 (costo fornitore)"
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg bg-emerald-50/30"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-slate-700 mb-1">
+                            Giacenza / Scorte (Unità)
+                            <span className="text-[10px] text-slate-400 font-normal ml-1">
+                              (vuoto = in verifica al banco)
+                            </span>
+                          </label>
+                          <input
+                            type="number"
+                            value={productForm.stock !== undefined && productForm.stock !== null ? productForm.stock : ''}
+                            onChange={e => {
+                              const val = e.target.value.trim() === '' ? null : parseInt(e.target.value);
+                              setProductForm({ ...productForm, stock: val });
+                            }}
+                            placeholder="es. 15 (o vuoto)"
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Stock Level *</label>
+                          <label className="block font-bold text-slate-700 mb-1">Codice a Barre (EAN / Barcode)</label>
                           <input
-                            type="number"
-                            required
-                            value={productForm.stock !== undefined ? productForm.stock : 10}
-                            onChange={e => setProductForm({ ...productForm, stock: parseInt(e.target.value) })}
-                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
+                            type="text"
+                            value={productForm.barcode || ''}
+                            onChange={e => setProductForm({ ...productForm, barcode: e.target.value })}
+                            placeholder="es. 8001234567890 (da scansione fisica)"
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg font-mono"
                           />
                         </div>
 
@@ -1370,36 +1550,47 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Availability</label>
+                          <label className="block font-bold text-slate-700 mb-1">Disponibilità Negozio</label>
                           <select
                             value={productForm.isAvailable !== false ? 'active' : 'inactive'}
                             onChange={e => setProductForm({ ...productForm, isAvailable: e.target.value === 'active' })}
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg bg-white"
                           >
-                            <option value="active">Active (Available for pickup)</option>
-                            <option value="inactive">Inactive / Hidden</option>
+                            <option value="active">Attivo (Disponibile per il ritiro in cassa)</option>
+                            <option value="inactive">Non attivo / Nascosto</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Ingredients (Optional)</label>
+                          <label className="block font-bold text-slate-700 mb-1">Ingredienti Attesi / Verificati</label>
                           <input
                             type="text"
-                            value={productForm.ingredients || ''}
-                            onChange={e => setProductForm({ ...productForm, ingredients: e.target.value })}
-                            placeholder="e.g. 100% Raw Shea Butter"
+                            value={productForm.ingredients || productForm.expectedIngredients || ''}
+                            onChange={e => setProductForm({ ...productForm, ingredients: e.target.value, expectedIngredients: e.target.value })}
+                            placeholder="e.g. 100% Farina di platano essiccato"
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
                           />
                         </div>
 
                         <div>
-                          <label className="block font-bold text-slate-700 mb-1">Allergen Information (Optional)</label>
+                          <label className="block font-bold text-slate-700 mb-1">Allergeni &amp; Avvertenze Intolleranze</label>
                           <input
                             type="text"
-                            value={productForm.allergenInfo || ''}
-                            onChange={e => setProductForm({ ...productForm, allergenInfo: e.target.value })}
-                            placeholder="e.g. May contain traces of peanuts"
+                            value={productForm.allergenInfo || productForm.allergensAlert || ''}
+                            onChange={e => setProductForm({ ...productForm, allergenInfo: e.target.value, allergensAlert: e.target.value })}
+                            placeholder="e.g. Può contenere glutine o tracce di crostacei"
                             className="w-full px-3 py-1.5 border border-stone-300 rounded-lg"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="block font-bold text-slate-700 mb-1">Note Inventario &amp; Verifica Banco</label>
+                          <input
+                            type="text"
+                            value={productForm.notes || ''}
+                            onChange={e => setProductForm({ ...productForm, notes: e.target.value })}
+                            placeholder="es. Identificazione chiara dal PDF; prezzo da confermare con scontrino cassa"
+                            className="w-full px-3 py-1.5 border border-stone-300 rounded-lg text-xs"
                           />
                         </div>
 
@@ -1524,7 +1715,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                     step="0.01"
                                     min="0.01"
                                     required={productForm.isDiscounted}
-                                    value={productForm.originalPrice !== undefined ? productForm.originalPrice : ''}
+                                    value={productForm.originalPrice != null ? productForm.originalPrice : ''}
                                     onChange={e => {
                                       const val = e.target.value ? parseFloat(e.target.value) : undefined;
                                       setProductForm({ ...productForm, originalPrice: val });
@@ -1544,8 +1735,8 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                     step="0.01"
                                     min="0.01"
                                     required
-                                    value={productForm.price !== undefined ? productForm.price : ''}
-                                    onChange={e => setProductForm({ ...productForm, price: parseFloat(e.target.value) })}
+                                    value={productForm.price != null ? productForm.price : ''}
+                                    onChange={e => setProductForm({ ...productForm, price: e.target.value ? parseFloat(e.target.value) : null })}
                                     placeholder="es. 6.50"
                                     className="w-full px-3 py-1.5 text-xs font-bold text-emerald-900 bg-stone-50 border border-stone-300 rounded-lg focus:border-emerald-600 outline-hidden"
                                   />
@@ -1697,10 +1888,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                           <tr>
                             <th className="p-3">Foto &amp; Prodotto</th>
                             <th className="p-3">Categoria</th>
-                            <th className="p-3">Prezzo</th>
-                            <th className="p-3">Promozioni &amp; Badge</th>
+                            <th className="p-3">Prezzo &amp; Costo</th>
                             <th className="p-3">Giacenza</th>
-                            <th className="p-3">Accuratezza Foto</th>
+                            <th className="p-3">Verifica Etichetta</th>
+                            <th className="p-3">Promozioni &amp; Badge</th>
                             <th className="p-3">Stato</th>
                             <th className="p-3 text-right">Azioni</th>
                           </tr>
@@ -1713,18 +1904,32 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                 const matchesSearch = (
                                   p.name.toLowerCase().includes(q) ||
                                   p.category.toLowerCase().includes(q) ||
-                                  (p.sku && p.sku.toLowerCase().includes(q))
+                                  (p.brand && p.brand.toLowerCase().includes(q)) ||
+                                  (p.sku && p.sku.toLowerCase().includes(q)) ||
+                                  (p.barcode && p.barcode.toLowerCase().includes(q))
                                 );
                                 if (!matchesSearch) return false;
                               }
                               if (productPromoFilter === 'offers') {
-                                return isProductDiscountActive(p) || p.isDiscounted || (p.originalPrice && p.originalPrice > p.price);
+                                return isProductDiscountActive(p) || p.isDiscounted || (p.originalPrice && p.price !== null && p.originalPrice > p.price);
                               }
                               if (productPromoFilter === 'new') {
                                 return isProductNewArrival(p);
                               }
                               if (productPromoFilter === 'lowstock') {
-                                return p.stock <= 5;
+                                return p.stock !== null && p.stock !== undefined && p.stock <= 5;
+                              }
+                              if (productPromoFilter === 'da_verificare') {
+                                return p.verificationStatus === 'da_verificare' || !p.verificationStatus;
+                              }
+                              if (productPromoFilter === 'da_identificare') {
+                                return p.verificationStatus === 'da_identificare';
+                              }
+                              if (productPromoFilter === 'in_revisione') {
+                                return p.verificationStatus === 'in_revisione';
+                              }
+                              if (productPromoFilter === 'verificato_etichetta') {
+                                return p.verificationStatus === 'verificato_etichetta';
                               }
                               return true;
                             })
@@ -1737,31 +1942,100 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                 <tr key={prod.id} className="hover:bg-stone-50/60">
                                   <td className="p-3 font-semibold text-slate-900 max-w-xs">
                                     <div className="flex items-center gap-2.5">
-                                      <div className="w-9 h-9 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
+                                      <div className="w-10 h-10 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
                                         <img
-                                          src={resolveImage(prod.image)}
-                                          alt=""
+                                          src={resolveProductImage(prod)}
+                                          alt={prod.name}
+                                          width={40}
+                                          height={40}
+                                          loading="lazy"
+                                          decoding="async"
+                                          referrerPolicy="no-referrer"
                                           className="w-full h-full object-cover"
                                         />
                                       </div>
                                       <div className="truncate">
-                                        <span className="block truncate font-bold text-slate-900">{prod.name}</span>
-                                        <span className="block text-[11px] text-slate-400 font-normal">
-                                          {prod.packageSize} {prod.sku && `· ${prod.sku}`}
+                                        <div className="flex items-center gap-1.5">
+                                          {prod.itemNumber && (
+                                            <span className="text-[10px] font-bold px-1.5 py-0.2 bg-stone-100 text-stone-600 rounded">
+                                              #{prod.itemNumber}
+                                            </span>
+                                          )}
+                                          <span className="block truncate font-bold text-slate-900">{prod.name}</span>
+                                        </div>
+                                        <span className="block text-[11px] text-slate-500 font-normal">
+                                          {prod.brand && <strong className="text-slate-700">{prod.brand} · </strong>}
+                                          {prod.packageSize || 'Dimensione standard'} {prod.sku && `· ${prod.sku}`}
                                         </span>
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="p-3 text-slate-600">{prod.category}</td>
+                                  <td className="p-3 text-slate-600 font-medium">{prod.category}</td>
                                   <td className="p-3">
-                                    <div className="font-extrabold text-slate-900">
-                                      €{prod.price.toFixed(2)}
-                                    </div>
-                                    {hasDiscount && prod.originalPrice && prod.originalPrice > prod.price && (
+                                    {prod.price != null ? (
+                                      <div className="font-extrabold text-slate-900">
+                                        €{prod.price.toFixed(2)}
+                                      </div>
+                                    ) : (
+                                      <div className="text-[11px] font-medium text-amber-900 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 inline-block">
+                                        {prod.observedPrice ? `Rilevato: ${prod.observedPrice}` : 'Prezzo da confermare'}
+                                      </div>
+                                    )}
+                                    {hasDiscount && prod.originalPrice && prod.price != null && prod.originalPrice > prod.price && (
                                       <div className="text-[11px] text-slate-400 line-through">
                                         €{prod.originalPrice.toFixed(2)}
                                       </div>
                                     )}
+                                    {prod.purchasePrice != null && (
+                                      <span className="text-[10px] text-emerald-800 font-mono block mt-0.5">
+                                        Acq: €{prod.purchasePrice.toFixed(2)}
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="p-3">
+                                    {prod.stock != null ? (
+                                      <span className={`font-bold ${prod.stock === 0 ? 'text-amber-700' : prod.stock <= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
+                                        {prod.stock === 0 && prod.verificationStatus !== 'verificato_etichetta'
+                                          ? '0 unità (da contare)'
+                                          : `${prod.stock} unità`}
+                                      </span>
+                                    ) : (
+                                      <span className="text-amber-700 italic text-[11px]">
+                                        In verifica al banco
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="p-3">
+                                    <div className="flex flex-col items-start gap-1">
+                                      {prod.verificationStatus === 'verificato_etichetta' ? (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                          ✓ Verificato Etichetta
+                                        </span>
+                                      ) : prod.verificationStatus === 'da_identificare' ? (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                                          ❓ Pending (Da Identificare)
+                                        </span>
+                                      ) : prod.verificationStatus === 'in_revisione' ? (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                          🔍 In Revisione
+                                        </span>
+                                      ) : (
+                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                                          ⏳ Pending Verification
+                                        </span>
+                                      )}
+                                      {prod.verificationStatus !== 'verificato_etichetta' && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleQuickVerify(prod, 'verificato_etichetta')}
+                                          className="text-[10px] text-emerald-700 hover:text-emerald-900 font-bold underline cursor-pointer"
+                                        >
+                                          ✓ Conferma
+                                        </button>
+                                      )}
+                                    </div>
                                   </td>
 
                                   {/* Promozioni & Badge */}
@@ -1774,11 +2048,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                         </span>
                                       )}
 
-                                      {(prod.isDiscounted || (prod.originalPrice && prod.originalPrice > prod.price)) ? (
+                                      {(prod.isDiscounted || (prod.originalPrice && prod.price !== null && prod.originalPrice > prod.price)) ? (
                                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold border inline-flex items-center gap-1 ${promoStatus.badgeClass}`}>
                                           <Flame className="w-2.5 h-2.5" />
                                           <span>
-                                            {prod.originalPrice && prod.originalPrice > prod.price 
+                                            {prod.originalPrice && prod.price !== null && prod.originalPrice > prod.price 
                                               ? `-${calculateDiscountPercentage(prod.originalPrice, prod.price)}% ` 
                                               : ''}
                                             {promoStatus.label}
@@ -1793,55 +2067,59 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                   </td>
 
                                   <td className="p-3">
-                                    <span className={`font-bold ${prod.stock <= 5 ? 'text-rose-600' : 'text-slate-700'}`}>
-                                      {prod.stock} unità
-                                    </span>
-                                  </td>
-                                  <td className="p-3">
                                     <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                      prod.imageStatus === 'verified'
-                                        ? 'bg-emerald-100 text-emerald-800'
-                                        : prod.imageStatus === 'missing'
-                                        ? 'bg-rose-100 text-rose-800'
-                                        : 'bg-amber-100 text-amber-800'
-                                    }`}>
-                                      {prod.imageStatus === 'verified' ? '✓ Verificata' : prod.imageStatus === 'missing' ? 'Mancante' : 'Da Rivedere'}
-                                    </span>
-                                  </td>
-                                  <td className="p-3">
-                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                      prod.isAvailable && prod.stock > 0
+                                      prod.isAvailable !== false
                                         ? 'bg-emerald-100 text-emerald-800'
                                         : 'bg-rose-100 text-rose-800'
                                     }`}>
-                                      {prod.isAvailable && prod.stock > 0 ? 'Attivo' : 'Non disp.'}
+                                      {prod.isAvailable !== false ? 'Attivo' : 'Non disp.'}
                                     </span>
                                   </td>
-                                <td className="p-3 text-right space-x-1">
-                                  <button
-                                    onClick={() => {
-                                      setEditingProduct(prod);
-                                      setIsCreatingProduct(false);
-                                      setProductSaveError(null);
-                                      setProductForm(prod);
-                                    }}
-                                    className="p-1.5 text-slate-500 hover:text-emerald-700 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
-                                    title="Edit product and photo"
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5" />
-                                    <span className="text-[11px] font-semibold">Edit</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteProduct(prod.id)}
-                                    className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
-                                    title="Delete product"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
+                                  <td className="p-3 text-right space-x-1">
+                                    <button
+                                      onClick={() => {
+                                        setEditingProduct(prod);
+                                        setIsCreatingProduct(false);
+                                        setProductSaveError(null);
+                                        setProductForm(prod);
+                                      }}
+                                      className="p-1.5 text-slate-500 hover:text-emerald-700 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
+                                      title="Edit product and details"
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5" />
+                                      <span className="text-[11px] font-semibold">Edit</span>
+                                    </button>
+                                    {confirmDeleteId === prod.id ? (
+                                      <span className="inline-flex items-center gap-1 ml-1">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteProduct(prod.id)}
+                                          className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[10.5px] font-bold cursor-pointer"
+                                        >
+                                          Elimina
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => setConfirmDeleteId(null)}
+                                          className="px-1.5 py-1 bg-stone-200 text-slate-700 rounded text-[10.5px] font-semibold cursor-pointer"
+                                        >
+                                          No
+                                        </button>
+                                      </span>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        onClick={() => setConfirmDeleteId(prod.id)}
+                                        className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
+                                        title="Elimina prodotto"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                         </tbody>
                       </table>
                     </div>

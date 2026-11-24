@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  Tag, 
   Sparkles, 
   Plus, 
   Minus, 
@@ -8,17 +7,17 @@ import {
   ArrowRight, 
   Clock, 
   Flame,
-  AlertTriangle 
+  Info
 } from 'lucide-react';
 import { Product } from '../types';
-import { resolveImage } from '../utils/imageHelper';
+import { resolveProductImage } from '../utils/imageHelper';
 import { 
   isProductDiscountActive, 
   isProductNewArrival, 
   calculateDiscountPercentage,
   formatDateToItalian 
 } from '../utils/promotionsHelper';
-import { getContainsList, getMayContainList } from '../utils/allergenHelper';
+import { getContainsList } from '../utils/allergenHelper';
 
 interface PromotionsSectionProps {
   products: Product[];
@@ -34,7 +33,7 @@ interface ProductCardProps {
   onOpenProductDetail: (product: Product) => void;
 }
 
-const PromoProductCard: React.FC<ProductCardProps> = ({
+const PromoProductCard: React.FC<ProductCardProps> = React.memo(({
   product,
   type,
   onAddToCart,
@@ -50,9 +49,9 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
     setTimeout(() => setIsAdded(false), 1400);
   };
 
-  const discountPercent = calculateDiscountPercentage(product.originalPrice, product.price);
-  const contains = getContainsList(product.dietaryInfo);
-  const mayContain = getMayContainList(product.dietaryInfo);
+  const discountPercent = calculateDiscountPercentage(product.originalPrice ?? undefined, product.price ?? undefined);
+  const contains = useMemo(() => getContainsList(product.dietaryInfo), [product.dietaryInfo]);
+  const imgSrc = useMemo(() => resolveProductImage(product), [product]);
 
   return (
     <div className="group bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-600/40 shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between overflow-hidden">
@@ -63,10 +62,14 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
         className="relative aspect-square w-full overflow-hidden bg-stone-50 cursor-pointer p-3 flex items-center justify-center"
       >
         <img
-          src={resolveImage(product.image)}
+          src={imgSrc}
           alt={product.name}
+          width={400}
+          height={400}
           className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
         />
 
         {/* Top Badges */}
@@ -78,7 +81,7 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
             </span>
           ) : <div />}
 
-          {(type === 'offer' || (product.originalPrice && product.originalPrice > product.price)) && (
+          {(type === 'offer' || (product.originalPrice && product.price != null && product.originalPrice > product.price)) && (
             <span className="px-2 py-0.5 bg-rose-600 text-white text-[10.5px] font-extrabold rounded-md shadow-xs flex items-center gap-1 tracking-tight">
               <Flame className="w-3 h-3 fill-white" />
               <span>-{discountPercent}%</span>
@@ -87,13 +90,13 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Low Stock Badge */}
-        {product.stock <= 5 && product.stock > 0 && (
+        {product.stock !== null && product.stock <= 5 && product.stock > 0 && (
           <span className="absolute bottom-3 left-3 px-1.5 py-0.5 bg-amber-500/95 text-white text-[10px] font-bold rounded-md shadow-xs pointer-events-none">
             Solo {product.stock} rimasti
           </span>
         )}
 
-        {/* Schedule / Expiration notice on hover */}
+        {/* Schedule / Expiration notice */}
         {product.discountEndDate && (
           <span className="absolute bottom-3 right-3 px-2 py-0.5 bg-slate-900/80 backdrop-blur-xs text-white text-[9.5px] font-medium rounded-md shadow-xs flex items-center gap-1 pointer-events-none">
             <Clock className="w-2.5 h-2.5 text-amber-300" />
@@ -122,20 +125,13 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
             {product.packageSize}
           </p>
 
-          {/* Quick Allergen Tag if present */}
-          {(contains.length > 0 || mayContain.length > 0) && (
-            <div className="mb-2 min-h-[18px]">
-              {contains.length > 0 ? (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-800 text-[10px] font-bold">
-                  <AlertTriangle className="w-2.5 h-2.5 text-rose-600" />
-                  <span className="truncate max-w-[150px]">Contiene: {contains.map(c => c.meta.shortLabel).join(', ')}</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-medium">
-                  <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
-                  <span className="truncate max-w-[150px]">Tracce: {mayContain.map(c => c.meta.shortLabel).join(', ')}</span>
-                </span>
-              )}
+          {/* Discreet Allergen Tag only if declared present */}
+          {contains.length > 0 && (
+            <div className="mb-2">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-50/80 border border-rose-200/80 text-rose-800 text-[10px] font-semibold">
+                <Info className="w-2.5 h-2.5 text-rose-600" />
+                <span className="truncate max-w-[150px]">Allergeni: {contains.map(c => c.meta.shortLabel).join(', ')}</span>
+              </span>
             </div>
           )}
         </div>
@@ -144,17 +140,23 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
         <div className="pt-2.5 border-t border-stone-100 mt-2">
           <div className="flex items-baseline justify-between mb-3">
             <div className="flex items-baseline gap-2">
-              <span className="font-extrabold text-lg text-slate-900">
-                €{product.price.toFixed(2)}
-              </span>
-              {product.originalPrice && product.originalPrice > product.price && (
+              {product.price != null ? (
+                <span className="font-extrabold text-lg text-slate-900">
+                  €{product.price.toFixed(2)}
+                </span>
+              ) : (
+                <span className="font-bold text-xs text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  {product.observedPrice ? `Rilevato: ${product.observedPrice}` : 'Prezzo al banco'}
+                </span>
+              )}
+              {product.originalPrice && product.price != null && product.originalPrice > product.price && (
                 <span className="text-xs text-slate-400 line-through">
                   €{product.originalPrice.toFixed(2)}
                 </span>
               )}
             </div>
 
-            {product.originalPrice && product.originalPrice > product.price && (
+            {product.originalPrice && product.price != null && product.originalPrice > product.price && (
               <span className="text-[10.5px] font-bold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
                 Risparmi €{(product.originalPrice - product.price).toFixed(2)}
               </span>
@@ -211,7 +213,9 @@ const PromoProductCard: React.FC<ProductCardProps> = ({
 
     </div>
   );
-};
+});
+
+PromoProductCard.displayName = 'PromoProductCard';
 
 export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
   products,
@@ -219,13 +223,13 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
   onOpenProductDetail,
   onNavigateSection
 }) => {
-  const now = new Date();
-
-  // Filter active discounts strictly (in stock, available, not expired, not future scheduled)
-  const activeDiscounts = products.filter(p => isProductDiscountActive(p, now));
-
-  // Filter new arrivals strictly (marked new, available, in stock)
-  const newArrivals = products.filter(p => isProductNewArrival(p));
+  const { activeDiscounts, newArrivals } = useMemo(() => {
+    const now = new Date();
+    return {
+      activeDiscounts: products.filter(p => isProductDiscountActive(p, now)),
+      newArrivals: products.filter(p => isProductNewArrival(p))
+    };
+  }, [products]);
 
   const hasDiscounts = activeDiscounts.length > 0;
   const hasNewArrivals = newArrivals.length > 0;
@@ -234,7 +238,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
     return null;
   }
 
-  // Render Special Offers section
   const renderSpecialOffers = () => {
     if (!hasDiscounts) return null;
 
@@ -245,7 +248,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           
-          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-rose-800 bg-rose-100/80 px-2.5 py-1 rounded-full mb-2">
@@ -269,7 +271,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
             </button>
           </div>
 
-          {/* Cards Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
             {activeDiscounts.map(product => (
               <PromoProductCard
@@ -287,7 +288,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
     );
   };
 
-  // Render New Arrivals section
   const renderNewArrivals = () => {
     if (!hasNewArrivals) return null;
 
@@ -298,7 +298,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           
-          {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-900 bg-emerald-100/80 px-2.5 py-1 rounded-full mb-2">
@@ -322,7 +321,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
             </button>
           </div>
 
-          {/* Cards Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-5">
             {newArrivals.map(product => (
               <PromoProductCard
@@ -340,10 +338,6 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
     );
   };
 
-  // Requirement:
-  // "Display a prominent Special Offers section near the top of the homepage whenever active discounts exist.
-  // Display New Arrivals immediately after Special Offers.
-  // If there are no active discounts, show New Arrivals first."
   return (
     <>
       {hasDiscounts ? (
@@ -352,9 +346,7 @@ export const PromotionsSection: React.FC<PromotionsSectionProps> = ({
           {renderNewArrivals()}
         </>
       ) : (
-        <>
-          {renderNewArrivals()}
-        </>
+        renderNewArrivals()
       )}
     </>
   );

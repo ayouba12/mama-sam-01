@@ -1,58 +1,107 @@
 [
   {
-    "id": "cat-1",
-    "name": "Tuberi e Verdure Fresche",
-    "summary": "Yam, Platani, Manioca e Peperoncini Scotch Bonnet",
-    "image": "catTubers",
+    "id": "cat-farine-amidi",
+    "name": "Farine e amidi",
+    "summary": "Maizena amido di mais, Eagle Brand Yam Flour, Pronto Rice Flour, Unifresh Kokonte & Yellow Gari, Ca Bianca",
+    "image": "catGrains",
     "itemCount": 6
   },
   {
-    "id": "cat-2",
-    "name": "Cereali e Farine Tradizionali",
-    "summary": "Garri Ijebu, Farina di Yam, Riso e Fagioli",
-    "image": "catGrains",
-    "itemCount": 5
-  },
-  {
-    "id": "cat-3",
-    "name": "Pesce Affumicato e Carni",
-    "summary": "Pesce Gatto Affumicato, Stoccafisso e Carne di Capra",
-    "image": "catFishMeats",
-    "itemCount": 4
-  },
-  {
-    "id": "cat-4",
-    "name": "Spezie e Olio di Palma",
-    "summary": "Olio di Palma Puro, Dadi Maggi, Egusi e Suya",
-    "image": "catSpicesOil",
-    "itemCount": 5
-  },
-  {
-    "id": "cat-5",
-    "name": "Bevande al Malto e Ibisco",
-    "summary": "Malta Guinness, Supermalt e Succo di Zobo",
+    "id": "cat-latte-derivati",
+    "name": "Latte e derivati",
+    "summary": "Peak Full Cream Milk Powder in polvere intero",
     "image": "catMaltDrinks",
-    "itemCount": 4
+    "itemCount": 1
   },
   {
-    "id": "cat-6",
-    "name": "Snack e Dolci Caraibici",
-    "summary": "Chin Chin Croccante, Chips di Platano e Jamaican Patty",
-    "image": "catSnacks",
+    "id": "cat-condimenti-dadi",
+    "name": "Condimenti e dadi",
+    "summary": "UFC White Vinegar & Soy Sauce, Jumbo Seasoning Powder & Cubes, Star Seasoning",
+    "image": "catSpicesOil",
+    "itemCount": 6
+  },
+  {
+    "id": "cat-noodles-pasta",
+    "name": "Noodles e pasta",
+    "summary": "Samyang Buldak Carbonara Ramen (busta & cup rosa), Samyang Buldak Cheese Ramen",
+    "image": "catGrains",
     "itemCount": 3
   },
   {
-    "id": "cat-7",
-    "name": "Cura Afro e Cosmetici",
-    "summary": "Burro di Karité Grezzo, Sapone Nero Dudu-Osun e Extension",
+    "id": "cat-carne-pesce",
+    "name": "Carne e pesce in scatola",
+    "summary": "Exeter Corned Beef in scatola e AdiBaba Dried Fish essiccato",
+    "image": "catFishMeats",
+    "itemCount": 2
+  },
+  {
+    "id": "cat-oli-grassi",
+    "name": "Oli e grassi",
+    "summary": "Pure Coconut Oil in barattoli",
+    "image": "catSpicesOil",
+    "itemCount": 1
+  },
+  {
+    "id": "cat-riso-cereali",
+    "name": "Riso e cereali",
+    "summary": "Dari Couscous semola di grano duro, Easy Cook Rice e riso/grani in confezione nera",
+    "image": "catGrains",
+    "itemCount": 3
+  },
+  {
+    "id": "cat-legumi-noci",
+    "name": "Legumi e frutta a guscio",
+    "summary": "AdiBaba Groundnuts / Peanuts arachidi e AdiBaba Sweet Beans fagioli",
+    "image": "catTubers",
+    "itemCount": 2
+  },
+  {
+    "id": "cat-snack-cereali",
+    "name": "Snack e cereali",
+    "summary": "AdiBaba Popcorn Kernels mais per popcorn",
+    "image": "catSnacks",
+    "itemCount": 1
+  },
+  {
+    "id": "cat-conserve-pomodoro",
+    "name": "Conserve e pomodoro",
+    "summary": "Gino Tomato Paste, De Rica Double Concentrated Tomato Paste e Petti Passata Extra Fine",
+    "image": "catSpicesOil",
+    "itemCount": 3
+  },
+  {
+    "id": "cat-spezie-aromi",
+    "name": "Spezie e aromi",
+    "summary": "Ducros Curry Powder e miscele di spezie/condimenti tradizionali",
+    "image": "catSpicesOil",
+    "itemCount": 2
+  },
+  {
+    "id": "cat-capelli-bellezza",
+    "name": "Capelli e bellezza",
+    "summary": "Dark & Lovely Relaxer & Hair Treatment, Olive Oil Hair, Naomi, oli e creme per capelli",
+    "image": "catCosmetics",
+    "itemCount": 6
+  },
+  {
+    "id": "cat-cura-pelle",
+    "name": "Cura della pelle",
+    "summary": "B.B. Clear Cream, Clairmen Products e Caro White Lotion",
     "image": "catCosmetics",
     "itemCount": 3
   },
   {
-    "id": "cat-1792918858949-fb90",
-    "name": "Asian Groceries & Noodles",
-    "summary": "Instant noodles, sriracha, soy sauces & dumplings",
-    "image": "catGrains",
-    "itemCount": 0
+    "id": "cat-saponi-igiene",
+    "name": "Saponi e igiene",
+    "summary": "Dettol Antiseptic liquido e Tura Soap",
+    "image": "catCosmetics",
+    "itemCount": 2
+  },
+  {
+    "id": "cat-profumi",
+    "name": "Profumi",
+    "summary": "212 Perfume e fragranze corpo",
+    "image": "catCosmetics",
+    "itemCount": 1
   }
 ]

@@ -61,8 +61,11 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                   <img
                     src={imgSrc}
                     alt={recipe.title}
+                    width={400}
+                    height={300}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[10px] font-bold rounded-md">
                     {recipe.region}
@@ -106,6 +109,10 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                             <img
                               src={resolveImage(ing.image)}
                               alt={ing.name}
+                              width={28}
+                              height={28}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-cover"
                             />
                           </div>

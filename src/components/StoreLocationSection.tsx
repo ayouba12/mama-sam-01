@@ -98,6 +98,10 @@ export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ sett
               <img
                 src={IMAGES.storefrontShop}
                 alt="Mama Sam Supermercato Africano e Caraibico a Messina"
+                width={640}
+                height={480}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-auto aspect-[4/3] object-cover object-center group-hover:scale-102 transition-transform duration-500"
               />
               

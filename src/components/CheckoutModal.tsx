@@ -2,19 +2,13 @@ import React, { useState } from 'react';
 import { 
   X, 
   MapPin, 
-  Clock, 
   CheckCircle2, 
-  ShoppingBag, 
-  Phone, 
   MessageCircle, 
-  CreditCard,
   AlertCircle,
-  AlertTriangle,
-  ShieldAlert,
   Info
 } from 'lucide-react';
 import { CartItem, Order, StoreSettings } from '../types';
-import { getContainsList, getMayContainList, hasAllergenWarnings } from '../utils/allergenHelper';
+import { getContainsList } from '../utils/allergenHelper';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -36,14 +30,14 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [customerEmail, setCustomerEmail] = useState('');
   const [pickupTimePreference, setPickupTimePreference] = useState('In circa 30 minuti');
   const [customerNote, setCustomerNote] = useState('');
-  const [allergenAcknowledged, setAllergenAcknowledged] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [completedOrder, setCompletedOrder] = useState<Order | null>(null);
 
   const subtotal = Number(
-    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0).toFixed(2)
+    items.reduce((sum, item) => sum + (item.product.price != null ? item.product.price : 0) * item.quantity, 0).toFixed(2)
   );
+  const hasDeclaredAllergens = items.some(it => getContainsList(it.product.dietaryInfo).length > 0);
 
   if (!isOpen) return null;
 
@@ -211,69 +205,33 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <span className="font-bold text-emerald-700">RITIRO GRATUITO</span>
               </div>
 
-              {/* Order Items Breakdown & Allergen Warnings */}
+              {/* Order Items Breakdown (Clean & scannable) */}
               <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-2">
                 <div className="flex justify-between items-center font-bold text-slate-800 pb-1.5 border-b border-stone-200">
                   <span>Prodotti Selezionati ({items.reduce((s, it) => s + it.quantity, 0)})</span>
                   <span>€{subtotal.toFixed(2)}</span>
                 </div>
-                <div className="max-h-40 overflow-y-auto space-y-2 divide-y divide-stone-100 pr-1">
-                  {items.map(item => {
-                    const contains = getContainsList(item.product.dietaryInfo);
-                    const mayContain = getMayContainList(item.product.dietaryInfo);
-                    return (
-                      <div key={item.product.id} className="pt-2 text-slate-700 first:pt-0">
-                        <div className="flex justify-between font-semibold text-slate-900">
-                          <span className="truncate pr-2">{item.quantity}x {item.product.name}</span>
-                          <span className="shrink-0">€{(item.product.price * item.quantity).toFixed(2)}</span>
-                        </div>
-                        {/* Specific Allergen Warnings beside this item */}
-                        {contains.length > 0 && (
-                          <div className="mt-1 flex items-start gap-1 text-[11px] text-rose-800 bg-rose-50 p-1.5 rounded border border-rose-200">
-                            <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0 mt-0.5" />
-                            <span><strong>Contiene:</strong> {contains.map(c => c.displayLabel).join(', ')}</span>
-                          </div>
-                        )}
-                        {mayContain.length > 0 && (
-                          <div className="mt-1 flex items-start gap-1 text-[11px] text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200">
-                            <Info className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
-                            <span><strong>Può contenere:</strong> {mayContain.map(c => c.displayLabel).join(', ')}</span>
-                          </div>
-                        )}
-                        {!contains.length && !mayContain.length && item.product.allergenInfo && (
-                          <div className="mt-1 flex items-start gap-1 text-[11px] text-amber-800 bg-amber-50 p-1.5 rounded border border-amber-200">
-                            <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
-                            <span>{item.product.allergenInfo}</span>
-                          </div>
-                        )}
+                <div className="max-h-36 overflow-y-auto space-y-1.5 divide-y divide-stone-100 pr-1">
+                  {items.map(item => (
+                    <div key={item.product.id} className="pt-1.5 text-slate-700 first:pt-0">
+                      <div className="flex justify-between font-medium text-slate-900">
+                        <span className="truncate pr-2">{item.quantity}x {item.product.name}</span>
+                        <span className="shrink-0">
+                          {item.product.price != null && item.product.price > 0
+                            ? `€${(item.product.price * item.quantity).toFixed(2)}`
+                            : (item.product.observedPrice ? `${item.product.observedPrice}` : 'In cassa')}
+                        </span>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Allergen & Packaging Safety Advisory */}
-              {items.some(it => hasAllergenWarnings(it.product.dietaryInfo) || Boolean(it.product.allergenInfo)) && (
-                <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-950 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                    <div>
-                      <strong className="block font-semibold">Promemoria Confezione e Allergeni:</strong>
-                      <p className="text-[11px] text-amber-900 leading-snug">
-                        Gli ingredienti e le avvertenze riportate sulla confezione fisica del prodotto prevalgono sulle schede del sito. Si prega di verificare la confezione al momento del ritiro.
-                      </p>
-                    </div>
-                  </div>
-                  <label className="flex items-center gap-2 pt-1.5 border-t border-amber-200/80 cursor-pointer text-[11px] text-amber-950">
-                    <input
-                      type="checkbox"
-                      checked={allergenAcknowledged}
-                      onChange={e => setAllergenAcknowledged(e.target.checked)}
-                      className="rounded border-amber-300 text-[#124b2e] focus:ring-[#124b2e]"
-                    />
-                    <span>Ho compreso e verificherò le etichette sulle confezioni al ritiro in negozio.</span>
-                  </label>
-                </div>
+              {hasDeclaredAllergens && (
+                <p className="text-[11px] text-slate-600 flex items-start gap-1.5 bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                  <Info className="w-3.5 h-3.5 text-slate-500 shrink-0 mt-0.5" />
+                  <span>Nota: alcuni articoli selezionati contengono allergeni dichiarati. Verifica sempre l'etichetta fisica al momento del ritiro.</span>
+                </p>
               )}
 
               {/* Customer Full Name */}
@@ -287,7 +245,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   placeholder="es. Mario Rossi o Blessing Adeleke"
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
+                  className="w-full px-3 py-2 text-base sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
                 />
               </div>
 
@@ -302,7 +260,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   placeholder="es. +39 351 000 0000"
                   value={customerPhone}
                   onChange={e => setCustomerPhone(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
+                  className="w-full px-3 py-2 text-base sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
                 />
               </div>
 
@@ -316,7 +274,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   placeholder="tua.email@esempio.com"
                   value={customerEmail}
                   onChange={e => setCustomerEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
+                  className="w-full px-3 py-2 text-base sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
                 />
               </div>
 
@@ -328,7 +286,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <select
                   value={pickupTimePreference}
                   onChange={e => setPickupTimePreference(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl bg-white focus:border-[#124b2e] outline-hidden cursor-pointer"
+                  className="w-full px-3 py-2 text-base sm:text-sm border border-stone-300 rounded-xl bg-white focus:border-[#124b2e] outline-hidden cursor-pointer"
                 >
                   <option value="In circa 30 minuti">In circa 30 minuti (Più rapido)</option>
                   <option value="Oggi nel pomeriggio">Oggi nel pomeriggio</option>
@@ -348,7 +306,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
                   placeholder="es. Preferisco platani molto maturi, oppure chiamatemi appena pronto."
                   value={customerNote}
                   onChange={e => setCustomerNote(e.target.value)}
-                  className="w-full px-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
+                  className="w-full px-3 py-2 text-base sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden"
                 />
               </div>
 

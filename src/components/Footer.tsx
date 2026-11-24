@@ -67,50 +67,50 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2 text-slate-400">
               <li>
                 <button
-                  onClick={() => onSelectCategory('Tuberi e Verdure Fresche')}
+                  onClick={() => onSelectCategory('Farine e amidi')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Yam del Ghana e Platani
+                  Farina di Platano, Fufu &amp; Gari
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onSelectCategory('Cereali e Farine Tradizionali')}
+                  onClick={() => onSelectCategory('Condimenti e dadi')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Garri Ijebu e Farina di Yam
+                  Condimenti, Dadi Maggi &amp; Brodi
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onSelectCategory('Pesce Affumicato e Carni')}
+                  onClick={() => onSelectCategory('Noodles e pasta')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Pesce Gatto Affumicato e Stoccafisso
+                  Noodles Istantanei &amp; Spaghetti
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onSelectCategory('Spezie e Olio di Palma')}
+                  onClick={() => onSelectCategory('Carne e pesce in scatola')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Olio di Palma Puro e Dadi Maggi
+                  Sardine, Tonno &amp; Corned Beef
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onSelectCategory('Bevande al Malto e Ibisco')}
+                  onClick={() => onSelectCategory('Oli e grassi')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Malta Guinness e Zobo all'Ibisco
+                  Olio di Palma &amp; Oli Vegetali
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => onSelectCategory('Cura Afro e Cosmetici')}
+                  onClick={() => onSelectCategory('Cura dei capelli')}
                   className="hover:text-emerald-400 transition-colors text-left cursor-pointer"
                 >
-                  Burro di Karité Grezzo e Sapone Nero
+                  Oli &amp; Cosmetici Afro per Capelli
                 </button>
               </li>
             </ul>

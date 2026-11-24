@@ -1,436 +1,4577 @@
 [
   {
-    "id": "prod-1",
-    "name": "Burro di Karité Grezzo d'Avorio Puro 100%",
-    "category": "Cura Afro e Cosmetici",
-    "origin": "Tamale, Ghana",
-    "subCategory": "Pelle e Capelli Afro",
-    "price": 6.9,
-    "originalPrice": 8,
-    "packageSize": "Confezione da 500g",
-    "image": "sheaButter",
-    "description": "Burro di karité ghanese grezzo e non raffinato di Grado A da Tamale. Nutre in profondità la pelle secca, ammorbidisce i ricci e protegge il cuoio capelluto.",
-    "stock": 24,
+    "id": "prod-real-1",
+    "itemNumber": 1,
+    "name": "Maizena – Amido di mais",
+    "brand": "Maizena",
+    "category": "Farine e amidi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Maizena",
+    "price": null,
+    "observedPrice": "€2.50",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd1",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Maizena – Amido di mais (Maizena). Identificazione abbastanza chiara; prezzo vicino al prodotto, da confermare.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 10,
-    "isDiscounted": true,
-    "discountActive": true
-  },
-  {
-    "id": "prod-2",
-    "name": "Farina di Yam Pounded Ayoola (Iyan)",
-    "category": "Cereali e Farine Tradizionali",
-    "origin": "Nigeria",
-    "subCategory": "Farine e Cereali",
-    "price": 5.8,
-    "packageSize": "Busta richiudibile da 1 kg",
-    "image": "yamFlour",
-    "description": "Farina istantanea di yam pestato per preparare l'autentico swallow nigeriano liscio e vellutato. Si prepara in acqua bollente in meno di 5 minuti senza grumi.",
-    "stock": 35,
-    "isAvailable": true,
-    "salesRank": 2,
-    "isNewArrival": true
-  },
-  {
-    "id": "prod-3",
-    "name": "Yam Bianco Africano Fresco (Puna Yam)",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Ghana / Nigeria",
-    "subCategory": "Tuberi Freschi",
-    "price": 6.9,
-    "originalPrice": 7.5,
-    "packageSize": "Tubero da circa 2,5 kg",
-    "image": "punaYam",
-    "description": "Pregiato yam bianco puna del Ghana dalla consistenza morbida, dolce e farinosa. Perfetto da bollire, friggere a fette o gustare con salsa d'uovo e peperoncino.",
-    "stock": 16,
-    "isAvailable": true,
+    "featured": false,
     "salesRank": 1,
-    "isDiscounted": true,
-    "discountActive": true
+    "ingredients": "Amido di mais (da verificare sull'etichetta)",
+    "expectedIngredients": "Amido di mais (da verificare sull'etichetta)",
+    "allergenInfo": "Nessun allergene maggiore atteso nel prodotto semplice; verificare contaminazioni",
+    "allergensAlert": "Nessun allergene maggiore atteso nel prodotto semplice; verificare contaminazioni",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel prodotto semplice; verificare contaminazioni.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-01",
+    "notes": "Identificazione abbastanza chiara; prezzo vicino al prodotto, da confermare.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-24T12:56:08.939Z"
   },
   {
-    "id": "prod-4",
-    "name": "Garri Ijebu Premium - Fiocchi di Manioca",
-    "category": "Cereali e Farine Tradizionali",
-    "origin": "Ogun State, Nigeria",
-    "subCategory": "Farine e Cereali",
-    "price": 6.5,
-    "originalPrice": 7.2,
-    "packageSize": "Sacco da 2 kg",
-    "image": "ijebuGarri",
-    "description": "Fiocchi di manioca bianca finemente setacciati e fermentati secondo la tradizione Ijebu, con la tipica nota acidula e croccante. Ideale per ammollo con arachidi o per preparare l'eba calda.",
-    "stock": 40,
+    "id": "prod-real-2",
+    "itemNumber": 2,
+    "name": "Peak Full Cream Milk Powder",
+    "brand": "Peak",
+    "category": "Latte e derivati",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Peak",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€6.50",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd2",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Peak Full Cream Milk Powder (Peak). Identificazione chiara; prezzo indicativo da cartellino vicino.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 3
+    "featured": false,
+    "salesRank": 2,
+    "ingredients": "Latte intero in polvere; eventuali vitamine/emulsionanti da verificare",
+    "expectedIngredients": "Latte intero in polvere; eventuali vitamine/emulsionanti da verificare",
+    "allergenInfo": "LATTE; possibile lattosio",
+    "allergensAlert": "LATTE; possibile lattosio",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "LATTE; possibile lattosio.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "contains",
+          "specificDetails": "Latte intero in polvere; possibile lattosio"
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-02",
+    "notes": "Identificazione chiara; prezzo indicativo da cartellino vicino.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-5",
-    "name": "Dadi di Condimento Maggi Star (100 pz)",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Costa d'Avorio",
-    "subCategory": "Condimenti e Spezie",
-    "price": 4,
-    "packageSize": "Scatola da 100 cubetti (400g)",
-    "image": "maggiCubes",
-    "description": "I celebri cubetti di brodo arricchiti dell'Africa Occidentale. Indispensabili per preparare riso jollof, zuppe di pepe, stufati di carne e salse di verdura.",
-    "stock": 55,
+    "id": "prod-real-3",
+    "itemNumber": 3,
+    "name": "UFC White Vinegar",
+    "brand": "UFC",
+    "category": "Condimenti e dadi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "UFC",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€4.50",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd3",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "UFC White Vinegar (UFC). Identificazione chiara; prezzo indicativo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 5
+    "featured": false,
+    "salesRank": 3,
+    "ingredients": "Aceto bianco; materia prima e acidità da verificare",
+    "expectedIngredients": "Aceto bianco; materia prima e acidità da verificare",
+    "allergenInfo": "Nessun allergene maggiore atteso; verificare ingredienti e stabilimento",
+    "allergensAlert": "Nessun allergene maggiore atteso; verificare ingredienti e stabilimento",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso; verificare ingredienti e stabilimento.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-03",
+    "notes": "Identificazione chiara; prezzo indicativo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-6",
-    "name": "Malta Guinness Bevanda al Malto (6x330ml)",
-    "category": "Bevande al Malto e Ibisco",
-    "origin": "Guinness Nigeria / Camerun",
-    "subCategory": "Bevande Analcoliche",
-    "price": 8.5,
-    "originalPrice": 9.6,
-    "packageSize": "6 lattine da 330ml",
-    "image": "maltaGuinness",
-    "description": "Bevanda analcolica al malto ricca e rinvigorente, arricchita con vitamine B1, B2, B3, B5, B6 e calcio. Perfetta servita ghiacciata.",
-    "stock": 30,
+    "id": "prod-real-4",
+    "itemNumber": 4,
+    "name": "UFC Soy Sauce",
+    "brand": "UFC",
+    "category": "Condimenti e dadi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "UFC",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Bottiglia (volume da verificare)",
+    "image": "realProd4",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "UFC Soy Sauce (UFC). Bottiglia riconoscibile; etichetta posteriore non visibile.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 7,
-    "isDiscounted": true,
-    "discountActive": true
+    "featured": false,
+    "salesRank": 4,
+    "ingredients": "Salsa di soia; ingredienti esatti da verificare",
+    "expectedIngredients": "Salsa di soia; ingredienti esatti da verificare",
+    "allergenInfo": "SOIA; possibile GRANO/GLUTINE",
+    "allergensAlert": "SOIA; possibile GRANO/GLUTINE",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "SOIA; possibile GRANO/GLUTINE.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Possibile grano/glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "contains",
+          "specificDetails": "Salsa di soia"
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-04",
+    "notes": "Bottiglia riconoscibile; etichetta posteriore non visibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-7",
-    "name": "Chin Chin Croccante alla Vaniglia Mama Sam",
-    "category": "Snack e Dolci Caraibici",
-    "origin": "Laboratorio Mama Sam, Messina",
-    "subCategory": "Snack Dolci",
-    "price": 3.5,
-    "packageSize": "Barattolo da 350g",
-    "image": "chinChin",
-    "description": "Bocconcini croccanti di pasticceria tipica dell'Africa Occidentale cotti freschi, aromatizzati con noce moscata, cannella e vaniglia. Fatti con passione a Messina.",
-    "stock": 22,
+    "id": "prod-real-5",
+    "itemNumber": 5,
+    "name": "Samyang Buldak Carbonara Ramen – confezione rosa",
+    "brand": "Samyang",
+    "category": "Noodles e pasta",
+    "origin": "Corea del Sud",
+    "subCategory": "Samyang",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non confermato",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Confezione rosa (peso da verificare)",
+    "image": "realProd5",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Samyang Buldak Carbonara Ramen – confezione rosa (Samyang). Prodotto riconoscibile; prezzo non attribuibile con certezza.",
+    "stock": 0,
     "isAvailable": true,
+    "featured": false,
+    "salesRank": 5,
+    "ingredients": "Noodles di frumento, olio, salsa e aromi; formula esatta da verificare",
+    "expectedIngredients": "Noodles di frumento, olio, salsa e aromi; formula esatta da verificare",
+    "allergenInfo": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione",
+    "allergensAlert": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Possibile frumento/glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Possibile soia"
+        },
+        "milk": {
+          "status": "may_contain",
+          "specificDetails": "Possibile latte"
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-05",
+    "notes": "Prodotto riconoscibile; prezzo non attribuibile con certezza.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-6",
+    "itemNumber": 6,
+    "name": "Samyang Buldak Carbonara Ramen – cup rosa",
+    "brand": "Samyang",
+    "category": "Noodles e pasta",
+    "origin": "Corea del Sud",
+    "subCategory": "Samyang",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€1.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Cup rosa (peso da verificare)",
+    "image": "realProd6",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Samyang Buldak Carbonara Ramen – cup rosa (Samyang). Cartellino promozionale vicino; associazione non certa.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
     "salesRank": 6,
-    "isNewArrival": true
+    "ingredients": "Noodles e condimento; ingredienti esatti da verificare",
+    "expectedIngredients": "Noodles e condimento; ingredienti esatti da verificare",
+    "allergenInfo": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione",
+    "allergensAlert": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Possibile frumento/glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Possibile soia"
+        },
+        "milk": {
+          "status": "may_contain",
+          "specificDetails": "Possibile latte"
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-06",
+    "notes": "Cartellino promozionale vicino; associazione non certa.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-8",
-    "name": "Olio di Palma Rosso Puro Extra Vergine (1L)",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Edo State, Nigeria",
-    "subCategory": "Oli e Condimenti",
-    "price": 5.5,
-    "originalPrice": 6.2,
-    "packageSize": "Bottiglia da 1 Litro",
-    "image": "palmOil1L",
-    "description": "100% puro olio di palma rosso vergine estratto a freddo, dal colore rubino brillante e dall'aroma rustico intenso. Fondamentale per zuppa egusi, oha e banga.",
-    "stock": 45,
+    "id": "prod-real-7",
+    "itemNumber": 7,
+    "name": "Samyang Buldak Cheese Ramen – confezione gialla",
+    "brand": "Samyang",
+    "category": "Noodles e pasta",
+    "origin": "Corea del Sud",
+    "subCategory": "Samyang",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Confezione gialla (peso da verificare)",
+    "image": "realProd7",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Samyang Buldak Cheese Ramen – confezione gialla (Samyang). Prodotto riconoscibile; prezzo non leggibile.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 4
+    "featured": false,
+    "salesRank": 7,
+    "ingredients": "Noodles di frumento e condimento al formaggio; formula esatta da verificare",
+    "expectedIngredients": "Noodles di frumento e condimento al formaggio; formula esatta da verificare",
+    "allergenInfo": "Possibili FRUMENTO/GLUTINE, LATTE, SOIA; controllare anche SESAMO",
+    "allergensAlert": "Possibili FRUMENTO/GLUTINE, LATTE, SOIA; controllare anche SESAMO",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Possibili FRUMENTO/GLUTINE, LATTE, SOIA; controllare anche SESAMO.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Possibile frumento/glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Possibile soia"
+        },
+        "milk": {
+          "status": "may_contain",
+          "specificDetails": "Condimento al formaggio / latte"
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "may_contain",
+          "specificDetails": "Controllare anche sesamo"
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-07",
+    "notes": "Prodotto riconoscibile; prezzo non leggibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-9",
-    "name": "Platani Gialli Dolci (Maturi)",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Camerun / Costa Rica",
-    "subCategory": "Ortofrutta Fresca",
-    "price": 3.2,
-    "packageSize": "Casco da 1 kg (~4 platani)",
-    "image": "yellowPlantains",
-    "description": "Platani gialli maturati al punto giusto, ideali da friggere dorati per il dodo caramellato, da bollire o da servire con fagioli e riso jollof.",
-    "stock": 28,
+    "id": "prod-real-8",
+    "itemNumber": 8,
+    "name": "Exeter Corned Beef",
+    "brand": "Exeter",
+    "category": "Carne e pesce in scatola",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Exeter",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Scatola / lattina (peso da verificare)",
+    "image": "realProd8",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Exeter Corned Beef (Exeter). Marchio leggibile; etichetta ingredienti non visibile.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 8
+    "featured": false,
+    "salesRank": 8,
+    "ingredients": "Carne bovina, acqua/sale e additivi da verificare",
+    "expectedIngredients": "Carne bovina, acqua/sale e additivi da verificare",
+    "allergenInfo": "Controllare eventuali SOIA, SENAPE o altri allergeni in etichetta",
+    "allergensAlert": "Controllare eventuali SOIA, SENAPE o altri allergeni in etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Controllare eventuali SOIA, SENAPE o altri allergeni in etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Controllare eventuale soia in etichetta"
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "may_contain",
+          "specificDetails": "Controllare eventuale senape in etichetta"
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-08",
+    "notes": "Marchio leggibile; etichetta ingredienti non visibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-10",
-    "name": "Pesce Gatto Intero Essiccato e Affumicato",
-    "category": "Pesce Affumicato e Carni",
-    "origin": "Nigeria / Atlantico",
-    "subCategory": "Pesce Affumicato",
-    "price": 8.9,
-    "originalPrice": 9.8,
-    "packageSize": "Intero da circa 350g",
-    "image": "smokedCatfish",
-    "description": "Pesce gatto africano affumicato a legno duro, dal profumo intenso e carni tenere e saporite. Arricchisce zuppe di egusi, edikang ikong e bitterleaf.",
-    "stock": 15,
+    "id": "prod-real-9",
+    "itemNumber": 9,
+    "name": "Pure Coconut Oil – barattoli",
+    "brand": "Non chiaro",
+    "category": "Oli e grassi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Oli e grassi",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Barattoli (peso/volume da verificare)",
+    "image": "realProd9",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Pure Coconut Oil – barattoli (Non chiaro). Prodotto visibile; marca non certa.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 9
+    "featured": false,
+    "salesRank": 9,
+    "ingredients": "Olio di cocco; verificare se 100% puro",
+    "expectedIngredients": "Olio di cocco; verificare se 100% puro",
+    "allergenInfo": "Verificare dichiarazione allergeni e possibili tracce",
+    "allergensAlert": "Verificare dichiarazione allergeni e possibili tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Verificare dichiarazione allergeni e possibili tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-09",
+    "notes": "Prodotto visibile; marca non certa.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-11",
-    "name": "Riso Aromatico a Chicco Lungo Parboiled",
-    "category": "Cereali e Farine Tradizionali",
-    "origin": "Ghana / Thailandia",
-    "subCategory": "Farine e Cereali",
-    "price": 11.5,
-    "packageSize": "Sacco da 5 kg",
-    "image": "longGrainRice",
-    "description": "Riso parboiled a chicco lungo di prima qualità: resta sgranato, morbido e profumato. La scelta ideale per il jollof rice nigeriano e ghanese.",
-    "stock": 32,
+    "id": "prod-real-10",
+    "itemNumber": 10,
+    "name": "Dari Couscous",
+    "brand": "Dari",
+    "category": "Riso e cereali",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Dari",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €2.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd10",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Dari Couscous (Dari). Marchio leggibile; prezzo vicino ma non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 11
+    "featured": false,
+    "salesRank": 10,
+    "ingredients": "Semola di grano duro (per couscous semplice; verificare confezione)",
+    "expectedIngredients": "Semola di grano duro (per couscous semplice; verificare confezione)",
+    "allergenInfo": "FRUMENTO/GLUTINE",
+    "allergensAlert": "FRUMENTO/GLUTINE",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "FRUMENTO/GLUTINE.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "contains",
+          "specificDetails": "Semola di grano duro (FRUMENTO/GLUTINE)"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-10",
+    "notes": "Marchio leggibile; prezzo vicino ma non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-12",
-    "name": "Tranci di Stoccafisso Artico Essiccato (Cod)",
-    "category": "Pesce Affumicato e Carni",
-    "origin": "Norvegia / Nigeria",
-    "subCategory": "Pesce Essiccato",
-    "price": 13.5,
-    "packageSize": "Tagli scelti da 400g",
-    "image": "stockfishCuts",
-    "description": "Vero merluzzo artico norvegese essiccato all'aria (okporoko / panla). Tranci spessi che donano corpo, aroma e collagene ineguagliabile alle zuppe tradizionali.",
-    "stock": 16,
+    "id": "prod-real-11",
+    "itemNumber": 11,
+    "name": "Jumbo Seasoning Powder",
+    "brand": "Jumbo",
+    "category": "Condimenti e dadi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Jumbo",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non confermato",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd11",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Jumbo Seasoning Powder (Jumbo). Cartellino €5,00 visibile sul ripiano; prodotto esatto non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 12
+    "featured": false,
+    "salesRank": 11,
+    "ingredients": "Miscela di condimenti; ingredienti variabili",
+    "expectedIngredients": "Miscela di condimenti; ingredienti variabili",
+    "allergenInfo": "Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni",
+    "allergensAlert": "Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Verificare SOIA, SEDANO, SENAPE, GLUTINE e altri allergeni.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Verificare glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Verificare soia"
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "may_contain",
+          "specificDetails": "Verificare sedano"
+        },
+        "mustard": {
+          "status": "may_contain",
+          "specificDetails": "Verificare senape"
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-11",
+    "notes": "Cartellino €5,00 visibile sul ripiano; prodotto esatto non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-13",
-    "name": "Patties Giamaicane di Manzo Speziato (2 pz)",
-    "category": "Snack e Dolci Caraibici",
-    "origin": "Giamaica / UK",
-    "subCategory": "Specialità Caraibiche",
-    "price": 4.8,
-    "packageSize": "Confezione da 2 x 140g",
-    "image": "jamaicanPatty",
-    "description": "Fagottini dorati di pasta sfogliata alla curcuma ripieni di carne macinata di manzo cotta a fuoco lento con scotch bonnet, timo e cipollotti freschi.",
-    "stock": 20,
+    "id": "prod-real-12",
+    "itemNumber": 12,
+    "name": "Jumbo Seasoning Cubes",
+    "brand": "Jumbo",
+    "category": "Condimenti e dadi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Jumbo",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd12",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Jumbo Seasoning Cubes (Jumbo). Prodotto/varietà non completamente leggibili.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 13
+    "featured": false,
+    "salesRank": 12,
+    "ingredients": "Dadi/condimento; ingredienti variabili",
+    "expectedIngredients": "Dadi/condimento; ingredienti variabili",
+    "allergenInfo": "Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni",
+    "allergensAlert": "Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Verificare SOIA, SEDANO, SENAPE, GLUTINE e altri allergeni.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Verificare glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Verificare soia"
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "may_contain",
+          "specificDetails": "Verificare sedano"
+        },
+        "mustard": {
+          "status": "may_contain",
+          "specificDetails": "Verificare senape"
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-12",
+    "notes": "Prodotto/varietà non completamente leggibili.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-14",
-    "name": "Chips Croccanti di Platano Salato al Peperoncino",
-    "category": "Snack e Dolci Caraibici",
-    "origin": "Ghana",
-    "subCategory": "Snack Salati",
-    "price": 2.2,
-    "packageSize": "Busta da 120g",
-    "image": "plantainChips",
-    "description": "Platani verdi tagliati sottilissimi e fritti in pentola fino a raggiungere la massima croccantezza, cosparsi di sale marino e peperoncino.",
-    "stock": 50,
+    "id": "prod-real-13",
+    "itemNumber": 13,
+    "name": "Star Seasoning",
+    "brand": "Star",
+    "category": "Condimenti e dadi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Star",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd13",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Star Seasoning (Star). Confezione visibile; variante non chiara.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 14
+    "featured": false,
+    "salesRank": 13,
+    "ingredients": "Condimento; ingredienti variabili",
+    "expectedIngredients": "Condimento; ingredienti variabili",
+    "allergenInfo": "Verificare ingredienti e allergeni sull'etichetta",
+    "allergensAlert": "Verificare ingredienti e allergeni sull'etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Verificare ingredienti e allergeni sull'etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-13",
+    "notes": "Confezione visibile; variante non chiara.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-15",
-    "name": "Fiori di Ibisco Essiccati per Zobo / Carcadè",
-    "category": "Bevande al Malto e Ibisco",
-    "origin": "Nigeria / Sudan",
-    "subCategory": "Infusi e Bevande",
-    "price": 3.9,
-    "packageSize": "Busta da 300g",
-    "image": "zoboHibiscus",
-    "description": "Calici interi biologici di Hibiscus sabdariffa essiccati al sole per preparare la rinfrescante bevanda Zobo o il tradizionale Sorrel caraibico.",
-    "stock": 38,
+    "id": "prod-real-14",
+    "itemNumber": 14,
+    "name": "Eagle Brand Ground Yam Flour",
+    "brand": "Eagle Brand",
+    "category": "Farine e amidi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Eagle Brand",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €4.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd14",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Eagle Brand Ground Yam Flour (Eagle Brand). Marchio/prodotto leggibile; prezzo vicino non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 15
+    "featured": false,
+    "salesRank": 14,
+    "ingredients": "Farina di igname; verificare eventuali aggiunte",
+    "expectedIngredients": "Farina di igname; verificare eventuali aggiunte",
+    "allergenInfo": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "allergensAlert": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-14",
+    "notes": "Marchio/prodotto leggibile; prezzo vicino non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-16",
-    "name": "Sapone Nero Africano Dudu-Osun (Pacco da 3)",
-    "category": "Cura Afro e Cosmetici",
-    "origin": "Nigeria",
-    "subCategory": "Saponi Naturali",
-    "price": 5.5,
-    "packageSize": "3 saponette da 150g",
-    "image": "blackSoap",
-    "description": "Sapone artigianale a base di erbe naturali, miele puro, burro di karité, legno di camwood e cenere di baccelli di cacao. Lenitivo e purificante.",
-    "stock": 42,
+    "id": "prod-real-15",
+    "itemNumber": 15,
+    "name": "Pronto Rice Flour",
+    "brand": "Pronto",
+    "category": "Farine e amidi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Pronto",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €2.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd15",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Pronto Rice Flour (Pronto). Confezione leggibile; prezzo vicino non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 16
+    "featured": false,
+    "salesRank": 15,
+    "ingredients": "Farina di riso",
+    "expectedIngredients": "Farina di riso",
+    "allergenInfo": "Nessun allergene maggiore atteso; verificare contaminazione crociata da glutine",
+    "allergensAlert": "Nessun allergene maggiore atteso; verificare contaminazione crociata da glutine",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso; verificare contaminazione crociata da glutine.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "may_contain",
+          "specificDetails": "Verificare contaminazione crociata da glutine"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-15",
+    "notes": "Confezione leggibile; prezzo vicino non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-17",
-    "name": "Peperoncini Scotch Bonnet Rossi e Gialli Freschi",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Uganda / Nigeria",
-    "subCategory": "Ortofrutta Fresca",
-    "price": 2.8,
-    "packageSize": "Vaschetta da 250g",
-    "image": "scotchBonnets",
-    "description": "Piccantissimi e profumatissimi peperoncini atarodo/habanero freschi, con la caratteristica nota floreale e fruttata. Arrivati freschi a Messina.",
-    "stock": 25,
+    "id": "prod-real-16",
+    "itemNumber": 16,
+    "name": "AdiBaba Groundnuts / Peanuts",
+    "brand": "AdiBaba",
+    "category": "Legumi e frutta a guscio",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "AdiBaba",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €3.20?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd16",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "AdiBaba Groundnuts / Peanuts (AdiBaba). Marchio/prodotto visibile; prezzo vicino non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 17
+    "featured": false,
+    "salesRank": 16,
+    "ingredients": "Arachidi; ingredienti aggiunti da verificare",
+    "expectedIngredients": "Arachidi; ingredienti aggiunti da verificare",
+    "allergenInfo": "ARACHIDI",
+    "allergensAlert": "ARACHIDI",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Contiene ARACHIDI.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "contains",
+          "specificDetails": "ARACHIDI"
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-16",
+    "notes": "Marchio/prodotto visibile; prezzo vicino non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-18",
-    "name": "Okra Fresca e Tenera (Gombo)",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Ghana",
-    "subCategory": "Ortofrutta Fresca",
-    "price": 3.5,
-    "packageSize": "Vaschetta da 500g",
-    "image": "freshOkra",
-    "description": "Baccelli di gombo freschissimi e croccanti per preparare la zuppa cremosa Ila Alasepo, gumbo o stufati leggeri di verdure.",
-    "stock": 20,
+    "id": "prod-real-17",
+    "itemNumber": 17,
+    "name": "AdiBaba Dried Fish",
+    "brand": "AdiBaba",
+    "category": "Carne e pesce in scatola",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "AdiBaba",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non confermato",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd17",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "AdiBaba Dried Fish (AdiBaba). Confezione visibile; prezzo non attribuibile con certezza.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 18
+    "featured": false,
+    "salesRank": 17,
+    "ingredients": "Pesce essiccato; specie e ingredienti da verificare",
+    "expectedIngredients": "Pesce essiccato; specie e ingredienti da verificare",
+    "allergenInfo": "PESCE",
+    "allergensAlert": "PESCE",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Contiene PESCE.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "contains",
+          "specificDetails": "PESCE essiccato"
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-17",
+    "notes": "Confezione visibile; prezzo non attribuibile con certezza.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-19",
-    "name": "Radici Fresche di Manioca Cerata (Yuca)",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Costa Rica / Nigeria",
-    "subCategory": "Tuberi Freschi",
-    "price": 3.8,
-    "packageSize": "Pezzo da circa 1,2 kg",
-    "image": "cassavaRoots",
-    "description": "Radici fresche di manioca a polpa bianca protette da paraffina naturale. Ottime bollite con salsa di peperoni, arrostite o fritte croccanti.",
-    "stock": 19,
+    "id": "prod-real-18",
+    "itemNumber": 18,
+    "name": "AdiBaba Popcorn Kernels",
+    "brand": "AdiBaba",
+    "category": "Snack e cereali",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "AdiBaba",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €2.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd18",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "AdiBaba Popcorn Kernels (AdiBaba). Prezzo vicino non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 19
+    "featured": false,
+    "salesRank": 18,
+    "ingredients": "Mais per popcorn",
+    "expectedIngredients": "Mais per popcorn",
+    "allergenInfo": "Nessun allergene maggiore atteso nel mais semplice; verificare tracce",
+    "allergensAlert": "Nessun allergene maggiore atteso nel mais semplice; verificare tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel mais semplice; verificare tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-18",
+    "notes": "Prezzo vicino non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-20",
-    "name": "Platani Verdi Aceri (Da Bollire o Friggere)",
-    "category": "Tuberi e Verdure Fresche",
-    "origin": "Camerun",
-    "subCategory": "Ortofrutta Fresca",
-    "price": 2.9,
-    "packageSize": "Casco da 1 kg",
-    "image": "greenPlantains",
-    "description": "Platani verdi compatti e ricchi di fibre resistenti. Perfetti per platano bollito a basso indice glicemico, tostones caraibici o zuppe di porridge.",
-    "stock": 24,
+    "id": "prod-real-19",
+    "itemNumber": 19,
+    "name": "AdiBaba Sweet Beans",
+    "brand": "AdiBaba",
+    "category": "Legumi e frutta a guscio",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "AdiBaba",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€1.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd19",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "AdiBaba Sweet Beans (AdiBaba). Prezzo vicino non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 20
+    "featured": false,
+    "salesRank": 19,
+    "ingredients": "Fagioli; varietà e ingredienti da verificare",
+    "expectedIngredients": "Fagioli; varietà e ingredienti da verificare",
+    "allergenInfo": "Controllare eventuali SOIA o contaminazioni; non presumere allergeni",
+    "allergensAlert": "Controllare eventuali SOIA o contaminazioni; non presumere allergeni",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Controllare eventuali SOIA o contaminazioni; non presumere allergeni.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "may_contain",
+          "specificDetails": "Controllare eventuale soia o contaminazioni"
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-19",
+    "notes": "Prezzo vicino non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-21",
-    "name": "Fagioli Miele Oloyin Nigeriani (Ewa Oloyin)",
-    "category": "Cereali e Farine Tradizionali",
-    "origin": "Nigeria",
-    "subCategory": "Legumi e Cereali",
-    "price": 4.9,
-    "packageSize": "Busta da 1 kg",
-    "image": "honeyBeans",
-    "description": "Fagioli bruni naturalmente dolci (Ewa Oloyin). Diventano morbidissimi e burrosi durante la cottura, ideali per stufato con platani e moi moi.",
-    "stock": 34,
+    "id": "prod-real-20",
+    "itemNumber": 20,
+    "name": "Easy Cook Rice",
+    "brand": "Non chiaro",
+    "category": "Riso e cereali",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Riso e cereali",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd20",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Easy Cook Rice (Non chiaro). Confezione parzialmente visibile.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 21
+    "featured": false,
+    "salesRank": 20,
+    "ingredients": "Riso; varietà da verificare",
+    "expectedIngredients": "Riso; varietà da verificare",
+    "allergenInfo": "Nessun allergene maggiore atteso nel riso semplice; verificare tracce",
+    "allergensAlert": "Nessun allergene maggiore atteso nel riso semplice; verificare tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel riso semplice; verificare tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-20",
+    "notes": "Confezione parzialmente visibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-22",
-    "name": "Garri Giallo all'Olio di Palma (Per Eba)",
-    "category": "Cereali e Farine Tradizionali",
-    "origin": "Nigeria",
-    "subCategory": "Farine e Cereali",
-    "price": 6.2,
-    "packageSize": "Sacco da 2 kg",
-    "image": "yellowGarri",
-    "description": "Fiocchi di manioca tradizionali arricchiti con olio di palma vergine durante la tostatura. Donano all'eba un caldo colore dorato e consistenza vellutata.",
-    "stock": 26,
+    "id": "prod-real-21",
+    "itemNumber": 21,
+    "name": "Gino Tomato Paste",
+    "brand": "Gino",
+    "category": "Conserve e pomodoro",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Gino",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€4.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd21",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Gino Tomato Paste (Gino). Cartellino vicino; non è certo che si riferisca a questo prodotto.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 22
+    "featured": false,
+    "salesRank": 21,
+    "ingredients": "Concentrato di pomodoro; ingredienti/additivi da verificare",
+    "expectedIngredients": "Concentrato di pomodoro; ingredienti/additivi da verificare",
+    "allergenInfo": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta",
+    "allergensAlert": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-21",
+    "notes": "Cartellino vicino; non è certo che si riferisca a questo prodotto.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-23",
-    "name": "Latta Famiglia Olio di Palma Rosso Puro (5L)",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Nigeria",
-    "subCategory": "Oli e Condimenti",
-    "price": 23.5,
-    "packageSize": "Fusto metallico da 5 Litri",
-    "image": "palmOil5L",
-    "description": "Formato scorta famigliare di olio di palma rosso vergine non filtrato 100% originale. Ricchissimo di betacarotene e con lunga conservazione.",
-    "stock": 14,
+    "id": "prod-real-22",
+    "itemNumber": 22,
+    "name": "De Rica Double Concentrated Tomato Paste",
+    "brand": "De Rica",
+    "category": "Conserve e pomodoro",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "De Rica",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€2.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd22",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "De Rica Double Concentrated Tomato Paste (De Rica). Cartellino vicino; non è certo che si riferisca a questo prodotto.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 23
+    "featured": false,
+    "salesRank": 22,
+    "ingredients": "Doppio concentrato di pomodoro; ingredienti/additivi da verificare",
+    "expectedIngredients": "Doppio concentrato di pomodoro; ingredienti/additivi da verificare",
+    "allergenInfo": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta",
+    "allergensAlert": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-22",
+    "notes": "Cartellino vicino; non è certo che si riferisca a questo prodotto.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-24",
-    "name": "Crayfish Intero Essiccato al Sole di Calabar",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Calabar, Nigeria",
-    "subCategory": "Condimenti di Mare",
-    "price": 5.2,
-    "packageSize": "Barattolo da 200g",
-    "image": "crayfish",
-    "description": "Gamberetti selvatici di mare affumicati ed essiccati al sole sulla costa di Calabar. Insostituibile condimento ad alto tenore umami per le salse africane.",
-    "stock": 36,
+    "id": "prod-real-23",
+    "itemNumber": 23,
+    "name": "Unifresh Kokonte Flour",
+    "brand": "Unifresh",
+    "category": "Farine e amidi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Unifresh",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd23",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Unifresh Kokonte Flour (Unifresh). Marchio/prodotto leggibile.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 24
+    "featured": false,
+    "salesRank": 23,
+    "ingredients": "Farina di cassava/manioca essiccata; verificare confezione",
+    "expectedIngredients": "Farina di cassava/manioca essiccata; verificare confezione",
+    "allergenInfo": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "allergensAlert": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-23",
+    "notes": "Marchio/prodotto leggibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-25",
-    "name": "Supermalt Originale Bevanda al Malto (4x330ml)",
-    "category": "Bevande al Malto e Ibisco",
-    "origin": "Danimarca / Export",
-    "subCategory": "Bevande Analcoliche",
-    "price": 6.2,
-    "packageSize": "4 bottiglie in vetro da 330ml",
-    "image": "supermalt",
-    "description": "La classica bevanda analcolica al malto d'orzo e luppolo, ricca di vitamine del gruppo B. Nutriente, vellutata e dissetante.",
-    "stock": 28,
+    "id": "prod-real-24",
+    "itemNumber": 24,
+    "name": "Unifresh Yellow Gari",
+    "brand": "Unifresh",
+    "category": "Farine e amidi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Unifresh",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€6.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd24",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Unifresh Yellow Gari (Unifresh). Cartellino vicino; prezzo non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 25
+    "featured": false,
+    "salesRank": 24,
+    "ingredients": "Gari giallo a base di manioca; verificare eventuale olio di palma e ingredienti",
+    "expectedIngredients": "Gari giallo a base di manioca; verificare eventuale olio di palma e ingredienti",
+    "allergenInfo": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "allergensAlert": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-24",
+    "notes": "Cartellino vicino; prezzo non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-26",
-    "name": "Carne di Capra Fresca a Bocconcini (Halal)",
-    "category": "Pesce Affumicato e Carni",
-    "origin": "Macelleria Halal Siciliana",
-    "subCategory": "Macelleria e Carni",
-    "price": 11.9,
-    "packageSize": "Vaschetta macelleria da 1 kg",
-    "image": "goatMeat",
-    "description": "Bocconcini con osso di carne di capra fresca certificata halal, perfetta per pepper soup nigeriana, curry di capra o spezzatini al pomodoro.",
-    "stock": 12,
+    "id": "prod-real-25",
+    "itemNumber": 25,
+    "name": "Ca Bianca Farina di Grano Tenero",
+    "brand": "Ca Bianca",
+    "category": "Farine e amidi",
+    "origin": "Italia",
+    "subCategory": "Ca Bianca",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€4.00?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd25",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Ca Bianca Farina di Grano Tenero (Ca Bianca). Cartellino vicino; prezzo non certo.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 26
+    "featured": false,
+    "salesRank": 25,
+    "ingredients": "Farina di grano tenero",
+    "expectedIngredients": "Farina di grano tenero",
+    "allergenInfo": "FRUMENTO/GLUTINE",
+    "allergensAlert": "FRUMENTO/GLUTINE",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "FRUMENTO/GLUTINE.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "contains",
+          "specificDetails": "Farina di grano tenero (FRUMENTO/GLUTINE)"
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-25",
+    "notes": "Cartellino vicino; prezzo non certo.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-27",
-    "name": "Vino di Palma Naturale Tradizionale (1L)",
-    "category": "Bevande al Malto e Ibisco",
-    "origin": "Ghana / Nigeria",
-    "subCategory": "Bevande Tradizionali",
-    "price": 5.9,
-    "packageSize": "Bottiglia da 1 Litro",
-    "image": "palmWine",
-    "description": "Linfa dolce naturalmente fermentata ricavata dalle palme da olio. Frizzante, aromatica e tradizionalmente servita durante festività e visite famigliari.",
-    "stock": 15,
+    "id": "prod-real-26",
+    "itemNumber": 26,
+    "name": "Petti Passata Extra Fine",
+    "brand": "Petti",
+    "category": "Conserve e pomodoro",
+    "origin": "Italia",
+    "subCategory": "Petti",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "€1.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd26",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Petti Passata Extra Fine (Petti). Prezzo vicino; associazione non certa.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 27
+    "featured": false,
+    "salesRank": 26,
+    "ingredients": "Pomodoro; sale o altri ingredienti da verificare",
+    "expectedIngredients": "Pomodoro; sale o altri ingredienti da verificare",
+    "allergenInfo": "Nessun allergene maggiore atteso nella passata semplice; controllare etichetta",
+    "allergensAlert": "Nessun allergene maggiore atteso nella passata semplice; controllare etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Nessun allergene maggiore atteso nella passata semplice; controllare etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-26",
+    "notes": "Prezzo vicino; associazione non certa.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-28",
-    "name": "Semi di Mango Selvatico Ogbono (Apon)",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Nigeria",
-    "subCategory": "Semi e Zuppe",
-    "price": 6.8,
-    "packageSize": "Barattolo da 250g",
-    "image": "ogbonoSeeds",
-    "description": "Pregiati semi di mango della foresta (ogbono) selezionati per preparare la densa, filante e saporitissima draw soup tradizionale.",
-    "stock": 22,
+    "id": "prod-real-27",
+    "itemNumber": 27,
+    "name": "Ducros Curry Powder",
+    "brand": "Ducros",
+    "category": "Spezie e aromi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Ducros",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd27",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Ducros Curry Powder (Ducros). Marca leggibile; variante non certa.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 28
+    "featured": false,
+    "salesRank": 27,
+    "ingredients": "Miscela di spezie; composizione da verificare",
+    "expectedIngredients": "Miscela di spezie; composizione da verificare",
+    "allergenInfo": "Verificare SENAPE, SEDANO e possibili tracce",
+    "allergensAlert": "Verificare SENAPE, SEDANO e possibili tracce",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Verificare SENAPE, SEDANO e possibili tracce.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "may_contain",
+          "specificDetails": "Verificare sedano"
+        },
+        "mustard": {
+          "status": "may_contain",
+          "specificDetails": "Verificare senape"
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-27",
+    "notes": "Marca leggibile; variante non certa.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-29",
-    "name": "Extension per Treccine X-Pression Ultra Braid (82\")",
-    "category": "Cura Afro e Cosmetici",
-    "origin": "Nigeria / Togo",
-    "subCategory": "Cura dei Capelli e Trecce",
-    "price": 4.5,
-    "packageSize": "Matassa lunghezza 82 pollici",
-    "image": "braidingHair",
-    "description": "Fibra sintetica Kanekalon 100% per trecce. Leggera, anti-nodi e fissabile in acqua calda per box braids, treccine aderenti e twist.",
-    "stock": 60,
+    "id": "prod-real-28",
+    "itemNumber": 28,
+    "name": "Riso/grani in confezione nera – marca non leggibile",
+    "brand": "Non identificata",
+    "category": "Riso e cereali",
+    "origin": "Da accertare",
+    "subCategory": "Riso e cereali",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Circa €3.50?",
+    "priceStatus": "estimated",
+    "purchasePrice": null,
+    "verificationStatus": "da_identificare",
+    "packageSize": "Confezione nera (peso da verificare)",
+    "image": "realProd28",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Riso/grani in confezione nera – marca non leggibile (Non identificata). Prodotto e prezzo incerti.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 29
+    "featured": false,
+    "salesRank": 28,
+    "ingredients": "Non identificabile con certezza dalla foto",
+    "expectedIngredients": "Non identificabile con certezza dalla foto",
+    "allergenInfo": "Non determinabile: leggere etichetta",
+    "allergensAlert": "Non determinabile: leggere etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Non determinabile dalla foto: leggere etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-28",
+    "notes": "Prodotto e prezzo incerti.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   },
   {
-    "id": "prod-30",
-    "name": "Miscela di Spezie per Suya Yaji Hausa",
-    "category": "Spezie e Olio di Palma",
-    "origin": "Kano, Nigeria",
-    "subCategory": "Miscela di Spezie",
-    "price": 4.2,
-    "packageSize": "Spargitore da 150g",
-    "image": "suyaSpice",
-    "description": "Autentico mix di spezie per spiedini Suya del nord della Nigeria con kuli-kuli di arachidi tostate, zenzero, peperoncino e chiodi di garofano. Esalta carne alla griglia e pollo.",
-    "stock": 44,
+    "id": "prod-real-29",
+    "itemNumber": 29,
+    "name": "Condimento per pollo in confezione verde – marca non leggibile",
+    "brand": "Non identificata",
+    "category": "Condimenti e dadi",
+    "origin": "Da accertare",
+    "subCategory": "Condimenti e dadi",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_identificare",
+    "packageSize": "Confezione verde (peso da verificare)",
+    "image": "realProd29",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Condimento per pollo in confezione verde – marca non leggibile (Non identificata). Prodotto non identificato con certezza.",
+    "stock": 0,
     "isAvailable": true,
-    "salesRank": 30
+    "featured": false,
+    "salesRank": 29,
+    "ingredients": "Miscela di spezie/aromi non identificata",
+    "expectedIngredients": "Miscela di spezie/aromi non identificata",
+    "allergenInfo": "Non determinabile: leggere etichetta",
+    "allergensAlert": "Non determinabile: leggere etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Non determinabile dalla foto: leggere etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-29",
+    "notes": "Prodotto non identificato con certezza.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-30",
+    "itemNumber": 30,
+    "name": "Confezioni dorate di spezie/condimento – marca non leggibile",
+    "brand": "Non identificata",
+    "category": "Spezie e aromi",
+    "origin": "Da accertare",
+    "subCategory": "Spezie e condimenti",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_identificare",
+    "packageSize": "Confezioni dorate (peso da verificare)",
+    "image": "realProd30",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Confezioni dorate di spezie/condimento – marca non leggibile (Non identificata). Prodotto non identificato con certezza.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 30,
+    "ingredients": "Miscela non identificata",
+    "expectedIngredients": "Miscela non identificata",
+    "allergenInfo": "Non determinabile: leggere etichetta",
+    "allergensAlert": "Non determinabile: leggere etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Non determinabile dalla foto: leggere etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-30",
+    "notes": "Prodotto non identificato con certezza.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-31",
+    "itemNumber": 31,
+    "name": "Dark & Lovely Relaxer",
+    "brand": "Dark & Lovely",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Dark & Lovely",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd31",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Dark & Lovely Relaxer (Dark & Lovely). Prodotto riconoscibile; variante non chiara.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 31,
+    "ingredients": "Formula chimica per trattamento/relaxer; consultare confezione",
+    "expectedIngredients": "Formula chimica per trattamento/relaxer; consultare confezione",
+    "allergenInfo": "Possibili profumi/conservanti; rischio irritazione. Seguire avvertenze e test indicato",
+    "allergensAlert": "Possibili profumi/conservanti; rischio irritazione. Seguire avvertenze e test indicato",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi/conservanti; rischio irritazione.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-31",
+    "notes": "Prodotto riconoscibile; variante non chiara.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-32",
+    "itemNumber": 32,
+    "name": "Dark & Lovely Hair Treatment",
+    "brand": "Dark & Lovely",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Dark & Lovely",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd32",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Dark & Lovely Hair Treatment (Dark & Lovely). Variante non chiara.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 32,
+    "ingredients": "Trattamento capelli; formula da verificare",
+    "expectedIngredients": "Trattamento capelli; formula da verificare",
+    "allergenInfo": "Possibili profumi/conservanti",
+    "allergensAlert": "Possibili profumi/conservanti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi/conservanti.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-32",
+    "notes": "Variante non chiara.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-33",
+    "itemNumber": 33,
+    "name": "Olive Oil Hair Products",
+    "brand": "Marca/variante non chiara",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Marca/variante non chiara",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd33",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Olive Oil Hair Products (Marca/variante non chiara). Linea visibile; singoli prodotti non distinguibili.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 33,
+    "ingredients": "Prodotti per capelli a base/tema olio d'oliva; ingredienti da verificare",
+    "expectedIngredients": "Prodotti per capelli a base/tema olio d'oliva; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi e conservanti",
+    "allergensAlert": "Possibili profumi e conservanti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi e conservanti.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-33",
+    "notes": "Linea visibile; singoli prodotti non distinguibili.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-34",
+    "itemNumber": 34,
+    "name": "B.B. Clear Cream",
+    "brand": "B.B. Clear",
+    "category": "Cura della pelle",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "B.B. Clear",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd34",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "B.B. Clear Cream (B.B. Clear). Prodotto visibile; formula non identificata.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 34,
+    "ingredients": "Crema cosmetica; ingredienti da verificare",
+    "expectedIngredients": "Crema cosmetica; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi/conservanti; verificare ingredienti e avvertenze",
+    "allergensAlert": "Possibili profumi/conservanti; verificare ingredienti e avvertenze",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico pelle. Verificare INCI, ingredienti e avvertenze.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-34",
+    "notes": "Prodotto visibile; formula non identificata.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-35",
+    "itemNumber": 35,
+    "name": "Clairmen Products",
+    "brand": "Clairmen",
+    "category": "Cura della pelle",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Clairmen",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd35",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Clairmen Products (Clairmen). Linea visibile; prodotto esatto non chiaro.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 35,
+    "ingredients": "Prodotti cosmetici; ingredienti da verificare",
+    "expectedIngredients": "Prodotti cosmetici; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi/conservanti; verificare ingredienti e avvertenze",
+    "allergensAlert": "Possibili profumi/conservanti; verificare ingredienti e avvertenze",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico pelle. Verificare INCI, ingredienti e avvertenze.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-35",
+    "notes": "Linea visibile; prodotto esatto non chiaro.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-36",
+    "itemNumber": 36,
+    "name": "Caro White Lotion",
+    "brand": "Caro White",
+    "category": "Cura della pelle",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Caro White",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd36",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Caro White Lotion (Caro White). Prodotto visibile; etichetta non leggibile.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 36,
+    "ingredients": "Lozione cosmetica; ingredienti da verificare",
+    "expectedIngredients": "Lozione cosmetica; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi/conservanti; controllare conformità UE e ingredienti",
+    "allergensAlert": "Possibili profumi/conservanti; controllare conformità UE e ingredienti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico pelle. Controllare conformità UE e INCI.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-36",
+    "notes": "Prodotto visibile; etichetta non leggibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-37",
+    "itemNumber": 37,
+    "name": "Dettol Antiseptic",
+    "brand": "Dettol",
+    "category": "Saponi e igiene",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Dettol",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd37",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Dettol Antiseptic (Dettol). Marchio riconoscibile; formulazione non identificata.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 37,
+    "ingredients": "Antisettico; formula varia per paese e formato",
+    "expectedIngredients": "Antisettico; formula varia per paese e formato",
+    "allergenInfo": "Possibili ingredienti irritanti/allergizzanti; seguire etichetta e uso previsto",
+    "allergensAlert": "Possibili ingredienti irritanti/allergizzanti; seguire etichetta e uso previsto",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Prodotto per igiene ad uso esterno. Seguire etichetta e uso previsto.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-37",
+    "notes": "Marchio riconoscibile; formulazione non identificata.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-38",
+    "itemNumber": 38,
+    "name": "Tura Soap",
+    "brand": "Tura",
+    "category": "Saponi e igiene",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Tura",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd38",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Tura Soap (Tura). Prodotto visibile.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 38,
+    "ingredients": "Sapone; ingredienti da verificare",
+    "expectedIngredients": "Sapone; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi e conservanti",
+    "allergensAlert": "Possibili profumi e conservanti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Sapone ad uso esterno. Possibili profumi e conservanti.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-38",
+    "notes": "Prodotto visibile.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-39",
+    "itemNumber": 39,
+    "name": "Naomi Hair Products",
+    "brand": "Naomi",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Naomi",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Da verificare su confezione",
+    "image": "realProd39",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Naomi Hair Products (Naomi). Prodotto/linea visibile; variante non chiara.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 39,
+    "ingredients": "Prodotti per capelli; ingredienti da verificare",
+    "expectedIngredients": "Prodotti per capelli; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi/conservanti",
+    "allergensAlert": "Possibili profumi/conservanti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi/conservanti.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-39",
+    "notes": "Prodotto/linea visibile; variante non chiara.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-40",
+    "itemNumber": 40,
+    "name": "212 Perfume",
+    "brand": "Non chiara",
+    "category": "Profumi",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Profumi",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Flacone (volume da verificare)",
+    "image": "realProd40",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "212 Perfume (Non chiara). Confezione visibile; marca non certa.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 40,
+    "ingredients": "Profumo; formula INCI da verificare",
+    "expectedIngredients": "Profumo; formula INCI da verificare",
+    "allergenInfo": "Profumi: possibili allergeni da fragranza, indicati in etichetta",
+    "allergensAlert": "Profumi: possibili allergeni da fragranza, indicati in etichetta",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Profumo uso esterno. Verificare allergeni da fragranza in etichetta.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-40",
+    "notes": "Confezione visibile; marca non certa.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-41",
+    "itemNumber": 41,
+    "name": "Oli per capelli assortiti",
+    "brand": "Varie",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Varie",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Assortimento (formati da verificare)",
+    "image": "realProd41",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Oli per capelli assortiti (Varie). Gruppo di prodotti non distinguibile singolarmente.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 41,
+    "ingredients": "Oli cosmetici; ingredienti da verificare",
+    "expectedIngredients": "Oli cosmetici; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi/oli essenziali",
+    "allergensAlert": "Possibili profumi/oli essenziali",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi/oli essenziali.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-41",
+    "notes": "Gruppo di prodotti non distinguibile singolarmente.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
+  },
+  {
+    "id": "prod-real-42",
+    "itemNumber": 42,
+    "name": "Creme e trattamenti per capelli assortiti",
+    "brand": "Varie",
+    "category": "Capelli e bellezza",
+    "origin": "Da verificare su etichetta",
+    "subCategory": "Varie",
+    "price": null,
+    "originalPrice": null,
+    "observedPrice": "Non leggibile",
+    "priceStatus": "unreadable",
+    "purchasePrice": null,
+    "verificationStatus": "da_verificare",
+    "packageSize": "Assortimento (formati da verificare)",
+    "image": "realProd42",
+    "imageStatus": "verified",
+    "imageStoragePath": null,
+    "gallery": [],
+    "description": "Creme e trattamenti per capelli assortiti (Varie). Gruppo di prodotti non distinguibile singolarmente.",
+    "stock": 0,
+    "isAvailable": true,
+    "featured": false,
+    "salesRank": 42,
+    "ingredients": "Formule varie; ingredienti da verificare",
+    "expectedIngredients": "Formule varie; ingredienti da verificare",
+    "allergenInfo": "Possibili profumi, conservanti e altri ingredienti",
+    "allergensAlert": "Possibili profumi, conservanti e altri ingredienti",
+    "dietaryInfo": {
+      "vegetarian": false,
+      "vegan": false,
+      "halal": false,
+      "glutenFreeClaim": false,
+      "lactoseFreeClaim": false,
+      "intoleranceNotes": "Cosmetico capelli. Possibili profumi e conservanti.",
+      "warningNote": "Dati preliminari da inventario fotografico. Non usare le informazioni non verificate per confermare l’idoneità per allergici: controllare sempre la confezione fisica.",
+      "infoSource": "catalogo_prodotti_inventario_foto.pdf",
+      "verificationStatus": "unverified",
+      "lastReviewedDate": "2026-11-16",
+      "allergens": {
+        "cereals_gluten": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "crustaceans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "eggs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "fish": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "peanuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "soybeans": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "milk": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "nuts": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "celery": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "mustard": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sesame": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "sulphites": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "lupin": {
+          "status": "not_declared",
+          "specificDetails": ""
+        },
+        "molluscs": {
+          "status": "not_declared",
+          "specificDetails": ""
+        }
+      }
+    },
+    "barcode": null,
+    "sku": "MS-CAT-42",
+    "notes": "Gruppo di prodotti non distinguibile singolarmente.",
+    "isNewArrival": false,
+    "isDiscounted": false,
+    "discountActive": false,
+    "discountStartDate": null,
+    "discountEndDate": null,
+    "createdAt": "2026-11-16T00:00:00.000Z",
+    "updatedAt": "2026-11-16T12:51:17.777Z"
   }
 ]

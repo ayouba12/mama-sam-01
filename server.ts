@@ -4,6 +4,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import sharp from 'sharp';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import { 
   supabaseServer, 
@@ -20,7 +21,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 // Security Headers Middleware (Enhanced defense-in-depth, compatible with Vite SPA and AI Studio preview)
 app.use((_req: Request, res: Response, next: NextFunction) => {
@@ -39,6 +40,9 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// Enable gzip compression for fast mobile & desktop API/asset delivery
+app.use(compression({ threshold: 1024 }));
+
 // Request body limits to prevent resource exhaustion attacks
 app.use(express.json({ limit: '15mb' }));
 app.use(express.urlencoded({ extended: true, limit: '15mb' }));
@@ -54,12 +58,47 @@ if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
-// Serve uploaded product images securely with cache headers
+// Serve uploaded product images securely with immutable long-lived cache headers
 app.use('/api/uploads', express.static(UPLOADS_DIR, {
-  maxAge: '7d',
+  maxAge: '30d',
+  immutable: true,
   dotfiles: 'ignore',
   index: false
 }));
+
+async function deleteOrphanedUploadedImage(imageUrl: string | null | undefined, remainingProducts: any[]): Promise<void> {
+  if (!imageUrl || typeof imageUrl !== 'string') return;
+  const isLocalUpload = imageUrl.startsWith('/api/uploads/');
+  const isSupabaseProductUpload = imageUrl.includes('/storage/v1/object/public/product-images/');
+  if (!isLocalUpload && !isSupabaseProductUpload) return;
+
+  const cleanUrl = imageUrl.split('?')[0];
+  const filename = path.basename(cleanUrl);
+  if (!filename || !filename.startsWith('prod_')) return;
+
+  const isReferencedElsewhere = remainingProducts.some(p =>
+    p.image === imageUrl ||
+    (Array.isArray(p.gallery) && p.gallery.includes(imageUrl))
+  );
+  if (isReferencedElsewhere) return;
+
+  const localPath = path.join(UPLOADS_DIR, filename);
+  if (localPath.startsWith(UPLOADS_DIR) && fs.existsSync(localPath)) {
+    try {
+      fs.unlinkSync(localPath);
+    } catch (err) {
+      console.warn(`Failed to unlink local orphaned image ${localPath}:`, err);
+    }
+  }
+
+  if (isServerSupabaseConfigured() && supabaseServer) {
+    try {
+      await supabaseServer.storage.from('product-images').remove([filename]);
+    } catch (err) {
+      console.warn(`Failed to remove orphaned image ${filename} from Supabase Storage:`, err);
+    }
+  }
+}
 
 const getFilePath = (file: string) => path.join(DATA_DIR, file);
 
@@ -470,6 +509,7 @@ app.get('/api/admin/schema-sql', (_req: Request, res: Response) => {
 
 // 1. Settings (Public read, Admin update)
 app.get('/api/settings', async (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   if (isServerSupabaseConfigured() && supabaseServer) {
     try {
       const { data, error } = await supabaseServer
@@ -558,6 +598,7 @@ app.put('/api/settings', requireAdminAuth, async (req: Request, res: Response) =
 
 // 2. Categories (Public read, Admin create/update)
 app.get('/api/categories', async (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   if (isServerSupabaseConfigured() && supabaseServer) {
     try {
       const { data, error } = await supabaseServer
@@ -613,28 +654,32 @@ app.post('/api/categories', requireAdminAuth, async (req: Request, res: Response
 
 // 3. Recipes
 app.get('/api/recipes', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   const recipes = readData('recipes.json', []);
   res.json(recipes);
 });
 
 // 4. Reviews
 app.get('/api/reviews', (_req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
   const reviews = readData('reviews.json', []);
   res.json(reviews);
 });
 
-// 5. Products (Public read with query filters)
+// 5. Products (Public read with query filters & admin-only purchasePrice)
 app.get('/api/products', async (req: Request, res: Response) => {
   let products: any[] = [];
   const category = req.query.category as string;
   const search = req.query.search as string;
+  const verificationStatus = req.query.verificationStatus as string;
+  const brand = req.query.brand as string;
 
   if (isServerSupabaseConfigured() && supabaseServer) {
     try {
       const { data, error } = await supabaseServer
         .from('products')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('item_number', { ascending: true, nullsFirst: false });
 
       if (!error && Array.isArray(data) && data.length > 0) {
         products = data.map(toFrontendProduct);
@@ -652,18 +697,52 @@ app.get('/api/products', async (req: Request, res: Response) => {
     products = products.filter(p => p.category === category);
   }
 
+  if (verificationStatus && verificationStatus !== 'all') {
+    products = products.filter(p => p.verificationStatus === verificationStatus);
+  }
+
+  if (brand && brand !== 'all') {
+    products = products.filter(p => p.brand === brand);
+  }
+
   if (search) {
     const q = search.toLowerCase().trim();
     products = products.filter(p =>
       (p.name && p.name.toLowerCase().includes(q)) ||
+      (p.brand && p.brand.toLowerCase().includes(q)) ||
       (p.description && p.description.toLowerCase().includes(q)) ||
       (p.category && p.category.toLowerCase().includes(q)) ||
       (p.origin && p.origin.toLowerCase().includes(q)) ||
+      (p.barcode && p.barcode.toLowerCase().includes(q)) ||
       (p.sku && p.sku.toLowerCase().includes(q))
     );
   }
 
-  res.json(products);
+  // Check admin authorization: Only authenticated admins see purchasePrice
+  const authHeader = req.headers.authorization;
+  let isAdmin = false;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    const session = activeSessions.get(token);
+    if (session && Date.now() <= session.expiresAt) {
+      isAdmin = true;
+    }
+  }
+
+  const sanitizedProducts = products.map(p => {
+    if (!isAdmin) {
+      const { purchasePrice, ...rest } = p;
+      return rest;
+    }
+    return p;
+  });
+
+  if (isAdmin) {
+    res.setHeader('Cache-Control', 'private, no-store');
+  } else {
+    res.setHeader('Cache-Control', 'public, max-age=15, stale-while-revalidate=60');
+  }
+  res.json(sanitizedProducts);
 });
 
 // Create product (Protected admin action)
@@ -672,17 +751,33 @@ app.post('/api/products', requireAdminAuth, async (req: Request, res: Response) 
   const body = req.body;
 
   if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
-    return res.status(400).json({ error: 'Product name is required.' });
+    return res.status(400).json({ error: 'Nome del prodotto obbligatorio.' });
   }
 
-  const price = Number(body.price);
-  if (isNaN(price) || price < 0) {
-    return res.status(400).json({ error: 'Valid positive product price is required.' });
+  let price: number | null = null;
+  if (body.price !== undefined && body.price !== null && body.price !== '') {
+    const parsedPrice = Number(body.price);
+    if (isNaN(parsedPrice) || parsedPrice < 0) {
+      return res.status(400).json({ error: 'Il prezzo deve essere un numero valido maggiore o uguale a zero.' });
+    }
+    price = Number(parsedPrice.toFixed(2));
   }
 
-  const stock = Number(body.stock ?? 10);
-  if (isNaN(stock) || stock < 0) {
-    return res.status(400).json({ error: 'Stock must be 0 or greater.' });
+  let stock: number | null = null;
+  if (body.stock !== undefined && body.stock !== null && body.stock !== '') {
+    const parsedStock = Number(body.stock);
+    if (isNaN(parsedStock) || parsedStock < 0) {
+      return res.status(400).json({ error: 'La giacenza deve essere 0 o maggiore.' });
+    }
+    stock = Math.floor(parsedStock);
+  }
+
+  let purchasePrice: number | null = null;
+  if (body.purchasePrice !== undefined && body.purchasePrice !== null && body.purchasePrice !== '') {
+    const parsedPP = Number(body.purchasePrice);
+    if (!isNaN(parsedPP) && parsedPP >= 0) {
+      purchasePrice = Number(parsedPP.toFixed(2));
+    }
   }
 
   let originalPrice: number | undefined = undefined;
@@ -694,7 +789,7 @@ app.post('/api/products', requireAdminAuth, async (req: Request, res: Response) 
   }
 
   const isDiscounted = Boolean(body.isDiscounted);
-  if (isDiscounted && originalPrice !== undefined && originalPrice <= price) {
+  if (isDiscounted && price !== null && originalPrice !== undefined && originalPrice <= price) {
     return res.status(400).json({ error: 'Il prezzo originale deve essere superiore al prezzo scontato.' });
   }
 
@@ -710,32 +805,49 @@ app.post('/api/products', requireAdminAuth, async (req: Request, res: Response) 
     }
   }
 
+  const itemNumber = body.itemNumber ? Number(body.itemNumber) : (products.length + 1);
+  const verificationStatus = ['da_verificare', 'in_revisione', 'verificato_etichetta', 'da_identificare'].includes(body.verificationStatus)
+    ? body.verificationStatus
+    : 'da_verificare';
+
   const newProduct = {
-    id: `prod-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+    id: body.id || `prod-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+    itemNumber,
     name: body.name.trim(),
-    category: body.category || 'Tuberi e Verdure Fresche',
-    origin: (body.origin || 'Importato').trim(),
-    subCategory: (body.subCategory || '').trim(),
-    price: Number(price.toFixed(2)),
-    originalPrice,
-    packageSize: (body.packageSize || '1 pezzo / conf.').trim(),
-    image: body.image || 'catTubers',
-    imageStatus: body.imageStatus || 'needs_review',
+    brand: (body.brand || 'Non identificata').trim(),
+    category: body.category || 'Farine e amidi',
+    origin: (body.origin || 'Importazione etnica').trim(),
+    subCategory: (body.subCategory || body.brand || '').trim(),
+    price,
+    originalPrice: originalPrice || null,
+    observedPrice: body.observedPrice ? String(body.observedPrice).trim() : null,
+    priceStatus: body.priceStatus || (price !== null ? 'confirmed' : 'unreadable'),
+    purchasePrice,
+    verificationStatus,
+    packageSize: (body.packageSize || 'Formato da verificare').trim(),
+    image: typeof body.image === 'string' ? body.image : '',
+    imageStatus: body.imageStatus || 'missing',
+    imageStoragePath: body.imageStoragePath || null,
     gallery: Array.isArray(body.gallery) ? body.gallery : [],
     description: (body.description || '').trim(),
-    stock: Math.floor(stock),
+    stock,
     isAvailable: body.isAvailable !== false,
-    ingredients: (body.ingredients || '').trim(),
-    allergenInfo: (body.allergenInfo || '').trim(),
+    ingredients: (body.ingredients || body.expectedIngredients || '').trim(),
+    expectedIngredients: (body.expectedIngredients || body.ingredients || '').trim(),
+    allergenInfo: (body.allergenInfo || body.allergensAlert || '').trim(),
+    allergensAlert: (body.allergensAlert || body.allergenInfo || '').trim(),
     dietaryInfo: body.dietaryInfo || undefined,
-    sku: (body.sku || `MS-SKU-${Math.floor(1000 + Math.random() * 9000)}`).trim(),
-    salesRank: products.length + 1,
+    barcode: body.barcode ? String(body.barcode).trim() : null,
+    sku: (body.sku || `MS-CAT-${String(itemNumber).padStart(2, '0')}`).trim(),
+    notes: (body.notes || '').trim(),
+    salesRank: itemNumber,
     isNewArrival: Boolean(body.isNewArrival),
     isDiscounted,
     discountActive: body.discountActive !== false,
     discountStartDate,
     discountEndDate,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   };
 
   if (isServerSupabaseConfigured() && supabaseServer) {
@@ -750,7 +862,7 @@ app.post('/api/products', requireAdminAuth, async (req: Request, res: Response) 
     }
   }
 
-  products.unshift(newProduct);
+  products.push(newProduct);
   writeData('products.json', products);
   res.status(201).json(newProduct);
 });
@@ -766,14 +878,42 @@ app.put('/api/products/:id', requireAdminAuth, async (req: Request, res: Respons
   const body = req.body;
   const current = products[index];
 
-  const updatedPrice = body.price !== undefined ? Number(body.price) : current.price;
-  if (isNaN(updatedPrice) || updatedPrice < 0) {
-    return res.status(400).json({ error: 'Price must be a valid non-negative number.' });
+  let updatedPrice = current.price;
+  if (body.price !== undefined) {
+    if (body.price === null || body.price === '') {
+      updatedPrice = null;
+    } else {
+      const parsed = Number(body.price);
+      if (isNaN(parsed) || parsed < 0) {
+        return res.status(400).json({ error: 'Il prezzo deve essere un numero valido maggiore o uguale a zero.' });
+      }
+      updatedPrice = Number(parsed.toFixed(2));
+    }
   }
 
-  const updatedStock = body.stock !== undefined ? Math.floor(Number(body.stock)) : current.stock;
-  if (isNaN(updatedStock) || updatedStock < 0) {
-    return res.status(400).json({ error: 'Stock must be a non-negative integer.' });
+  let updatedStock = current.stock;
+  if (body.stock !== undefined) {
+    if (body.stock === null || body.stock === '') {
+      updatedStock = null;
+    } else {
+      const parsedStock = Number(body.stock);
+      if (isNaN(parsedStock) || parsedStock < 0) {
+        return res.status(400).json({ error: 'La giacenza deve essere un numero intero non negativo.' });
+      }
+      updatedStock = Math.floor(parsedStock);
+    }
+  }
+
+  let purchasePrice = current.purchasePrice;
+  if (body.purchasePrice !== undefined) {
+    if (body.purchasePrice === null || body.purchasePrice === '') {
+      purchasePrice = null;
+    } else {
+      const parsedPP = Number(body.purchasePrice);
+      if (!isNaN(parsedPP) && parsedPP >= 0) {
+        purchasePrice = Number(parsedPP.toFixed(2));
+      }
+    }
   }
 
   let originalPrice = current.originalPrice;
@@ -789,7 +929,7 @@ app.put('/api/products/:id', requireAdminAuth, async (req: Request, res: Respons
   }
 
   const isDiscounted = body.isDiscounted !== undefined ? Boolean(body.isDiscounted) : current.isDiscounted;
-  if (isDiscounted && originalPrice !== undefined && originalPrice <= updatedPrice) {
+  if (isDiscounted && updatedPrice !== null && originalPrice !== undefined && originalPrice <= updatedPrice) {
     return res.status(400).json({ error: 'Il prezzo originale deve essere superiore al prezzo scontato.' });
   }
 
@@ -809,34 +949,51 @@ app.put('/api/products/:id', requireAdminAuth, async (req: Request, res: Respons
     }
   }
 
-  // Track if image changed to clean up old uploaded image safely
+  const verificationStatus = body.verificationStatus !== undefined
+    ? body.verificationStatus
+    : current.verificationStatus;
+
+  // Track if image or gallery changed to clean up obsolete uploaded files safely
   const oldImage = current.image;
+  const oldGallery: string[] = Array.isArray(current.gallery) ? current.gallery : [];
   const newImage = body.image !== undefined ? body.image : current.image;
+  const newGallery: string[] = Array.isArray(body.gallery) ? body.gallery : oldGallery;
 
   products[index] = {
     ...current,
     name: body.name !== undefined ? String(body.name).trim() : current.name,
+    brand: body.brand !== undefined ? String(body.brand).trim() : current.brand,
     category: body.category || current.category,
     origin: body.origin !== undefined ? String(body.origin).trim() : current.origin,
     subCategory: body.subCategory !== undefined ? String(body.subCategory).trim() : current.subCategory,
-    price: Number(updatedPrice.toFixed(2)),
+    price: updatedPrice,
     originalPrice,
+    observedPrice: body.observedPrice !== undefined ? (body.observedPrice ? String(body.observedPrice).trim() : null) : current.observedPrice,
+    priceStatus: body.priceStatus || current.priceStatus,
+    purchasePrice,
+    verificationStatus,
     packageSize: body.packageSize !== undefined ? String(body.packageSize).trim() : current.packageSize,
     image: newImage,
-    imageStatus: body.imageStatus || current.imageStatus || 'verified',
-    gallery: Array.isArray(body.gallery) ? body.gallery : (current.gallery || []),
+    imageStatus: body.imageStatus || current.imageStatus || 'missing',
+    imageStoragePath: body.imageStoragePath !== undefined ? body.imageStoragePath : current.imageStoragePath,
+    gallery: newGallery,
     description: body.description !== undefined ? String(body.description).trim() : current.description,
     stock: updatedStock,
     isAvailable: body.isAvailable !== undefined ? Boolean(body.isAvailable) : current.isAvailable,
     ingredients: body.ingredients !== undefined ? String(body.ingredients).trim() : current.ingredients,
+    expectedIngredients: body.expectedIngredients !== undefined ? String(body.expectedIngredients).trim() : current.expectedIngredients,
     allergenInfo: body.allergenInfo !== undefined ? String(body.allergenInfo).trim() : current.allergenInfo,
+    allergensAlert: body.allergensAlert !== undefined ? String(body.allergensAlert).trim() : current.allergensAlert,
     dietaryInfo: body.dietaryInfo !== undefined ? body.dietaryInfo : current.dietaryInfo,
+    barcode: body.barcode !== undefined ? (body.barcode ? String(body.barcode).trim() : null) : current.barcode,
     sku: body.sku !== undefined ? String(body.sku).trim() : current.sku,
+    notes: body.notes !== undefined ? String(body.notes).trim() : current.notes,
     isNewArrival: body.isNewArrival !== undefined ? Boolean(body.isNewArrival) : current.isNewArrival,
     isDiscounted: Boolean(isDiscounted),
     discountActive: body.discountActive !== undefined ? Boolean(body.discountActive) : (current.discountActive !== false),
     discountStartDate,
-    discountEndDate
+    discountEndDate,
+    updatedAt: new Date().toISOString()
   };
 
   if (isServerSupabaseConfigured() && supabaseServer) {
@@ -853,19 +1010,12 @@ app.put('/api/products/:id', requireAdminAuth, async (req: Request, res: Respons
 
   writeData('products.json', products);
 
-  // If old image was an uploaded file and is no longer used by ANY product, clean it up
-  if (oldImage && oldImage !== newImage && oldImage.startsWith('/api/uploads/')) {
-    const filename = path.basename(oldImage);
-    const isUsedElsewhere = products.some(p => p.image === oldImage || (p.gallery && p.gallery.includes(oldImage)));
-    if (!isUsedElsewhere) {
-      const filePath = path.join(UPLOADS_DIR, filename);
-      if (fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch (cleanupErr) {
-          console.warn(`Failed to cleanup orphaned image file ${filePath}:`, cleanupErr);
-        }
-      }
+  if (oldImage && oldImage !== newImage) {
+    await deleteOrphanedUploadedImage(oldImage, products);
+  }
+  for (const prevGalleryImg of oldGallery) {
+    if (!newGallery.includes(prevGalleryImg)) {
+      await deleteOrphanedUploadedImage(prevGalleryImg, products);
     }
   }
 
@@ -894,19 +1044,10 @@ app.delete('/api/products/:id', requireAdminAuth, async (req: Request, res: Resp
   products = products.filter(p => p.id !== req.params.id);
   writeData('products.json', products);
 
-  // Clean up uploaded image if not referenced by any other product
-  if (productToDelete.image && productToDelete.image.startsWith('/api/uploads/')) {
-    const filename = path.basename(productToDelete.image);
-    const isUsedElsewhere = products.some(p => p.image === productToDelete.image || (p.gallery && p.gallery.includes(productToDelete.image)));
-    if (!isUsedElsewhere) {
-      const filePath = path.join(UPLOADS_DIR, filename);
-      if (fs.existsSync(filePath)) {
-        try {
-          fs.unlinkSync(filePath);
-        } catch (err) {
-          console.warn(`Failed to unlink image ${filePath}:`, err);
-        }
-      }
+  await deleteOrphanedUploadedImage(productToDelete.image, products);
+  if (Array.isArray(productToDelete.gallery)) {
+    for (const galleryImg of productToDelete.gallery) {
+      await deleteOrphanedUploadedImage(galleryImg, products);
     }
   }
 
@@ -935,14 +1076,16 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
       return res.status(400).json({ error: 'Malformed or empty image file.' });
     }
 
-    // Security Check 2: Actual Magic Byte validation (inspect binary header directly)
+    // Security Check 2: Actual Magic Byte validation (JPEG, PNG, WebP, AVIF)
     const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
     const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
     const isWebp = buffer.slice(0, 4).toString() === 'RIFF' && buffer.slice(8, 12).toString() === 'WEBP';
+    const ftypBrand = buffer.slice(4, 12).toString();
+    const isAvif = ftypBrand.startsWith('ftypavif') || ftypBrand.startsWith('ftypavis');
 
-    if (!isJpeg && !isPng && !isWebp) {
+    if (!isJpeg && !isPng && !isWebp && !isAvif) {
       return res.status(400).json({
-        error: 'Invalid file format. Only authentic raster images (JPEG, PNG, WebP) are accepted. SVG, HTML, and executables are rejected.'
+        error: 'Invalid file format. Only authentic raster images (JPEG, PNG, WebP, AVIF) are accepted. SVG, HTML, and executables are rejected.'
       });
     }
 
@@ -954,29 +1097,29 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
       return res.status(400).json({ error: 'Could not decode image dimensions.' });
     }
 
-    // Dimension limit check (max 4096 x 4096 to prevent memory exhaustion / decompression bombs)
     if (metadata.width > 4096 || metadata.height > 4096) {
       return res.status(400).json({ error: 'Image dimensions exceed maximum allowed resolution (4096x4096px).' });
     }
 
-    // Standardize to high-quality WebP, resized appropriately (max 1200px width/height), stripping all EXIF metadata
     const secureFilename = `prod_${Date.now()}_${crypto.randomBytes(8).toString('hex')}.webp`;
     const targetFilePath = path.join(UPLOADS_DIR, secureFilename);
 
-    // Prevent any directory traversal: ensure resolved path is strictly inside UPLOADS_DIR
     if (!targetFilePath.startsWith(UPLOADS_DIR)) {
       return res.status(400).json({ error: 'Invalid file destination path.' });
     }
 
     const processedBuffer = await imagePipeline
+      .rotate()
       .resize({
         width: 1200,
         height: 1200,
         fit: 'inside',
         withoutEnlargement: true
       })
-      .webp({ quality: 85 })
+      .webp({ quality: 84, effort: 4 })
       .toBuffer();
+
+    const outMeta = await sharp(processedBuffer).metadata();
 
     // 1. If Supabase Storage is configured, upload directly to 'product-images' bucket
     if (isServerSupabaseConfigured() && supabaseServer) {
@@ -985,6 +1128,7 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
           .from('product-images')
           .upload(secureFilename, processedBuffer, {
             contentType: 'image/webp',
+            cacheControl: '31536000',
             upsert: true
           });
 
@@ -1002,6 +1146,9 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
             filename: secureFilename,
             storage: 'supabase',
             format: 'webp',
+            width: outMeta.width,
+            height: outMeta.height,
+            sizeBytes: processedBuffer.length,
             originalName: typeof filename === 'string' ? path.basename(filename).substring(0, 50) : 'upload.webp'
           });
         } else {
@@ -1022,6 +1169,9 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
       filename: secureFilename,
       storage: 'local',
       format: 'webp',
+      width: outMeta.width,
+      height: outMeta.height,
+      sizeBytes: processedBuffer.length,
       originalName: typeof filename === 'string' ? path.basename(filename).substring(0, 50) : 'upload.webp'
     });
   } catch (err: any) {
@@ -1031,7 +1181,7 @@ app.post('/api/upload/image', requireAdminAuth, async (req: Request, res: Respon
 });
 
 // Delete specific uploaded image (Protected admin action)
-app.delete('/api/upload/image/:filename', requireAdminAuth, (req: Request, res: Response) => {
+app.delete('/api/upload/image/:filename', requireAdminAuth, async (req: Request, res: Response) => {
   const safeFilename = path.basename(req.params.filename);
   const targetPath = path.join(UPLOADS_DIR, safeFilename);
 
@@ -1039,22 +1189,39 @@ app.delete('/api/upload/image/:filename', requireAdminAuth, (req: Request, res: 
     return res.status(400).json({ error: 'Invalid path.' });
   }
 
-  // Prevent accidental deletion if image is currently referenced in products
   const products = readData<any[]>('products.json', []);
   const publicUrl = `/api/uploads/${safeFilename}`;
-  const isReferenced = products.some(p => p.image === publicUrl || (p.gallery && p.gallery.includes(publicUrl)));
+  const isReferenced = products.some(p =>
+    p.image === publicUrl ||
+    (typeof p.image === 'string' && p.image.endsWith(`/${safeFilename}`)) ||
+    (Array.isArray(p.gallery) && p.gallery.some((g: string) => g === publicUrl || g.endsWith(`/${safeFilename}`)))
+  );
 
   if (isReferenced) {
     return res.status(400).json({ error: 'Cannot delete image: it is currently set as the image for an active product.' });
   }
 
+  let deleted = false;
   if (fs.existsSync(targetPath)) {
     try {
       fs.unlinkSync(targetPath);
-      return res.json({ success: true, message: 'Image deleted from storage.' });
-    } catch (e: any) {
+      deleted = true;
+    } catch {
       return res.status(500).json({ error: 'Failed to delete file from disk.' });
     }
+  }
+
+  if (isServerSupabaseConfigured() && supabaseServer) {
+    try {
+      await supabaseServer.storage.from('product-images').remove([safeFilename]);
+      deleted = true;
+    } catch (err) {
+      console.warn('Supabase storage delete warning:', err);
+    }
+  }
+
+  if (deleted) {
+    return res.json({ success: true, message: 'Image deleted from storage.' });
   }
 
   res.status(404).json({ error: 'File not found on storage.' });
@@ -1167,7 +1334,7 @@ app.post('/api/orders', async (req: Request, res: Response) => {
         return res.status(400).json({ error: `Articolo attualmente non disponibile: ${product.name}` });
       }
       const requestedQty = Math.max(1, Math.floor(Number(item.quantity) || 1));
-      if (product.stock < requestedQty) {
+      if (product.verificationStatus === 'verificato_etichetta' && product.stock != null && product.stock < requestedQty) {
         return res.status(400).json({
           error: `Giacenza insufficiente per ${product.name}. Solo ${product.stock} unità disponibili.`
         });
@@ -1175,12 +1342,14 @@ app.post('/api/orders', async (req: Request, res: Response) => {
 
       // Authoritative promotional price calculation (reverts to originalPrice if discount expired or disabled)
       const { effectivePrice } = resolveServerProductPrice(product, new Date());
-      const unitPrice = Number(effectivePrice.toFixed(2));
+      const unitPrice = Number((effectivePrice || 0).toFixed(2));
       const lineTotal = Number((unitPrice * requestedQty).toFixed(2));
       calculatedSubtotal += lineTotal;
 
-      // Decrement stock
-      product.stock -= requestedQty;
+      // Decrement stock safely
+      if (product.stock != null && product.stock > 0) {
+        product.stock = Math.max(0, product.stock - requestedQty);
+      }
 
       // Snapshot product image and details at time of order so subsequent changes never corrupt history
       orderItems.push({
@@ -1614,31 +1783,69 @@ app.get('/api/admin/credentials-status', (_req: Request, res: Response) => {
 
 // ----------------- VITE / STATIC SERVING -----------------
 async function startServer() {
-  // Ensure backend admin accounts are initialized in credentials registry & Supabase
-  try {
-    await ensureBackendAdminAccounts();
-  } catch (err: any) {
-    console.warn('Backend admin account provisioning note:', err.message);
-  }
-
   if (process.env.NODE_ENV !== 'production') {
     const { createServer } = await import('vite');
     const vite = await createServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        hmr: false,
+        ws: false,
+        watch: null
+      },
       appType: 'spa'
     });
+
+    // Prevent /@vite/client from dialing an unavailable :24678 HMR WebSocket
+    // in middlewareMode while keeping CSS style injection and Vite exports intact.
+    app.get('/@vite/client', async (_req: Request, res: Response, next: NextFunction) => {
+      try {
+        const result = await vite.transformRequest('/@vite/client');
+        if (!result?.code) return next();
+        const safeCode = result.code.replace(
+          'transport.connect(createHMRHandler(handleMessage));',
+          '/* HMR WebSocket disabled */'
+        );
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-cache');
+        return res.send(safeCode);
+      } catch {
+        return next();
+      }
+    });
+
     app.use(vite.middlewares);
   } else {
     const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
+    app.use('/assets', express.static(path.join(distPath, 'assets'), {
+      maxAge: '365d',
+      immutable: true
+    }));
+    app.use(express.static(distPath, {
+      maxAge: '7d'
+    }));
     app.get('*', (_req: Request, res: Response) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Mama Sam Supermarket server running on http://0.0.0.0:${PORT}`);
+    
+    // Background provisioning of admin accounts without blocking the HTTP listener
+    ensureBackendAdminAccounts().catch((err: any) => {
+      console.warn('Backend admin account provisioning note:', err.message);
+    });
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use.`);
+    } else {
+      console.error('Server listen error:', err);
+    }
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Failed to start server:', err);
+});

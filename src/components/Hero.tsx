@@ -87,6 +87,11 @@ export const Hero: React.FC<HeroProps> = ({
               <img
                 src={IMAGES.heroShopkeeper}
                 alt="Mama Sam Supermercato Africano e Caraibico a Messina"
+                width={800}
+                height={640}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
               />
               

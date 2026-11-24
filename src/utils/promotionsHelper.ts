@@ -10,7 +10,7 @@ import { Product } from '../types';
  * - If discountEndDate is set, current time must be <= end of that day/date
  */
 export function isProductDiscountActive(product: Partial<Product>, now: Date = new Date()): boolean {
-  if (product.isAvailable === false || (product.stock !== undefined && product.stock <= 0)) {
+  if (product.isAvailable === false || (product.stock !== undefined && product.stock !== null && product.stock <= 0)) {
     return false;
   }
 
@@ -56,7 +56,7 @@ export function isProductDiscountActive(product: Partial<Product>, now: Date = n
  * Validates whether a product is marked as New Arrival and is available.
  */
 export function isProductNewArrival(product: Partial<Product>): boolean {
-  if (product.isAvailable === false || (product.stock !== undefined && product.stock <= 0)) {
+  if (product.isAvailable === false || (product.stock !== undefined && product.stock !== null && product.stock <= 0)) {
     return false;
   }
   return Boolean(product.isNewArrival);

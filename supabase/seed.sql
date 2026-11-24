@@ -1,5 +1,5 @@
 -- ====================================================================
--- MAMA SAM SUPERMARKET - SUPABASE SEED DATA
+-- MAMA SAM SUPERMARKET - SUPABASE SEED DATA (REAL INVENTORY: 42 PRODUCTS)
 -- ====================================================================
 
 -- 1. Store Settings
@@ -25,237 +25,891 @@ ON CONFLICT (id) DO UPDATE SET
   address = EXCLUDED.address,
   hours_mon_sat = EXCLUDED.hours_mon_sat;
 
--- 2. Categories
+-- 2. Categories (15 Clean Departments)
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-1', 'Tuberi e Verdure Fresche', 'Yam, Platani, Manioca e Peperoncini Scotch Bonnet', 'catTubers', 6)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-farine-amidi', 'Farine e amidi', 'Maizena amido di mais, Eagle Brand Yam Flour, Pronto Rice Flour, Unifresh Kokonte & Yellow Gari, Ca Bianca', 'catGrains', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-2', 'Cereali e Farine Tradizionali', 'Garri Ijebu, Farina di Yam, Riso e Fagioli', 'catGrains', 5)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-latte-derivati', 'Latte e derivati', 'Peak Full Cream Milk Powder in polvere intero', 'catMaltDrinks', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-3', 'Pesce Affumicato e Carni', 'Pesce Gatto Affumicato, Stoccafisso e Carne di Capra', 'catFishMeats', 4)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-condimenti-dadi', 'Condimenti e dadi', 'UFC White Vinegar & Soy Sauce, Jumbo Seasoning Powder & Cubes, Star Seasoning', 'catSpicesOil', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-4', 'Spezie e Olio di Palma', 'Olio di Palma Puro, Dadi Maggi, Egusi e Suya', 'catSpicesOil', 5)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-noodles-pasta', 'Noodles e pasta', 'Samyang Buldak Carbonara Ramen (busta & cup rosa), Samyang Buldak Cheese Ramen', 'catGrains', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-5', 'Bevande al Malto e Ibisco', 'Malta Guinness, Supermalt e Succo di Zobo', 'catMaltDrinks', 4)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-carne-pesce', 'Carne e pesce in scatola', 'Exeter Corned Beef in scatola e AdiBaba Dried Fish essiccato', 'catFishMeats', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-6', 'Snack e Dolci Caraibici', 'Chin Chin Croccante, Chips di Platano e Jamaican Patty', 'catSnacks', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-oli-grassi', 'Oli e grassi', 'Pure Coconut Oil in barattoli', 'catSpicesOil', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 INSERT INTO public.categories (id, name, summary, image, item_count)
-VALUES ('cat-7', 'Cura Afro e Cosmetici', 'Burro di Karité Grezzo, Sapone Nero Dudu-Osun e Extension', 'catCosmetics', 3)
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, image = EXCLUDED.image;
+VALUES ('cat-riso-cereali', 'Riso e cereali', 'Dari Couscous semola di grano duro, Easy Cook Rice e riso/grani in confezione nera', 'catGrains', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-legumi-noci', 'Legumi e frutta a guscio', 'AdiBaba Groundnuts / Peanuts arachidi e AdiBaba Sweet Beans fagioli', 'catTubers', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-snack-cereali', 'Snack e cereali', 'AdiBaba Popcorn Kernels mais per popcorn', 'catSnacks', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-conserve-pomodoro', 'Conserve e pomodoro', 'Gino Tomato Paste, De Rica Double Concentrated Tomato Paste e Petti Passata Extra Fine', 'catSpicesOil', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-spezie-aromi', 'Spezie e aromi', 'Ducros Curry Powder e miscele di spezie/condimenti tradizionali', 'catSpicesOil', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-capelli-bellezza', 'Capelli e bellezza', 'Dark & Lovely Relaxer & Hair Treatment, Olive Oil Hair, Naomi, oli e creme per capelli', 'catCosmetics', 6)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-cura-pelle', 'Cura della pelle', 'B.B. Clear Cream, Clairmen Products e Caro White Lotion', 'catCosmetics', 3)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-saponi-igiene', 'Saponi e igiene', 'Dettol Antiseptic liquido e Tura Soap', 'catCosmetics', 2)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
+INSERT INTO public.categories (id, name, summary, image, item_count)
+VALUES ('cat-profumi', 'Profumi', '212 Perfume e fragranze corpo', 'catCosmetics', 1)
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, summary = EXCLUDED.summary, item_count = EXCLUDED.item_count;
 
--- 3. Products
+-- 3. Products (42 Real Inventory Items)
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-1', 'Burro di Karité Grezzo d''Avorio Puro 100%', 'Cura Afro e Cosmetici', 'Tamale, Ghana', 6.9, 8, 'Confezione da 500g', 'sheaButter', 'verified', 'Burro di karité ghanese grezzo e non raffinato di Grado A da Tamale. Nutre in profondità la pelle secca, ammorbidisce i ricci e protegge il cuoio capelluto.', 24, true, false, '', '', '{}'::jsonb, '', false, true, true, NULL, NULL
+  'prod-real-1', 1, 'Maizena – Amido di mais', 'Maizena', 'Farine e amidi', 'Da verificare su etichetta',
+  NULL, '€2.50', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd1', 'verified', 'Maizena – Amido di mais (Maizena). Identificazione abbastanza chiara; prezzo vicino al prodotto, da confermare.',
+  0, true, 'da_verificare',
+  'Amido di mais (da verificare sull''etichetta)', 'Amido di mais (da verificare sull''etichetta)', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare contaminazioni', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare contaminazioni',
+  'MS-CAT-01', NULL, 'Identificazione abbastanza chiara; prezzo vicino al prodotto, da confermare.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-2', 'Farina di Yam Pounded Ayoola (Iyan)', 'Cereali e Farine Tradizionali', 'Nigeria', 5.8, NULL, 'Busta richiudibile da 1 kg', 'yamFlour', 'verified', 'Farina istantanea di yam pestato per preparare l''autentico swallow nigeriano liscio e vellutato. Si prepara in acqua bollente in meno di 5 minuti senza grumi.', 35, true, false, '', '', '{}'::jsonb, '', true, false, true, NULL, NULL
+  'prod-real-2', 2, 'Peak Full Cream Milk Powder', 'Peak', 'Latte e derivati', 'Da verificare su etichetta',
+  NULL, '€6.50', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd2', 'verified', 'Peak Full Cream Milk Powder (Peak). Identificazione chiara; prezzo indicativo da cartellino vicino.',
+  0, true, 'da_verificare',
+  'Latte intero in polvere; eventuali vitamine/emulsionanti da verificare', 'Latte intero in polvere; eventuali vitamine/emulsionanti da verificare', 'LATTE; possibile lattosio', 'LATTE; possibile lattosio',
+  'MS-CAT-02', NULL, 'Identificazione chiara; prezzo indicativo da cartellino vicino.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-3', 'Yam Bianco Africano Fresco (Puna Yam)', 'Tuberi e Verdure Fresche', 'Ghana / Nigeria', 6.9, 7.5, 'Tubero da circa 2,5 kg', 'punaYam', 'verified', 'Pregiato yam bianco puna del Ghana dalla consistenza morbida, dolce e farinosa. Perfetto da bollire, friggere a fette o gustare con salsa d''uovo e peperoncino.', 18, true, false, '', '', '{}'::jsonb, '', false, true, true, NULL, NULL
+  'prod-real-3', 3, 'UFC White Vinegar', 'UFC', 'Condimenti e dadi', 'Da verificare su etichetta',
+  NULL, '€4.50', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd3', 'verified', 'UFC White Vinegar (UFC). Identificazione chiara; prezzo indicativo.',
+  0, true, 'da_verificare',
+  'Aceto bianco; materia prima e acidità da verificare', 'Aceto bianco; materia prima e acidità da verificare', 'Nessun allergene maggiore atteso; verificare ingredienti e stabilimento', 'Nessun allergene maggiore atteso; verificare ingredienti e stabilimento',
+  'MS-CAT-03', NULL, 'Identificazione chiara; prezzo indicativo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-4', 'Garri Ijebu Premium - Fiocchi di Manioca', 'Cereali e Farine Tradizionali', 'Ogun State, Nigeria', 6.5, 7.2, 'Sacco da 2 kg', 'ijebuGarri', 'verified', 'Fiocchi di manioca bianca finemente setacciati e fermentati secondo la tradizione Ijebu, con la tipica nota acidula e croccante. Ideale per ammollo con arachidi o per preparare l''eba calda.', 40, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-4', 4, 'UFC Soy Sauce', 'UFC', 'Condimenti e dadi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Bottiglia (volume da verificare)', 'realProd4', 'verified', 'UFC Soy Sauce (UFC). Bottiglia riconoscibile; etichetta posteriore non visibile.',
+  0, true, 'da_verificare',
+  'Salsa di soia; ingredienti esatti da verificare', 'Salsa di soia; ingredienti esatti da verificare', 'SOIA; possibile GRANO/GLUTINE', 'SOIA; possibile GRANO/GLUTINE',
+  'MS-CAT-04', NULL, 'Bottiglia riconoscibile; etichetta posteriore non visibile.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-5', 'Dadi di Condimento Maggi Star (100 pz)', 'Spezie e Olio di Palma', 'Costa d''Avorio', 4, NULL, 'Scatola da 100 cubetti (400g)', 'maggiCubes', 'verified', 'I celebri cubetti di brodo arricchiti dell''Africa Occidentale. Indispensabili per preparare riso jollof, zuppe di pepe, stufati di carne e salse di verdura.', 55, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-5', 5, 'Samyang Buldak Carbonara Ramen – confezione rosa', 'Samyang', 'Noodles e pasta', 'Corea del Sud',
+  NULL, 'Non confermato', 'unreadable', NULL, NULL,
+  'Confezione rosa (peso da verificare)', 'realProd5', 'verified', 'Samyang Buldak Carbonara Ramen – confezione rosa (Samyang). Prodotto riconoscibile; prezzo non attribuibile con certezza.',
+  0, true, 'da_verificare',
+  'Noodles di frumento, olio, salsa e aromi; formula esatta da verificare', 'Noodles di frumento, olio, salsa e aromi; formula esatta da verificare', 'Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione', 'Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione',
+  'MS-CAT-05', NULL, 'Prodotto riconoscibile; prezzo non attribuibile con certezza.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-6', 'Malta Guinness Bevanda al Malto (6x330ml)', 'Bevande al Malto e Ibisco', 'Guinness Nigeria / Camerun', 8.5, 9.6, '6 lattine da 330ml', 'maltaGuinness', 'verified', 'Bevanda analcolica al malto ricca e rinvigorente, arricchita con vitamine B1, B2, B3, B5, B6 e calcio. Perfetta servita ghiacciata.', 30, true, false, '', '', '{}'::jsonb, '', false, true, true, NULL, NULL
+  'prod-real-6', 6, 'Samyang Buldak Carbonara Ramen – cup rosa', 'Samyang', 'Noodles e pasta', 'Corea del Sud',
+  NULL, '€1.00?', 'estimated', NULL, NULL,
+  'Cup rosa (peso da verificare)', 'realProd6', 'verified', 'Samyang Buldak Carbonara Ramen – cup rosa (Samyang). Cartellino promozionale vicino; associazione non certa.',
+  0, true, 'da_verificare',
+  'Noodles e condimento; ingredienti esatti da verificare', 'Noodles e condimento; ingredienti esatti da verificare', 'Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione', 'Possibili FRUMENTO/GLUTINE, SOIA, LATTE e altri allergeni secondo confezione',
+  'MS-CAT-06', NULL, 'Cartellino promozionale vicino; associazione non certa.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-7', 'Chin Chin Croccante alla Vaniglia Mama Sam', 'Snack e Dolci Caraibici', 'Laboratorio Mama Sam, Messina', 3.5, NULL, 'Barattolo da 350g', 'chinChin', 'verified', 'Bocconcini croccanti di pasticceria tipica dell''Africa Occidentale cotti freschi, aromatizzati con noce moscata, cannella e vaniglia. Fatti con passione a Messina.', 22, true, false, '', '', '{}'::jsonb, '', true, false, true, NULL, NULL
+  'prod-real-7', 7, 'Samyang Buldak Cheese Ramen – confezione gialla', 'Samyang', 'Noodles e pasta', 'Corea del Sud',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Confezione gialla (peso da verificare)', 'realProd7', 'verified', 'Samyang Buldak Cheese Ramen – confezione gialla (Samyang). Prodotto riconoscibile; prezzo non leggibile.',
+  0, true, 'da_verificare',
+  'Noodles di frumento e condimento al formaggio; formula esatta da verificare', 'Noodles di frumento e condimento al formaggio; formula esatta da verificare', 'Possibili FRUMENTO/GLUTINE, LATTE, SOIA; controllare anche SESAMO', 'Possibili FRUMENTO/GLUTINE, LATTE, SOIA; controllare anche SESAMO',
+  'MS-CAT-07', NULL, 'Prodotto riconoscibile; prezzo non leggibile.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-8', 'Olio di Palma Rosso Puro Extra Vergine (1L)', 'Spezie e Olio di Palma', 'Edo State, Nigeria', 5.5, 6.2, 'Bottiglia da 1 Litro', 'palmOil1L', 'verified', '100% puro olio di palma rosso vergine estratto a freddo, dal colore rubino brillante e dall''aroma rustico intenso. Fondamentale per zuppa egusi, oha e banga.', 45, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-8', 8, 'Exeter Corned Beef', 'Exeter', 'Carne e pesce in scatola', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Scatola / lattina (peso da verificare)', 'realProd8', 'verified', 'Exeter Corned Beef (Exeter). Marchio leggibile; etichetta ingredienti non visibile.',
+  0, true, 'da_verificare',
+  'Carne bovina, acqua/sale e additivi da verificare', 'Carne bovina, acqua/sale e additivi da verificare', 'Controllare eventuali SOIA, SENAPE o altri allergeni in etichetta', 'Controllare eventuali SOIA, SENAPE o altri allergeni in etichetta',
+  'MS-CAT-08', NULL, 'Marchio leggibile; etichetta ingredienti non visibile.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-9', 'Platani Gialli Dolci (Maturi)', 'Tuberi e Verdure Fresche', 'Camerun / Costa Rica', 3.2, NULL, 'Casco da 1 kg (~4 platani)', 'yellowPlantains', 'verified', 'Platani gialli maturati al punto giusto, ideali da friggere dorati per il dodo caramellato, da bollire o da servire con fagioli e riso jollof.', 28, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-9', 9, 'Pure Coconut Oil – barattoli', 'Non chiaro', 'Oli e grassi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Barattoli (peso/volume da verificare)', 'realProd9', 'verified', 'Pure Coconut Oil – barattoli (Non chiaro). Prodotto visibile; marca non certa.',
+  0, true, 'da_verificare',
+  'Olio di cocco; verificare se 100% puro', 'Olio di cocco; verificare se 100% puro', 'Verificare dichiarazione allergeni e possibili tracce', 'Verificare dichiarazione allergeni e possibili tracce',
+  'MS-CAT-09', NULL, 'Prodotto visibile; marca non certa.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-10', 'Pesce Gatto Intero Essiccato e Affumicato', 'Pesce Affumicato e Carni', 'Nigeria / Atlantico', 8.9, 9.8, 'Intero da circa 350g', 'smokedCatfish', 'verified', 'Pesce gatto africano affumicato a legno duro, dal profumo intenso e carni tenere e saporite. Arricchisce zuppe di egusi, edikang ikong e bitterleaf.', 15, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-10', 10, 'Dari Couscous', 'Dari', 'Riso e cereali', 'Da verificare su etichetta',
+  NULL, 'Circa €2.50?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd10', 'verified', 'Dari Couscous (Dari). Marchio leggibile; prezzo vicino ma non certo.',
+  0, true, 'da_verificare',
+  'Semola di grano duro (per couscous semplice; verificare confezione)', 'Semola di grano duro (per couscous semplice; verificare confezione)', 'FRUMENTO/GLUTINE', 'FRUMENTO/GLUTINE',
+  'MS-CAT-10', NULL, 'Marchio leggibile; prezzo vicino ma non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-11', 'Riso Aromatico a Chicco Lungo Parboiled', 'Cereali e Farine Tradizionali', 'Ghana / Thailandia', 11.5, NULL, 'Sacco da 5 kg', 'longGrainRice', 'verified', 'Riso parboiled a chicco lungo di prima qualità: resta sgranato, morbido e profumato. La scelta ideale per il jollof rice nigeriano e ghanese.', 32, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-11', 11, 'Jumbo Seasoning Powder', 'Jumbo', 'Condimenti e dadi', 'Da verificare su etichetta',
+  NULL, 'Non confermato', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd11', 'verified', 'Jumbo Seasoning Powder (Jumbo). Cartellino €5,00 visibile sul ripiano; prodotto esatto non certo.',
+  0, true, 'da_verificare',
+  'Miscela di condimenti; ingredienti variabili', 'Miscela di condimenti; ingredienti variabili', 'Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni', 'Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni',
+  'MS-CAT-11', NULL, 'Cartellino €5,00 visibile sul ripiano; prodotto esatto non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-12', 'Tranci di Stoccafisso Artico Essiccato (Cod)', 'Pesce Affumicato e Carni', 'Norvegia / Nigeria', 13.5, NULL, 'Tagli scelti da 400g', 'stockfishCuts', 'verified', 'Vero merluzzo artico norvegese essiccato all''aria (okporoko / panla). Tranci spessi che donano corpo, aroma e collagene ineguagliabile alle zuppe tradizionali.', 16, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-12', 12, 'Jumbo Seasoning Cubes', 'Jumbo', 'Condimenti e dadi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd12', 'verified', 'Jumbo Seasoning Cubes (Jumbo). Prodotto/varietà non completamente leggibili.',
+  0, true, 'da_verificare',
+  'Dadi/condimento; ingredienti variabili', 'Dadi/condimento; ingredienti variabili', 'Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni', 'Verificare SOIA, SEDANO (CELIERO), SENAPE, GLUTINE e altri allergeni',
+  'MS-CAT-12', NULL, 'Prodotto/varietà non completamente leggibili.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-13', 'Patties Giamaicane di Manzo Speziato (2 pz)', 'Snack e Dolci Caraibici', 'Giamaica / UK', 4.8, NULL, 'Confezione da 2 x 140g', 'jamaicanPatty', 'verified', 'Fagottini dorati di pasta sfogliata alla curcuma ripieni di carne macinata di manzo cotta a fuoco lento con scotch bonnet, timo e cipollotti freschi.', 20, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-13', 13, 'Star Seasoning', 'Star', 'Condimenti e dadi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd13', 'verified', 'Star Seasoning (Star). Confezione visibile; variante non chiara.',
+  0, true, 'da_verificare',
+  'Condimento; ingredienti variabili', 'Condimento; ingredienti variabili', 'Verificare ingredienti e allergeni sull''etichetta', 'Verificare ingredienti e allergeni sull''etichetta',
+  'MS-CAT-13', NULL, 'Confezione visibile; variante non chiara.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-14', 'Chips Croccanti di Platano Salato al Peperoncino', 'Snack e Dolci Caraibici', 'Ghana', 2.2, NULL, 'Busta da 120g', 'plantainChips', 'verified', 'Platani verdi tagliati sottilissimi e fritti in pentola fino a raggiungere la massima croccantezza, cosparsi di sale marino e peperoncino.', 50, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-14', 14, 'Eagle Brand Ground Yam Flour', 'Eagle Brand', 'Farine e amidi', 'Da verificare su etichetta',
+  NULL, 'Circa €4.00?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd14', 'verified', 'Eagle Brand Ground Yam Flour (Eagle Brand). Marchio/prodotto leggibile; prezzo vicino non certo.',
+  0, true, 'da_verificare',
+  'Farina di igname; verificare eventuali aggiunte', 'Farina di igname; verificare eventuali aggiunte', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce',
+  'MS-CAT-14', NULL, 'Marchio/prodotto leggibile; prezzo vicino non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-15', 'Fiori di Ibisco Essiccati per Zobo / Carcadè', 'Bevande al Malto e Ibisco', 'Nigeria / Sudan', 3.9, NULL, 'Busta da 300g', 'zoboHibiscus', 'verified', 'Calici interi biologici di Hibiscus sabdariffa essiccati al sole per preparare la rinfrescante bevanda Zobo o il tradizionale Sorrel caraibico.', 38, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-15', 15, 'Pronto Rice Flour', 'Pronto', 'Farine e amidi', 'Da verificare su etichetta',
+  NULL, 'Circa €2.50?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd15', 'verified', 'Pronto Rice Flour (Pronto). Confezione leggibile; prezzo vicino non certo.',
+  0, true, 'da_verificare',
+  'Farina di riso', 'Farina di riso', 'Nessun allergene maggiore atteso; verificare contaminazione crociata da glutine', 'Nessun allergene maggiore atteso; verificare contaminazione crociata da glutine',
+  'MS-CAT-15', NULL, 'Confezione leggibile; prezzo vicino non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-16', 'Sapone Nero Africano Dudu-Osun (Pacco da 3)', 'Cura Afro e Cosmetici', 'Nigeria', 5.5, NULL, '3 saponette da 150g', 'blackSoap', 'verified', 'Sapone artigianale a base di erbe naturali, miele puro, burro di karité, legno di camwood e cenere di baccelli di cacao. Lenitivo e purificante.', 42, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-16', 16, 'AdiBaba Groundnuts / Peanuts', 'AdiBaba', 'Legumi e frutta a guscio', 'Da verificare su etichetta',
+  NULL, 'Circa €3.20?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd16', 'verified', 'AdiBaba Groundnuts / Peanuts (AdiBaba). Marchio/prodotto visibile; prezzo vicino non certo.',
+  0, true, 'da_verificare',
+  'Arachidi; ingredienti aggiunti da verificare', 'Arachidi; ingredienti aggiunti da verificare', 'ARACHIDI', 'ARACHIDI',
+  'MS-CAT-16', NULL, 'Marchio/prodotto visibile; prezzo vicino non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-17', 'Peperoncini Scotch Bonnet Rossi e Gialli Freschi', 'Tuberi e Verdure Fresche', 'Uganda / Nigeria', 2.8, NULL, 'Vaschetta da 250g', 'scotchBonnets', 'verified', 'Piccantissimi e profumatissimi peperoncini atarodo/habanero freschi, con la caratteristica nota floreale e fruttata. Arrivati freschi a Messina.', 25, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-17', 17, 'AdiBaba Dried Fish', 'AdiBaba', 'Carne e pesce in scatola', 'Da verificare su etichetta',
+  NULL, 'Non confermato', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd17', 'verified', 'AdiBaba Dried Fish (AdiBaba). Confezione visibile; prezzo non attribuibile con certezza.',
+  0, true, 'da_verificare',
+  'Pesce essiccato; specie e ingredienti da verificare', 'Pesce essiccato; specie e ingredienti da verificare', 'PESCE', 'PESCE',
+  'MS-CAT-17', NULL, 'Confezione visibile; prezzo non attribuibile con certezza.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-18', 'Okra Fresca e Tenera (Gombo)', 'Tuberi e Verdure Fresche', 'Ghana', 3.5, NULL, 'Vaschetta da 500g', 'freshOkra', 'verified', 'Baccelli di gombo freschissimi e croccanti per preparare la zuppa cremosa Ila Alasepo, gumbo o stufati leggeri di verdure.', 20, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-18', 18, 'AdiBaba Popcorn Kernels', 'AdiBaba', 'Snack e cereali', 'Da verificare su etichetta',
+  NULL, 'Circa €2.50?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd18', 'verified', 'AdiBaba Popcorn Kernels (AdiBaba). Prezzo vicino non certo.',
+  0, true, 'da_verificare',
+  'Mais per popcorn', 'Mais per popcorn', 'Nessun allergene maggiore atteso nel mais semplice; verificare tracce', 'Nessun allergene maggiore atteso nel mais semplice; verificare tracce',
+  'MS-CAT-18', NULL, 'Prezzo vicino non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-19', 'Radici Fresche di Manioca Cerata (Yuca)', 'Tuberi e Verdure Fresche', 'Costa Rica / Nigeria', 3.8, NULL, 'Pezzo da circa 1,2 kg', 'cassavaRoots', 'verified', 'Radici fresche di manioca a polpa bianca protette da paraffina naturale. Ottime bollite con salsa di peperoni, arrostite o fritte croccanti.', 19, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-19', 19, 'AdiBaba Sweet Beans', 'AdiBaba', 'Legumi e frutta a guscio', 'Da verificare su etichetta',
+  NULL, '€1.50?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd19', 'verified', 'AdiBaba Sweet Beans (AdiBaba). Prezzo vicino non certo.',
+  0, true, 'da_verificare',
+  'Fagioli; varietà e ingredienti da verificare', 'Fagioli; varietà e ingredienti da verificare', 'Controllare eventuali SOIA o contaminazioni; non presumere allergeni', 'Controllare eventuali SOIA o contaminazioni; non presumere allergeni',
+  'MS-CAT-19', NULL, 'Prezzo vicino non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-20', 'Platani Verdi Aceri (Da Bollire o Friggere)', 'Tuberi e Verdure Fresche', 'Camerun', 2.9, NULL, 'Casco da 1 kg', 'greenPlantains', 'verified', 'Platani verdi compatti e ricchi di fibre resistenti. Perfetti per platano bollito a basso indice glicemico, tostones caraibici o zuppe di porridge.', 24, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-20', 20, 'Easy Cook Rice', 'Non chiaro', 'Riso e cereali', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd20', 'verified', 'Easy Cook Rice (Non chiaro). Confezione parzialmente visibile.',
+  0, true, 'da_verificare',
+  'Riso; varietà da verificare', 'Riso; varietà da verificare', 'Nessun allergene maggiore atteso nel riso semplice; verificare tracce', 'Nessun allergene maggiore atteso nel riso semplice; verificare tracce',
+  'MS-CAT-20', NULL, 'Confezione parzialmente visibile.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-21', 'Fagioli Miele Oloyin Nigeriani (Ewa Oloyin)', 'Cereali e Farine Tradizionali', 'Nigeria', 4.9, NULL, 'Busta da 1 kg', 'honeyBeans', 'verified', 'Fagioli bruni naturalmente dolci (Ewa Oloyin). Diventano morbidissimi e burrosi durante la cottura, ideali per stufato con platani e moi moi.', 34, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-21', 21, 'Gino Tomato Paste', 'Gino', 'Conserve e pomodoro', 'Da verificare su etichetta',
+  NULL, '€4.00?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd21', 'verified', 'Gino Tomato Paste (Gino). Cartellino vicino; non è certo che si riferisca a questo prodotto.',
+  0, true, 'da_verificare',
+  'Concentrato di pomodoro; ingredienti/additivi da verificare', 'Concentrato di pomodoro; ingredienti/additivi da verificare', 'Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta', 'Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta',
+  'MS-CAT-21', NULL, 'Cartellino vicino; non è certo che si riferisca a questo prodotto.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-22', 'Garri Giallo all''Olio di Palma (Per Eba)', 'Cereali e Farine Tradizionali', 'Nigeria', 6.2, NULL, 'Sacco da 2 kg', 'yellowGarri', 'verified', 'Fiocchi di manioca tradizionali arricchiti con olio di palma vergine durante la tostatura. Donano all''eba un caldo colore dorato e consistenza vellutata.', 26, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-22', 22, 'De Rica Double Concentrated Tomato Paste', 'De Rica', 'Conserve e pomodoro', 'Da verificare su etichetta',
+  NULL, '€2.00?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd22', 'verified', 'De Rica Double Concentrated Tomato Paste (De Rica). Cartellino vicino; non è certo che si riferisca a questo prodotto.',
+  0, true, 'da_verificare',
+  'Doppio concentrato di pomodoro; ingredienti/additivi da verificare', 'Doppio concentrato di pomodoro; ingredienti/additivi da verificare', 'Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta', 'Nessun allergene maggiore atteso nel concentrato semplice; controllare etichetta',
+  'MS-CAT-22', NULL, 'Cartellino vicino; non è certo che si riferisca a questo prodotto.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-23', 'Latta Famiglia Olio di Palma Rosso Puro (5L)', 'Spezie e Olio di Palma', 'Nigeria', 23.5, NULL, 'Fusto metallico da 5 Litri', 'palmOil5L', 'verified', 'Formato scorta famigliare di olio di palma rosso vergine non filtrato 100% originale. Ricchissimo di betacarotene e con lunga conservazione.', 14, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-23', 23, 'Unifresh Kokonte Flour', 'Unifresh', 'Farine e amidi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd23', 'verified', 'Unifresh Kokonte Flour (Unifresh). Marchio/prodotto leggibile.',
+  0, true, 'da_verificare',
+  'Farina di cassava/manioca essiccata; verificare confezione', 'Farina di cassava/manioca essiccata; verificare confezione', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce',
+  'MS-CAT-23', NULL, 'Marchio/prodotto leggibile.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-24', 'Crayfish Intero Essiccato al Sole di Calabar', 'Spezie e Olio di Palma', 'Calabar, Nigeria', 5.2, NULL, 'Barattolo da 200g', 'crayfish', 'verified', 'Gamberetti selvatici di mare affumicati ed essiccati al sole sulla costa di Calabar. Insostituibile condimento ad alto tenore umami per le salse africane.', 36, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-24', 24, 'Unifresh Yellow Gari', 'Unifresh', 'Farine e amidi', 'Da verificare su etichetta',
+  NULL, '€6.00?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd24', 'verified', 'Unifresh Yellow Gari (Unifresh). Cartellino vicino; prezzo non certo.',
+  0, true, 'da_verificare',
+  'Gari giallo a base di manioca; verificare eventuale olio di palma e ingredienti', 'Gari giallo a base di manioca; verificare eventuale olio di palma e ingredienti', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce', 'Nessun allergene maggiore atteso nel prodotto semplice; verificare tracce',
+  'MS-CAT-24', NULL, 'Cartellino vicino; prezzo non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-25', 'Supermalt Originale Bevanda al Malto (4x330ml)', 'Bevande al Malto e Ibisco', 'Danimarca / Export', 6.2, NULL, '4 bottiglie in vetro da 330ml', 'supermalt', 'verified', 'La classica bevanda analcolica al malto d''orzo e luppolo, ricca di vitamine del gruppo B. Nutriente, vellutata e dissetante.', 28, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-25', 25, 'Ca Bianca Farina di Grano Tenero', 'Ca Bianca', 'Farine e amidi', 'Italia',
+  NULL, '€4.00?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd25', 'verified', 'Ca Bianca Farina di Grano Tenero (Ca Bianca). Cartellino vicino; prezzo non certo.',
+  0, true, 'da_verificare',
+  'Farina di grano tenero', 'Farina di grano tenero', 'FRUMENTO/GLUTINE', 'FRUMENTO/GLUTINE',
+  'MS-CAT-25', NULL, 'Cartellino vicino; prezzo non certo.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-26', 'Carne di Capra Fresca a Bocconcini (Halal)', 'Pesce Affumicato e Carni', 'Macelleria Halal Siciliana', 11.9, NULL, 'Vaschetta macelleria da 1 kg', 'goatMeat', 'verified', 'Bocconcini con osso di carne di capra fresca certificata halal, perfetta per pepper soup nigeriana, curry di capra o spezzatini al pomodoro.', 12, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-26', 26, 'Petti Passata Extra Fine', 'Petti', 'Conserve e pomodoro', 'Italia',
+  NULL, '€1.50?', 'estimated', NULL, NULL,
+  'Da verificare su confezione', 'realProd26', 'verified', 'Petti Passata Extra Fine (Petti). Prezzo vicino; associazione non certa.',
+  0, true, 'da_verificare',
+  'Pomodoro; sale o altri ingredienti da verificare', 'Pomodoro; sale o altri ingredienti da verificare', 'Nessun allergene maggiore atteso nella passata semplice; controllare etichetta', 'Nessun allergene maggiore atteso nella passata semplice; controllare etichetta',
+  'MS-CAT-26', NULL, 'Prezzo vicino; associazione non certa.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-27', 'Vino di Palma Naturale Tradizionale (1L)', 'Bevande al Malto e Ibisco', 'Ghana / Nigeria', 5.9, NULL, 'Bottiglia da 1 Litro', 'palmWine', 'verified', 'Linfa dolce naturalmente fermentata ricavata dalle palme da olio. Frizzante, aromatica e tradizionalmente servita durante festività e visite famigliari.', 15, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-27', 27, 'Ducros Curry Powder', 'Ducros', 'Spezie e aromi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd27', 'verified', 'Ducros Curry Powder (Ducros). Marca leggibile; variante non certa.',
+  0, true, 'da_verificare',
+  'Miscela di spezie; composizione da verificare', 'Miscela di spezie; composizione da verificare', 'Verificare SENAPE, SEDANO e possibili tracce', 'Verificare SENAPE, SEDANO e possibili tracce',
+  'MS-CAT-27', NULL, 'Marca leggibile; variante non certa.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-28', 'Semi di Mango Selvatico Ogbono (Apon)', 'Spezie e Olio di Palma', 'Nigeria', 6.8, NULL, 'Barattolo da 250g', 'ogbonoSeeds', 'verified', 'Pregiati semi di mango della foresta (ogbono) selezionati per preparare la densa, filante e saporitissima draw soup tradizionale.', 22, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-28', 28, 'Riso/grani in confezione nera – marca non leggibile', 'Non identificata', 'Riso e cereali', 'Da accertare',
+  NULL, 'Circa €3.50?', 'estimated', NULL, NULL,
+  'Confezione nera (peso da verificare)', 'realProd28', 'verified', 'Riso/grani in confezione nera – marca non leggibile (Non identificata). Prodotto e prezzo incerti.',
+  0, true, 'da_identificare',
+  'Non identificabile con certezza dalla foto', 'Non identificabile con certezza dalla foto', 'Non determinabile: leggere etichetta', 'Non determinabile: leggere etichetta',
+  'MS-CAT-28', NULL, 'Prodotto e prezzo incerti.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-29', 'Extension per Treccine X-Pression Ultra Braid (82")', 'Cura Afro e Cosmetici', 'Nigeria / Togo', 4.5, NULL, 'Matassa lunghezza 82 pollici', 'braidingHair', 'verified', 'Fibra sintetica Kanekalon 100% per trecce. Leggera, anti-nodi e fissabile in acqua calda per box braids, treccine aderenti e twist.', 60, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-29', 29, 'Condimento per pollo in confezione verde – marca non leggibile', 'Non identificata', 'Condimenti e dadi', 'Da accertare',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Confezione verde (peso da verificare)', 'realProd29', 'verified', 'Condimento per pollo in confezione verde – marca non leggibile (Non identificata). Prodotto non identificato con certezza.',
+  0, true, 'da_identificare',
+  'Miscela di spezie/aromi non identificata', 'Miscela di spezie/aromi non identificata', 'Non determinabile: leggere etichetta', 'Non determinabile: leggere etichetta',
+  'MS-CAT-29', NULL, 'Prodotto non identificato con certezza.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
 INSERT INTO public.products (
-  id, name, category, origin, price, original_price, package_size, image, image_status, description, stock, is_available, featured, ingredients, allergen_info, dietary_info, sku, is_new_arrival, is_discounted, discount_active, discount_start_date, discount_end_date
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
 ) VALUES (
-  'prod-30', 'Miscela di Spezie per Suya Yaji Hausa', 'Spezie e Olio di Palma', 'Kano, Nigeria', 4.2, NULL, 'Spargitore da 150g', 'suyaSpice', 'verified', 'Autentico mix di spezie per spiedini Suya del nord della Nigeria con kuli-kuli di arachidi tostate, zenzero, peperoncino e chiodi di garofano. Esalta carne alla griglia e pollo.', 44, true, false, '', '', '{}'::jsonb, '', false, false, true, NULL, NULL
+  'prod-real-30', 30, 'Confezioni dorate di spezie/condimento – marca non leggibile', 'Non identificata', 'Spezie e aromi', 'Da accertare',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Confezioni dorate (peso da verificare)', 'realProd30', 'verified', 'Confezioni dorate di spezie/condimento – marca non leggibile (Non identificata). Prodotto non identificato con certezza.',
+  0, true, 'da_identificare',
+  'Miscela non identificata', 'Miscela non identificata', 'Non determinabile: leggere etichetta', 'Non determinabile: leggere etichetta',
+  'MS-CAT-30', NULL, 'Prodotto non identificato con certezza.', false, false
 ) ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, price = EXCLUDED.price, stock = EXCLUDED.stock, is_available = EXCLUDED.is_available;
-
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-31', 31, 'Dark & Lovely Relaxer', 'Dark & Lovely', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd31', 'verified', 'Dark & Lovely Relaxer (Dark & Lovely). Prodotto riconoscibile; variante non chiara.',
+  0, true, 'da_verificare',
+  'Formula chimica per trattamento/relaxer; consultare confezione', 'Formula chimica per trattamento/relaxer; consultare confezione', 'Possibili profumi/conservanti; rischio irritazione. Seguire avvertenze e test indicato', 'Possibili profumi/conservanti; rischio irritazione. Seguire avvertenze e test indicato',
+  'MS-CAT-31', NULL, 'Prodotto riconoscibile; variante non chiara.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-32', 32, 'Dark & Lovely Hair Treatment', 'Dark & Lovely', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd32', 'verified', 'Dark & Lovely Hair Treatment (Dark & Lovely). Variante non chiara.',
+  0, true, 'da_verificare',
+  'Trattamento capelli; formula da verificare', 'Trattamento capelli; formula da verificare', 'Possibili profumi/conservanti', 'Possibili profumi/conservanti',
+  'MS-CAT-32', NULL, 'Variante non chiara.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-33', 33, 'Olive Oil Hair Products', 'Marca/variante non chiara', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd33', 'verified', 'Olive Oil Hair Products (Marca/variante non chiara). Linea visibile; singoli prodotti non distinguibili.',
+  0, true, 'da_verificare',
+  'Prodotti per capelli a base/tema olio d''oliva; ingredienti da verificare', 'Prodotti per capelli a base/tema olio d''oliva; ingredienti da verificare', 'Possibili profumi e conservanti', 'Possibili profumi e conservanti',
+  'MS-CAT-33', NULL, 'Linea visibile; singoli prodotti non distinguibili.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-34', 34, 'B.B. Clear Cream', 'B.B. Clear', 'Cura della pelle', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd34', 'verified', 'B.B. Clear Cream (B.B. Clear). Prodotto visibile; formula non identificata.',
+  0, true, 'da_verificare',
+  'Crema cosmetica; ingredienti da verificare', 'Crema cosmetica; ingredienti da verificare', 'Possibili profumi/conservanti; verificare ingredienti e avvertenze', 'Possibili profumi/conservanti; verificare ingredienti e avvertenze',
+  'MS-CAT-34', NULL, 'Prodotto visibile; formula non identificata.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-35', 35, 'Clairmen Products', 'Clairmen', 'Cura della pelle', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd35', 'verified', 'Clairmen Products (Clairmen). Linea visibile; prodotto esatto non chiaro.',
+  0, true, 'da_verificare',
+  'Prodotti cosmetici; ingredienti da verificare', 'Prodotti cosmetici; ingredienti da verificare', 'Possibili profumi/conservanti; verificare ingredienti e avvertenze', 'Possibili profumi/conservanti; verificare ingredienti e avvertenze',
+  'MS-CAT-35', NULL, 'Linea visibile; prodotto esatto non chiaro.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-36', 36, 'Caro White Lotion', 'Caro White', 'Cura della pelle', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd36', 'verified', 'Caro White Lotion (Caro White). Prodotto visibile; etichetta non leggibile.',
+  0, true, 'da_verificare',
+  'Lozione cosmetica; ingredienti da verificare', 'Lozione cosmetica; ingredienti da verificare', 'Possibili profumi/conservanti; controllare conformità UE e ingredienti', 'Possibili profumi/conservanti; controllare conformità UE e ingredienti',
+  'MS-CAT-36', NULL, 'Prodotto visibile; etichetta non leggibile.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-37', 37, 'Dettol Antiseptic', 'Dettol', 'Saponi e igiene', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd37', 'verified', 'Dettol Antiseptic (Dettol). Marchio riconoscibile; formulazione non identificata.',
+  0, true, 'da_verificare',
+  'Antisettico; formula varia per paese e formato', 'Antisettico; formula varia per paese e formato', 'Possibili ingredienti irritanti/allergizzanti; seguire etichetta e uso previsto', 'Possibili ingredienti irritanti/allergizzanti; seguire etichetta e uso previsto',
+  'MS-CAT-37', NULL, 'Marchio riconoscibile; formulazione non identificata.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-38', 38, 'Tura Soap', 'Tura', 'Saponi e igiene', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd38', 'verified', 'Tura Soap (Tura). Prodotto visibile.',
+  0, true, 'da_verificare',
+  'Sapone; ingredienti da verificare', 'Sapone; ingredienti da verificare', 'Possibili profumi e conservanti', 'Possibili profumi e conservanti',
+  'MS-CAT-38', NULL, 'Prodotto visibile.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-39', 39, 'Naomi Hair Products', 'Naomi', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Da verificare su confezione', 'realProd39', 'verified', 'Naomi Hair Products (Naomi). Prodotto/linea visibile; variante non chiara.',
+  0, true, 'da_verificare',
+  'Prodotti per capelli; ingredienti da verificare', 'Prodotti per capelli; ingredienti da verificare', 'Possibili profumi/conservanti', 'Possibili profumi/conservanti',
+  'MS-CAT-39', NULL, 'Prodotto/linea visibile; variante non chiara.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-40', 40, '212 Perfume', 'Non chiara', 'Profumi', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Flacone (volume da verificare)', 'realProd40', 'verified', '212 Perfume (Non chiara). Confezione visibile; marca non certa.',
+  0, true, 'da_verificare',
+  'Profumo; formula INCI da verificare', 'Profumo; formula INCI da verificare', 'Profumi: possibili allergeni da fragranza, indicati in etichetta', 'Profumi: possibili allergeni da fragranza, indicati in etichetta',
+  'MS-CAT-40', NULL, 'Confezione visibile; marca non certa.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-41', 41, 'Oli per capelli assortiti', 'Varie', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Assortimento (formati da verificare)', 'realProd41', 'verified', 'Oli per capelli assortiti (Varie). Gruppo di prodotti non distinguibile singolarmente.',
+  0, true, 'da_verificare',
+  'Oli cosmetici; ingredienti da verificare', 'Oli cosmetici; ingredienti da verificare', 'Possibili profumi/oli essenziali', 'Possibili profumi/oli essenziali',
+  'MS-CAT-41', NULL, 'Gruppo di prodotti non distinguibile singolarmente.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;
+INSERT INTO public.products (
+  id, item_number, name, brand, category, origin, price, observed_price, price_status, purchase_price, original_price,
+  package_size, image, image_status, description, stock, is_available, verification_status, ingredients,
+  expected_ingredients, allergen_info, allergens_alert, sku, barcode, notes, is_new_arrival, is_discounted
+) VALUES (
+  'prod-real-42', 42, 'Creme e trattamenti per capelli assortiti', 'Varie', 'Capelli e bellezza', 'Da verificare su etichetta',
+  NULL, 'Non leggibile', 'unreadable', NULL, NULL,
+  'Assortimento (formati da verificare)', 'realProd42', 'verified', 'Creme e trattamenti per capelli assortiti (Varie). Gruppo di prodotti non distinguibile singolarmente.',
+  0, true, 'da_verificare',
+  'Formule varie; ingredienti da verificare', 'Formule varie; ingredienti da verificare', 'Possibili profumi, conservanti e altri ingredienti', 'Possibili profumi, conservanti e altri ingredienti',
+  'MS-CAT-42', NULL, 'Gruppo di prodotti non distinguibile singolarmente.', false, false
+) ON CONFLICT (id) DO UPDATE SET
+  name = EXCLUDED.name,
+  brand = EXCLUDED.brand,
+  category = EXCLUDED.category,
+  price = EXCLUDED.price,
+  observed_price = EXCLUDED.observed_price,
+  verification_status = EXCLUDED.verification_status,
+  stock = EXCLUDED.stock,
+  is_available = EXCLUDED.is_available;

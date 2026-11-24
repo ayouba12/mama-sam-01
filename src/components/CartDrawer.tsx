@@ -1,7 +1,8 @@
-import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, MapPin, Clock, AlertTriangle, ShieldAlert, Info } from 'lucide-react';
+import React from 'react';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, MapPin, Info } from 'lucide-react';
 import { CartItem } from '../types';
-import { resolveImage } from '../utils/imageHelper';
-import { getContainsList, getMayContainList, hasAllergenWarnings } from '../utils/allergenHelper';
+import { resolveProductImage } from '../utils/imageHelper';
+import { getContainsList } from '../utils/allergenHelper';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -25,9 +26,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   if (!isOpen) return null;
 
   const subtotal = Number(
-    items.reduce((sum, item) => sum + item.product.price * item.quantity, 0).toFixed(2)
+    items.reduce((sum, item) => sum + (item.product.price != null ? item.product.price : 0) * item.quantity, 0).toFixed(2)
   );
   const totalCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const hasDeclaredAllergens = items.some(it => getContainsList(it.product.dietaryInfo).length > 0);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -66,7 +68,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
                 <h4 className="font-bold text-slate-800 text-base mb-1">Il tuo carrello è vuoto</h4>
                 <p className="text-xs text-slate-500 max-w-xs mb-6">
-                  Aggiungi yam ghanesi, garri ijebu, platani maturi o spezie tradizionali per iniziare.
+                  Aggiungi farine tradizionali, condimenti, noodles o cosmetici autentici per iniziare.
                 </p>
                 <button
                   onClick={onClose}
@@ -77,12 +79,18 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
             ) : (
               items.map((item) => {
-                const lineTotal = (item.product.price * item.quantity).toFixed(2);
+                const hasPrice = item.product.price != null && item.product.price > 0;
+                const lineTotal = hasPrice ? (item.product.price! * item.quantity).toFixed(2) : null;
                 return (
                   <div key={item.product.id} className="py-3.5 flex gap-3">
                     <img
-                      src={resolveImage(item.product.image)}
+                      src={resolveProductImage(item.product)}
                       alt={item.product.name}
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
                       className="w-16 h-16 object-cover rounded-xl border border-stone-200 bg-stone-50 shrink-0"
                     />
                     <div className="flex-1 min-w-0">
@@ -94,45 +102,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           onClick={() => onRemoveItem(item.product.id)}
                           className="text-slate-400 hover:text-rose-600 p-0.5 cursor-pointer"
                           title="Rimuovi articolo"
+                          aria-label={`Rimuovi ${item.product.name}`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
-                      <p className="text-[11px] text-slate-500 mb-1.5">
-                        {item.product.packageSize} · €{item.product.price.toFixed(2)} cad.
+                      <p className="text-[11px] text-slate-500 mb-2">
+                        {item.product.packageSize} · {hasPrice ? `€${item.product.price!.toFixed(2)} cad.` : (item.product.observedPrice ? `Stima: ${item.product.observedPrice}` : 'Prezzo in cassa')}
                       </p>
-
-                      {/* Product-Specific Allergen Warnings */}
-                      {(() => {
-                        const contains = getContainsList(item.product.dietaryInfo);
-                        const mayContain = getMayContainList(item.product.dietaryInfo);
-                        if (contains.length > 0) {
-                          return (
-                            <div className="mb-2 p-1.5 bg-rose-50 border border-rose-200 rounded-lg text-[10.5px] text-rose-900 flex items-start gap-1.5">
-                              <AlertTriangle className="w-3 h-3 text-rose-600 shrink-0 mt-0.5" />
-                              <span><strong>Contiene:</strong> {contains.map(c => c.displayLabel).join(', ')}</span>
-                            </div>
-                          );
-                        }
-                        if (mayContain.length > 0) {
-                          return (
-                            <div className="mb-2 p-1.5 bg-amber-50 border border-amber-200 rounded-lg text-[10.5px] text-amber-900 flex items-start gap-1.5">
-                              <Info className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
-                              <span><strong>Può contenere:</strong> {mayContain.map(c => c.displayLabel).join(', ')}</span>
-                            </div>
-                          );
-                        }
-                        if (item.product.allergenInfo) {
-                          return (
-                            <div className="mb-2 p-1.5 bg-amber-50 border border-amber-200 rounded-lg text-[10.5px] text-amber-900 flex items-start gap-1.5">
-                              <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
-                              <span>{item.product.allergenInfo}</span>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
 
                       <div className="flex items-center justify-between">
                         {/* Stepper */}
@@ -140,6 +118,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           <button
                             onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
                             className="p-1 hover:bg-stone-200 text-slate-600 transition-colors cursor-pointer"
+                            aria-label="Riduci quantità"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -149,13 +128,14 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                           <button
                             onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
                             className="p-1 hover:bg-stone-200 text-slate-600 transition-colors cursor-pointer"
+                            aria-label="Aumenta quantità"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
 
                         <span className="font-bold text-xs sm:text-sm text-slate-900">
-                          €{lineTotal}
+                          {lineTotal ? `€${lineTotal}` : (item.product.observedPrice ? `${item.product.observedPrice} (da conf.)` : 'In cassa')}
                         </span>
                       </div>
                     </div>
@@ -179,14 +159,11 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </span>
               </div>
 
-              {/* Allergen Bag Advisory Notice */}
-              {items.some(it => hasAllergenWarnings(it.product.dietaryInfo) || Boolean(it.product.allergenInfo)) && (
-                <div className="p-2.5 bg-amber-50/90 rounded-xl border border-amber-200 text-[11px] text-amber-950 flex items-start gap-2">
-                  <ShieldAlert className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                  <div>
-                    <strong>Avviso di Sicurezza Allergeni:</strong> Alcuni prodotti nel tuo ordine contengono avvisi per allergeni. Si prega di verificare l'etichetta al ritiro in negozio.
-                  </div>
-                </div>
+              {hasDeclaredAllergens && (
+                <p className="text-[11px] text-slate-600 flex items-center gap-1.5 px-1">
+                  <Info className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Alcuni articoli contengono allergeni dichiarati (verifica sempre l'etichetta al ritiro).</span>
+                </p>
               )}
 
               {/* Subtotal */}

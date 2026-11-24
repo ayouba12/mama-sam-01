@@ -2,31 +2,43 @@ export type ProductCategory = string;
 
 export interface Product {
   id: string;
+  itemNumber?: number;
   name: string;
+  brand: string;
   category: ProductCategory;
   origin: string;
   subCategory?: string;
-  price: number;
-  originalPrice?: number;
+  price: number | null;
+  originalPrice?: number | null;
+  observedPrice?: string | null;
+  priceStatus: 'confirmed' | 'estimated' | 'unreadable';
+  purchasePrice?: number | null; // Admin only, stripped in public API
+  verificationStatus: 'da_verificare' | 'in_revisione' | 'verificato_etichetta' | 'da_identificare';
   packageSize: string;
   image: string;
   imageStatus?: 'verified' | 'needs_review' | 'missing';
+  imageStoragePath?: string | null;
   gallery?: string[];
   description: string;
-  stock: number;
+  stock: number | null;
   isAvailable: boolean;
   featured?: boolean;
   salesRank?: number;
   ingredients?: string;
+  expectedIngredients?: string;
   allergenInfo?: string;
+  allergensAlert?: string;
   dietaryInfo?: ProductDietaryInfo;
+  barcode?: string | null;
   sku?: string;
+  notes?: string;
   isNewArrival?: boolean;
   isDiscounted?: boolean;
   discountActive?: boolean;
   discountStartDate?: string;
   discountEndDate?: string;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export type AllergenKey = 

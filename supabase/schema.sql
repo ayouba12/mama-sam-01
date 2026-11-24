@@ -78,25 +78,36 @@ CREATE POLICY "categories_admin_all" ON public.categories
 -- --------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.products (
   id TEXT PRIMARY KEY,
+  item_number INTEGER,
   name TEXT NOT NULL,
+  brand TEXT,
   category TEXT NOT NULL,
   origin TEXT NOT NULL DEFAULT 'Importato',
   sub_category TEXT,
-  price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+  price NUMERIC(10, 2) CHECK (price IS NULL OR price >= 0),
+  observed_price TEXT,
+  price_status TEXT DEFAULT 'da_verificare',
+  purchase_price NUMERIC(10, 2) CHECK (purchase_price IS NULL OR purchase_price >= 0),
   original_price NUMERIC(10, 2) CHECK (original_price IS NULL OR original_price > 0),
+  verification_status TEXT NOT NULL DEFAULT 'da_verificare' CHECK (verification_status IN ('da_verificare', 'in_revisione', 'verificato_etichetta', 'da_identificare')),
   package_size TEXT NOT NULL DEFAULT '1 pz',
   image TEXT NOT NULL,
-  image_status TEXT NOT NULL DEFAULT 'verified' CHECK (image_status IN ('verified', 'needs_review', 'missing')),
+  image_storage_path TEXT,
+  image_status TEXT NOT NULL DEFAULT 'needs_review' CHECK (image_status IN ('verified', 'needs_review', 'missing')),
   gallery TEXT[] DEFAULT '{}',
   description TEXT,
-  stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  stock INTEGER CHECK (stock IS NULL OR stock >= 0),
   is_available BOOLEAN NOT NULL DEFAULT true,
   featured BOOLEAN DEFAULT false,
   sales_rank INTEGER DEFAULT 0,
   ingredients TEXT,
+  expected_ingredients TEXT,
   allergen_info TEXT,
+  allergens_alert TEXT,
   dietary_info JSONB DEFAULT '{}'::jsonb,
   sku TEXT,
+  barcode TEXT,
+  notes TEXT,
   is_new_arrival BOOLEAN DEFAULT false,
   is_discounted BOOLEAN DEFAULT false,
   discount_active BOOLEAN DEFAULT true,
@@ -107,6 +118,8 @@ CREATE TABLE IF NOT EXISTS public.products (
 );
 
 CREATE INDEX IF NOT EXISTS idx_products_category ON public.products(category);
+CREATE INDEX IF NOT EXISTS idx_products_verification ON public.products(verification_status);
+CREATE INDEX IF NOT EXISTS idx_products_item_number ON public.products(item_number);
 CREATE INDEX IF NOT EXISTS idx_products_is_available ON public.products(is_available);
 CREATE INDEX IF NOT EXISTS idx_products_stock ON public.products(stock);
 

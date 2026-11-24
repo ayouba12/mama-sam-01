@@ -49,6 +49,50 @@ import prodOgbonoSeeds from './images/prod_ogbono_seeds_1791807335960.jpg';
 import prodBraidingHair from './images/prod_braiding_hair_1791807928279.jpg';
 import prodSuyaSpice from './images/prod_suya_spice_1791807380914.jpg';
 
+// Real Inventory 42 Product Images (Matched 1:1 to Catalog)
+import realProd1Img from './images/maizena_corn_starch_1795531388429.jpg';
+import realProd2Img from './images/peak_milk_powder_1795531388622.jpg';
+import realProd3Img from './images/ufc_white_vinegar_1795531389640.jpg';
+import realProd4Img from './images/ufc_soy_sauce_1795531389611.jpg';
+import realProd5Img from './images/samyang_carbonara_pack_1795531389062.jpg';
+import realProd6Img from './images/samyang_carbonara_cup_1795531389732.jpg';
+import realProd7Img from './images/samyang_cheese_pack_1795531390535.jpg';
+import realProd8Img from './images/exeter_corned_beef_1795531390674.jpg';
+import realProd9Img from './images/pure_coconut_oil_1795531391174.jpg';
+import realProd10Img from './images/dari_couscous_pack_1795531391286.jpg';
+import realProd11Img from './images/jumbo_seasoning_powder_1795531486862.jpg';
+import realProd12Img from './images/jumbo_seasoning_cubes_1795531487638.jpg';
+import realProd13Img from './images/star_seasoning_pack_1795531393283.jpg';
+import realProd14Img from './images/eagle_yam_flour_1795531487324.jpg';
+import realProd15Img from './images/pronto_rice_flour_1795531394587.jpg';
+import realProd16Img from './images/adibaba_groundnuts_bag_1795531487685.jpg';
+import realProd17Img from './images/adibaba_dried_fish_1795531394401.jpg';
+import realProd18Img from './images/adibaba_popcorn_kernels_1795531488913.jpg';
+import realProd19Img from './images/adibaba_sweet_beans_1795531488282.jpg';
+import realProd20Img from './images/easy_cook_rice_1795531490196.jpg';
+import realProd21Img from './images/gino_tomato_paste_1795531396400.jpg';
+import realProd22Img from './images/derica_tomato_paste_1795531396383.jpg';
+import realProd23Img from './images/unifresh_kokonte_flour_1795531489200.jpg';
+import realProd24Img from './images/unifresh_yellow_gari_1795531490260.jpg';
+import realProd25Img from './images/cabianca_wheat_flour_1795531490471.jpg';
+import realProd26Img from './images/petti_passata_bottle_1795531580964.jpg';
+import realProd27Img from './images/ducros_curry_powder_1795531580380.jpg';
+import realProd28Img from './images/black_bag_grains_1795531581039.jpg';
+import realProd29Img from './images/green_chicken_seasoning_1795531581340.jpg';
+import realProd30Img from './images/gold_spice_sachets_1795531582444.jpg';
+import realProd31Img from './images/darklovely_relaxer_box_1795531582673.jpg';
+import realProd32Img from './images/darklovely_hair_treatment_1795531582071.jpg';
+import realProd33Img from './images/olive_hair_care_1795531582647.jpg';
+import realProd34Img from './images/bb_clear_cream_1795531582810.jpg';
+import realProd35Img from './images/clairmen_skin_lotion_1795531583719.jpg';
+import realProd36Img from './images/caro_white_lotion_1795531673347.jpg';
+import realProd37Img from './images/dettol_antiseptic_bottle_1795531674339.jpg';
+import realProd38Img from './images/tura_beauty_soap_1795531675381.jpg';
+import realProd39Img from './images/naomi_hair_products_1795531687003.jpg';
+import realProd40Img from './images/perfume_212_bottle_1795531674873.jpg';
+import realProd41Img from './images/assorted_hair_oils_1795531705981.jpg';
+import realProd42Img from './images/assorted_hair_creams_1795531676211.jpg';
+
 export const IMAGES = {
   heroShopkeeper,
   storefrontShop,
@@ -96,5 +140,47 @@ export const IMAGES = {
     ogbonoSeeds: prodOgbonoSeeds,
     braidingHair: prodBraidingHair,
     suyaSpice: prodSuyaSpice,
+    realProd1: realProd1Img,
+    realProd2: realProd2Img,
+    realProd3: realProd3Img,
+    realProd4: realProd4Img,
+    realProd5: realProd5Img,
+    realProd6: realProd6Img,
+    realProd7: realProd7Img,
+    realProd8: realProd8Img,
+    realProd9: realProd9Img,
+    realProd10: realProd10Img,
+    realProd11: realProd11Img,
+    realProd12: realProd12Img,
+    realProd13: realProd13Img,
+    realProd14: realProd14Img,
+    realProd15: realProd15Img,
+    realProd16: realProd16Img,
+    realProd17: realProd17Img,
+    realProd18: realProd18Img,
+    realProd19: realProd19Img,
+    realProd20: realProd20Img,
+    realProd21: realProd21Img,
+    realProd22: realProd22Img,
+    realProd23: realProd23Img,
+    realProd24: realProd24Img,
+    realProd25: realProd25Img,
+    realProd26: realProd26Img,
+    realProd27: realProd27Img,
+    realProd28: realProd28Img,
+    realProd29: realProd29Img,
+    realProd30: realProd30Img,
+    realProd31: realProd31Img,
+    realProd32: realProd32Img,
+    realProd33: realProd33Img,
+    realProd34: realProd34Img,
+    realProd35: realProd35Img,
+    realProd36: realProd36Img,
+    realProd37: realProd37Img,
+    realProd38: realProd38Img,
+    realProd39: realProd39Img,
+    realProd40: realProd40Img,
+    realProd41: realProd41Img,
+    realProd42: realProd42Img,
   }
 };

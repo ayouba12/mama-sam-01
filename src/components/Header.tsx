@@ -31,7 +31,39 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileHeaderVisible, setMobileHeaderVisible] = useState(true);
+  const [localSearch, setLocalSearch] = useState(searchQuery);
   const lastScrollYRef = useRef(0);
+  const debounceTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    setLocalSearch(searchQuery);
+  }, [searchQuery]);
+
+  const handleSearchInput = (value: string) => {
+    setLocalSearch(value);
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+    debounceTimerRef.current = window.setTimeout(() => {
+      onSearchChange(value);
+    }, 160);
+  };
+
+  const handleClearSearchInput = () => {
+    if (debounceTimerRef.current) {
+      window.clearTimeout(debounceTimerRef.current);
+    }
+    setLocalSearch('');
+    onSearchChange('');
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        window.clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     let ticking = false;
@@ -205,16 +237,17 @@ export const Header: React.FC<HeaderProps> = ({
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
+              value={localSearch}
+              onChange={(e) => handleSearchInput(e.target.value)}
               placeholder="Cerca yam, platani, garri, olio di palma, carne di capra, zobo..."
-              className="w-full pl-10 pr-9 py-2 bg-stone-50 hover:bg-stone-100/70 focus:bg-white text-xs sm:text-sm border border-stone-200 focus:border-[#124b2e] rounded-lg outline-hidden text-slate-900 transition-colors shadow-2xs placeholder:text-slate-400"
+              className="w-full pl-10 pr-9 py-2 bg-stone-50 hover:bg-stone-100/70 focus:bg-white text-base sm:text-sm border border-stone-200 focus:border-[#124b2e] rounded-lg outline-hidden text-slate-900 transition-colors shadow-2xs placeholder:text-slate-400"
             />
-            {searchQuery && (
+            {localSearch && (
               <button
-                onClick={() => onSearchChange('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                onClick={handleClearSearchInput}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                 title="Cancella ricerca"
+                aria-label="Cancella ricerca"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
