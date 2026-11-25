@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Clock, Utensils, ShoppingBag, Check, ChefHat } from 'lucide-react';
 import { Recipe } from '../types';
 import { resolveImage } from '../utils/imageHelper';
+import { OptimizedImage } from './OptimizedImage';
 
 interface RecipeModalProps {
   recipe: Recipe | null;
@@ -51,14 +52,14 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
         {/* Body */}
         <div className="p-5 max-h-[75vh] overflow-y-auto space-y-5">
           <div className="aspect-[16/9] w-full rounded-xl overflow-hidden bg-[#ede9dd]">
-            <img
+            <OptimizedImage
               src={resolveImage(recipe.image)}
               alt={recipe.title}
               width={640}
               height={360}
-              loading="lazy"
-              decoding="async"
-              referrerPolicy="no-referrer"
+              widths={[400, 800]}
+              sizes="(max-width: 640px) 95vw, 560px"
+              priority={true}
               className="w-full h-full object-contain"
             />
           </div>
@@ -79,13 +80,15 @@ export const RecipeModal: React.FC<RecipeModalProps> = ({
                   key={idx}
                   className="flex items-center gap-2.5 p-2.5 bg-stone-50 rounded-xl border border-stone-200"
                 >
-                  <img
+                  <OptimizedImage
                     src={resolveImage(ing.image, 'Ingrediente', ing.name)}
                     alt={ing.name}
-                    width={40}
-                    height={40}
-                    loading="lazy"
-                    decoding="async"
+                    width={80}
+                    height={80}
+                    widths={[80]}
+                    sizes="40px"
+                    priority={true}
+                    wrapperClassName="w-10 h-10 shrink-0"
                     className="w-10 h-10 rounded-lg object-cover border border-stone-200"
                   />
                   <div className="text-xs">

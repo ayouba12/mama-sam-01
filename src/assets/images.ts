@@ -1,5 +1,5 @@
 // Image assets mapping for Mama Sam Supermarket
-import heroShopkeeper from './images/hero_shopkeeper_1791804624580.jpg';
+const heroShopkeeper = '/assets/aistudio/4CBC565E-4065-42A6-B2E6-BD5E13B1854D_9006d503.png';
 import storefrontShop from './images/storefront_shop_1791804645259.jpg';
 
 // Recipes

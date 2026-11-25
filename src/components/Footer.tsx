@@ -1,6 +1,7 @@
 import React from 'react';
-import { MapPin, Phone, Mail, Clock, ShieldCheck, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, ShieldCheck, MessageCircle, Bell } from 'lucide-react';
 import { StoreSettings } from '../types';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface FooterProps {
   settings: StoreSettings;
@@ -10,6 +11,9 @@ interface FooterProps {
   onWhatsAppOrder: () => void;
   onOpenAllergenInfo?: () => void;
   onOpenLegalNotice?: () => void;
+  onOpenNotifications?: () => void;
+  canInstallPWA?: boolean;
+  onInstallPWA?: () => Promise<boolean>;
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -19,7 +23,10 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenBiometrics,
   onWhatsAppOrder,
   onOpenAllergenInfo,
-  onOpenLegalNotice
+  onOpenLegalNotice,
+  onOpenNotifications,
+  canInstallPWA = false,
+  onInstallPWA
 }) => {
   return (
     <footer className="bg-[#111827] text-slate-300 text-xs pt-12 pb-8 border-t border-slate-800">
@@ -138,6 +145,23 @@ export const Footer: React.FC<FooterProps> = ({
               <li className="text-slate-400">
                 <span className="text-white block font-medium">Domenica:</span> {settings.hoursSun}
               </li>
+              {onOpenNotifications && (
+                <li className="pt-1.5">
+                  <button
+                    type="button"
+                    onClick={onOpenNotifications}
+                    className="inline-flex items-center gap-1.5 text-emerald-300 hover:text-emerald-200 font-semibold transition-colors cursor-pointer"
+                  >
+                    <Bell className="w-3.5 h-3.5" />
+                    <span>Avvisi Orari &amp; Nuovi Arrivi</span>
+                  </button>
+                </li>
+              )}
+              {onInstallPWA && canInstallPWA && (
+                <li className="pt-1">
+                  <PWAInstallButton canInstall={canInstallPWA} onInstall={onInstallPWA} variant="footer" />
+                </li>
+              )}
             </ul>
           </div>
 

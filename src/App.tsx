@@ -14,6 +14,10 @@ import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
 import { ProductDetailModal } from './components/ProductDetailModal';
 import { PromotionsSection } from './components/PromotionsSection';
+import { OfflineIndicator } from './components/OfflineIndicator';
+import { NotificationPreferencesModal } from './components/NotificationPreferencesModal';
+import { usePushNotifications } from './hooks/usePushNotifications';
+import { usePWAInstall } from './hooks/usePWAInstall';
 
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { Product, Recipe, Review, StoreSettings, CartItem, Order } from './types';
@@ -71,6 +75,10 @@ export default function App() {
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [isAllergenInfoOpen, setIsAllergenInfoOpen] = useState(false);
   const [isLegalNoticeOpen, setIsLegalNoticeOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const push = usePushNotifications();
+  const pwa = usePWAInstall();
 
   // Direct access to Admin via URL hash (#admin) or query (?admin=true)
   useEffect(() => {
@@ -219,7 +227,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#fbfbf9] text-slate-900 flex flex-col font-sans">
-      
+      <OfflineIndicator isOnline={pwa.isOnline} />
+
       {/* 1. Header */}
       <Header
         settings={settings}
@@ -230,6 +239,10 @@ export default function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onNavigateSection={handleNavigateSection}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
+        isPushSubscribed={push.isSubscribed}
+        canInstallPWA={pwa.canInstall}
+        onInstallPWA={pwa.promptInstall}
       />
 
       <main className="flex-1">
@@ -286,7 +299,10 @@ export default function App() {
         <ReviewsSection reviews={reviews} />
 
         {/* 9. Store Location */}
-        <StoreLocationSection settings={settings} />
+        <StoreLocationSection
+          settings={settings}
+          onOpenNotifications={() => setIsNotificationsOpen(true)}
+        />
 
         {/* 10. FAQ */}
         <FaqSection />
@@ -304,6 +320,9 @@ export default function App() {
         onWhatsAppOrder={handleWhatsAppOrder}
         onOpenAllergenInfo={() => setIsAllergenInfoOpen(true)}
         onOpenLegalNotice={() => setIsLegalNoticeOpen(true)}
+        onOpenNotifications={() => setIsNotificationsOpen(true)}
+        canInstallPWA={pwa.canInstall}
+        onInstallPWA={pwa.promptInstall}
       />
 
       {/* Cart Drawer */}
@@ -329,6 +348,23 @@ export default function App() {
           onClose={() => setSelectedProduct(null)}
           onAddToCart={handleAddToCart}
           onOpenAllergenPolicy={() => setIsAllergenInfoOpen(true)}
+        />
+      )}
+
+      {/* Notification Preferences Modal */}
+      {isNotificationsOpen && (
+        <NotificationPreferencesModal
+          isOpen={isNotificationsOpen}
+          onClose={() => setIsNotificationsOpen(false)}
+          isSupported={push.isSupported}
+          permission={push.permission}
+          isSubscribed={push.isSubscribed}
+          isLoading={push.isLoading}
+          error={push.error}
+          topics={push.topics}
+          onSubscribe={push.subscribe}
+          onUpdateTopics={push.updateTopics}
+          onUnsubscribe={push.unsubscribe}
         />
       )}
 

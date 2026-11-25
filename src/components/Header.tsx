@@ -4,9 +4,12 @@ import {
   Search, 
   Phone, 
   X, 
-  Menu 
+  Menu,
+  Bell,
+  BellRing
 } from 'lucide-react';
 import { StoreSettings } from '../types';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   settings: StoreSettings;
@@ -17,6 +20,10 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onNavigateSection: (sectionId: string) => void;
+  onOpenNotifications?: () => void;
+  isPushSubscribed?: boolean;
+  canInstallPWA?: boolean;
+  onInstallPWA?: () => Promise<boolean>;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -27,7 +34,11 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenBiometrics,
   searchQuery,
   onSearchChange,
-  onNavigateSection
+  onNavigateSection,
+  onOpenNotifications,
+  isPushSubscribed = false,
+  canInstallPWA = false,
+  onInstallPWA
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileHeaderVisible, setMobileHeaderVisible] = useState(true);
@@ -209,8 +220,32 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Right Action Island: Shopping Bag */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          {/* Right Action Island: Notifications, Install & Shopping Bag */}
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            {onInstallPWA && (
+              <PWAInstallButton canInstall={canInstallPWA} onInstall={onInstallPWA} variant="header" />
+            )}
+
+            {onOpenNotifications && (
+              <button
+                type="button"
+                onClick={onOpenNotifications}
+                className={`p-2 rounded-lg border transition-colors cursor-pointer relative ${
+                  isPushSubscribed
+                    ? 'bg-emerald-50 border-emerald-300 text-[#124b2e] hover:bg-emerald-100'
+                    : 'bg-white border-stone-200 text-slate-600 hover:text-[#124b2e] hover:border-emerald-300'
+                }`}
+                title={isPushSubscribed ? 'Notifiche attive — Gestisci preferenze' : 'Attiva notifiche per nuovi arrivi e cambi orari'}
+                aria-label="Preferenze notifiche"
+              >
+                {isPushSubscribed ? (
+                  <BellRing className="w-4 h-4 text-[#124b2e]" />
+                ) : (
+                  <Bell className="w-4 h-4" />
+                )}
+              </button>
+            )}
+
             <button
               onClick={onOpenCart}
               className="flex items-center gap-2 px-3.5 sm:px-4 py-2 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-lg font-medium text-xs sm:text-sm shadow-xs transition-all active:scale-[0.98] cursor-pointer"

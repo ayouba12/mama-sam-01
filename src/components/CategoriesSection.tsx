@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { resolveImage } from '../utils/imageHelper';
+import { OptimizedImage } from './OptimizedImage';
 
 interface CategoryItem {
   id: string;
@@ -55,15 +56,14 @@ export const CategoriesSection: React.FC<CategoriesSectionProps> = ({
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#f2f1eb]">
-                  <img
+                  <OptimizedImage
                     src={imgSrc}
                     alt={cat.name}
                     width={400}
                     height={300}
+                    widths={[240, 400, 640]}
+                    sizes="(max-width: 640px) 48vw, 25vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
                   />
                   {/* Item count tag */}
                   <span className="absolute bottom-2.5 right-2.5 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[11px] font-semibold rounded-md shadow-xs">

@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Product } from '../types';
 import { resolveProductImage } from '../utils/imageHelper';
+import { OptimizedImage } from './OptimizedImage';
 import { 
   getContainsList, 
   getMayContainList, 
@@ -94,14 +95,15 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
         {/* Content */}
         <div className="p-5 space-y-4 max-h-[80vh] overflow-y-auto">
-          <div className="aspect-square max-h-64 w-full rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center relative">
-            <img
+          <div className="aspect-square max-h-64 w-full rounded-xl overflow-hidden bg-stone-50 border border-stone-200 relative">
+            <OptimizedImage
               src={resolveProductImage(product)}
               alt={product.name}
               width={400}
               height={400}
-              decoding="async"
-              referrerPolicy="no-referrer"
+              widths={[240, 400, 800]}
+              sizes="(max-width: 640px) 90vw, 480px"
+              priority={true}
               className="w-full h-full object-cover"
             />
 

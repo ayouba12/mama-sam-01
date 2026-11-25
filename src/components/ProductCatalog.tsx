@@ -14,6 +14,7 @@ import { Product } from '../types';
 import { resolveProductImage } from '../utils/imageHelper';
 import { getContainsList, getDietaryBadges } from '../utils/allergenHelper';
 import { isProductDiscountActive, isProductNewArrival, calculateDiscountPercentage } from '../utils/promotionsHelper';
+import { OptimizedImage } from './OptimizedImage';
 
 interface ProductCatalogProps {
   products: Product[];
@@ -70,16 +71,15 @@ const CatalogProductCard: React.FC<CatalogCardProps> = React.memo(({
       {/* Product Image */}
       <div 
         onClick={() => onOpenProductDetail(product)}
-        className="relative aspect-square w-full overflow-hidden bg-stone-50 cursor-pointer p-2 flex items-center justify-center"
+        className="relative aspect-square w-full overflow-hidden bg-stone-50 cursor-pointer p-2"
       >
-        <img
+        <OptimizedImage
           src={imgSrc}
           alt={product.name}
           width={400}
           height={400}
-          loading="lazy"
-          decoding="async"
-          referrerPolicy="no-referrer"
+          widths={[160, 400, 640]}
+          sizes="(max-width: 640px) 46vw, (max-width: 1024px) 32vw, 280px"
           className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500"
         />
         {/* Badges */}

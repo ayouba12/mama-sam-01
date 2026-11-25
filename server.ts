@@ -3,9 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 import sharp from 'sharp';
 import compression from 'compression';
 import dotenv from 'dotenv';
+
+const require = createRequire(import.meta.url);
+const webpush = require('web-push') as typeof import('web-push');
 import { 
   supabaseServer, 
   isServerSupabaseConfigured, 
@@ -50,12 +54,19 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 // Paths & Storage Directories
 const DATA_DIR = path.resolve(__dirname, 'data');
 const UPLOADS_DIR = path.resolve(DATA_DIR, 'uploads');
+const IMG_CACHE_DIR = path.resolve(DATA_DIR, '.img_cache');
+const SRC_IMAGES_DIR = path.resolve(__dirname, 'src', 'assets', 'images');
+const PUBLIC_ASSETS_DIR = path.resolve(__dirname, 'public', 'assets');
+const DIST_ASSETS_DIR = path.resolve(__dirname, 'dist', 'assets');
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+if (!fs.existsSync(IMG_CACHE_DIR)) {
+  fs.mkdirSync(IMG_CACHE_DIR, { recursive: true });
 }
 
 // Serve uploaded product images securely with immutable long-lived cache headers
@@ -65,6 +76,204 @@ app.use('/api/uploads', express.static(UPLOADS_DIR, {
   dotfiles: 'ignore',
   index: false
 }));
+
+// ----------------- OPTIMIZED AVIF / WEBP IMAGE DELIVERY & RESIZING -----------------
+const ALLOWED_IMAGE_WIDTHS = [80, 160, 240, 400, 640, 800, 1200, 1600];
+
+function snapImageWidth(rawWidth: unknown): number {
+  const num = Number(rawWidth);
+  if (!Number.isFinite(num) || num <= 0) return 400;
+  const clamped = Math.min(1600, Math.max(48, Math.round(num)));
+  for (const w of ALLOWED_IMAGE_WIDTHS) {
+    if (w >= clamped) return w;
+  }
+  return 1600;
+}
+
+function isConfinedWithin(candidate: string, allowedRoot: string): boolean {
+  const resolvedCandidate = path.resolve(candidate);
+  const resolvedRoot = path.resolve(allowedRoot);
+  return resolvedCandidate.startsWith(resolvedRoot + path.sep);
+}
+
+async function resolveImageSourceBuffer(rawSrc: string): Promise<{ buffer?: Buffer; filePath?: string; cacheKeyPart: string } | null> {
+  const cleanSrc = rawSrc.split('?')[0].split('#')[0].trim();
+  if (!cleanSrc || cleanSrc.includes('\0') || cleanSrc.includes('..')) {
+    return null;
+  }
+
+  // 1. Local uploaded images (/api/uploads/...)
+  if (cleanSrc.startsWith('/api/uploads/')) {
+    const rel = cleanSrc.slice('/api/uploads/'.length);
+    const candidate = path.resolve(UPLOADS_DIR, rel);
+    if (isConfinedWithin(candidate, UPLOADS_DIR) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      const mtime = Math.floor(fs.statSync(candidate).mtimeMs);
+      return { filePath: candidate, cacheKeyPart: `${candidate}:${mtime}` };
+    }
+    return null;
+  }
+
+  // 2. Vite dev asset path (/src/assets/images/...)
+  if (cleanSrc.startsWith('/src/assets/images/')) {
+    const rel = cleanSrc.slice('/src/assets/images/'.length);
+    const candidate = path.resolve(SRC_IMAGES_DIR, rel);
+    if (isConfinedWithin(candidate, SRC_IMAGES_DIR) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+      const mtime = Math.floor(fs.statSync(candidate).mtimeMs);
+      return { filePath: candidate, cacheKeyPart: `${candidate}:${mtime}` };
+    }
+    return null;
+  }
+
+  // 3. Public or built static assets (/assets/...)
+  if (cleanSrc.startsWith('/assets/')) {
+    const rel = cleanSrc.slice('/assets/'.length);
+    for (const root of [PUBLIC_ASSETS_DIR, DIST_ASSETS_DIR]) {
+      if (!fs.existsSync(root)) continue;
+      const candidate = path.resolve(root, rel);
+      if (isConfinedWithin(candidate, root) && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+        const mtime = Math.floor(fs.statSync(candidate).mtimeMs);
+        return { filePath: candidate, cacheKeyPart: `${candidate}:${mtime}` };
+      }
+    }
+    return null;
+  }
+
+  // 4. Configured Supabase Storage product-images URL only (no arbitrary SSRF)
+  if (cleanSrc.startsWith('https://')) {
+    const supabaseBase = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+    if (!supabaseBase) return null;
+    try {
+      const parsedSrc = new URL(cleanSrc);
+      const parsedBase = new URL(supabaseBase);
+      if (
+        parsedSrc.hostname === parsedBase.hostname &&
+        parsedSrc.pathname.startsWith('/storage/v1/object/public/product-images/')
+      ) {
+        const filename = path.basename(parsedSrc.pathname);
+        if (filename) {
+          const localBackup = path.resolve(UPLOADS_DIR, filename);
+          if (isConfinedWithin(localBackup, UPLOADS_DIR) && fs.existsSync(localBackup) && fs.statSync(localBackup).isFile()) {
+            const mtime = Math.floor(fs.statSync(localBackup).mtimeMs);
+            return { filePath: localBackup, cacheKeyPart: `${localBackup}:${mtime}` };
+          }
+        }
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        try {
+          const upstream = await fetch(parsedSrc.toString(), { signal: controller.signal });
+          if (!upstream.ok) return null;
+          const contentLen = Number(upstream.headers.get('content-length') || 0);
+          if (contentLen > 8 * 1024 * 1024) return null;
+          const arrayBuf = await upstream.arrayBuffer();
+          if (arrayBuf.byteLength > 8 * 1024 * 1024) return null;
+          return { buffer: Buffer.from(arrayBuf), cacheKeyPart: cleanSrc };
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+const imgInFlight = new Map<string, Promise<Buffer>>();
+let activeSharpJobs = 0;
+const sharpWaitQueue: Array<() => void> = [];
+
+async function runWithSharpLimit<T>(fn: () => Promise<T>): Promise<T> {
+  if (activeSharpJobs >= 4) {
+    await new Promise<void>(resolve => sharpWaitQueue.push(resolve));
+  }
+  activeSharpJobs += 1;
+  try {
+    return await fn();
+  } finally {
+    activeSharpJobs -= 1;
+    const next = sharpWaitQueue.shift();
+    if (next) next();
+  }
+}
+
+app.get('/api/image', async (req: Request, res: Response) => {
+  try {
+    const rawSrc = typeof req.query.src === 'string' ? req.query.src : '';
+    if (!rawSrc) {
+      return res.status(400).json({ error: 'Missing src parameter' });
+    }
+
+    const fmtRaw = typeof req.query.fmt === 'string' ? req.query.fmt.toLowerCase() : 'webp';
+    const fmt: 'avif' | 'webp' | 'jpeg' = fmtRaw === 'avif' ? 'avif' : fmtRaw === 'jpeg' ? 'jpeg' : 'webp';
+    const width = snapImageWidth(req.query.w);
+    const defaultQ = fmt === 'avif' ? 58 : fmt === 'webp' ? 80 : 82;
+    const rawQ = Number(req.query.q);
+    const quality = Number.isFinite(rawQ) ? Math.min(92, Math.max(40, Math.round(rawQ))) : defaultQ;
+
+    const source = await resolveImageSourceBuffer(rawSrc);
+    if (!source) {
+      return res.status(404).json({ error: 'Image source not found or not permitted' });
+    }
+
+    const cacheHash = crypto
+      .createHash('sha256')
+      .update(`${source.cacheKeyPart}|w=${width}|fmt=${fmt}|q=${quality}`)
+      .digest('hex');
+    const cachedFile = path.join(IMG_CACHE_DIR, `${cacheHash}.${fmt}`);
+
+    if (fs.existsSync(cachedFile)) {
+      res.setHeader('Content-Type', `image/${fmt}`);
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      res.setHeader('Vary', 'Accept');
+      return res.sendFile(cachedFile);
+    }
+
+    let pending = imgInFlight.get(cacheHash);
+    if (!pending) {
+      pending = runWithSharpLimit(async () => {
+        const inputData = source.filePath ? fs.readFileSync(source.filePath) : source.buffer!;
+        const pipeline = sharp(inputData).rotate().resize({
+          width,
+          withoutEnlargement: true,
+          fit: 'inside'
+        });
+
+        let outputBuffer: Buffer;
+        if (fmt === 'avif') {
+          outputBuffer = await pipeline.avif({ quality, effort: 1 }).toBuffer();
+        } else if (fmt === 'jpeg') {
+          outputBuffer = await pipeline.jpeg({ quality, mozjpeg: true }).toBuffer();
+        } else {
+          outputBuffer = await pipeline.webp({ quality, effort: 2 }).toBuffer();
+        }
+
+        try {
+          const tempCache = `${cachedFile}.${process.pid}.${Date.now()}.tmp`;
+          fs.writeFileSync(tempCache, outputBuffer);
+          fs.renameSync(tempCache, cachedFile);
+        } catch {
+          // Non-fatal cache write failure
+        }
+
+        return outputBuffer;
+      });
+      imgInFlight.set(cacheHash, pending);
+      pending.finally(() => imgInFlight.delete(cacheHash));
+    }
+
+    const outputBuffer = await pending;
+
+    res.setHeader('Content-Type', `image/${fmt}`);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    res.setHeader('Vary', 'Accept');
+    return res.send(outputBuffer);
+  } catch (err: any) {
+    console.warn('Image optimize endpoint warning:', err?.message || err);
+    return res.status(500).json({ error: 'Failed to optimize image' });
+  }
+});
 
 async function deleteOrphanedUploadedImage(imageUrl: string | null | undefined, remainingProducts: any[]): Promise<void> {
   if (!imageUrl || typeof imageUrl !== 'string') return;
@@ -593,6 +802,21 @@ app.put('/api/settings', requireAdminAuth, async (req: Request, res: Response) =
   }
 
   writeData('settings.json', updated);
+
+  // Notify subscribed customers automatically if store opening hours changed
+  const hoursChanged =
+    (sanitized.hoursMonSat !== undefined && sanitized.hoursMonSat !== current.hoursMonSat) ||
+    (sanitized.hoursSun !== undefined && sanitized.hoursSun !== current.hoursSun);
+
+  if (hoursChanged && req.body.notifySubscribers !== false) {
+    dispatchPushNotifications({
+      topic: 'storeHours',
+      title: 'Aggiornamento Orari · Mama Sam Messina',
+      body: `Nuovi orari negozio: Lun–Sab ${updated.hoursMonSat || ''} · Dom ${updated.hoursSun || ''}`.trim(),
+      url: '/#location-section'
+    }).catch(err => console.warn('Push dispatch error on settings update:', err));
+  }
+
   res.json(updated);
 });
 
@@ -864,6 +1088,16 @@ app.post('/api/products', requireAdminAuth, async (req: Request, res: Response) 
 
   products.push(newProduct);
   writeData('products.json', products);
+
+  if (newProduct.isNewArrival && req.body.notifySubscribers !== false) {
+    dispatchPushNotifications({
+      topic: 'newArrivals',
+      title: 'Nuovo Arrivo da Mama Sam!',
+      body: `${newProduct.name}${newProduct.packageSize ? ` (${newProduct.packageSize})` : ''} è ora disponibile in negozio.`,
+      url: '/#new-arrivals-section'
+    }).catch(err => console.warn('Push dispatch error on new product:', err));
+  }
+
   res.status(201).json(newProduct);
 });
 
@@ -1017,6 +1251,15 @@ app.put('/api/products/:id', requireAdminAuth, async (req: Request, res: Respons
     if (!newGallery.includes(prevGalleryImg)) {
       await deleteOrphanedUploadedImage(prevGalleryImg, products);
     }
+  }
+
+  if (!current.isNewArrival && products[index].isNewArrival && req.body.notifySubscribers !== false) {
+    dispatchPushNotifications({
+      topic: 'newArrivals',
+      title: 'Nuovo Arrivo da Mama Sam!',
+      body: `${products[index].name}${products[index].packageSize ? ` (${products[index].packageSize})` : ''} è appena arrivato in Via Ugo Bassi 104.`,
+      url: '/#new-arrivals-section'
+    }).catch(err => console.warn('Push dispatch error on product arrival toggle:', err));
   }
 
   res.json(products[index]);
@@ -1779,6 +2022,311 @@ app.get('/api/admin/credentials-status', (_req: Request, res: Response) => {
       }
     ]
   });
+});
+
+// ----------------- WEB PUSH NOTIFICATIONS (VAPID & SUBSCRIPTIONS) -----------------
+interface VapidKeyPair {
+  publicKey: string;
+  privateKey: string;
+  subject: string;
+}
+
+interface StoredPushSubscription {
+  id: string;
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  topics: {
+    newArrivals: boolean;
+    storeHours: boolean;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface PushDispatchLog {
+  id: string;
+  title: string;
+  body: string;
+  topic: 'newArrivals' | 'storeHours' | 'all';
+  sentCount: number;
+  failedCount: number;
+  removedCount: number;
+  createdAt: string;
+}
+
+let cachedVapidKeys: VapidKeyPair | null = null;
+
+function getVapidKeys(): VapidKeyPair {
+  if (cachedVapidKeys) return cachedVapidKeys;
+
+  const envPub = process.env.VAPID_PUBLIC_KEY?.trim();
+  const envPriv = process.env.VAPID_PRIVATE_KEY?.trim();
+  const subject = process.env.VAPID_SUBJECT?.trim() || 'mailto:mamasamafrican@gmail.com';
+
+  if (envPub && envPriv) {
+    cachedVapidKeys = { publicKey: envPub, privateKey: envPriv, subject };
+    webpush.setVapidDetails(subject, envPub, envPriv);
+    return cachedVapidKeys;
+  }
+
+  const keyFile = path.join(DATA_DIR, '.vapid_keys.json');
+  if (fs.existsSync(keyFile)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(keyFile, 'utf-8'));
+      if (parsed?.publicKey && parsed?.privateKey) {
+        cachedVapidKeys = {
+          publicKey: parsed.publicKey,
+          privateKey: parsed.privateKey,
+          subject: parsed.subject || subject
+        };
+        webpush.setVapidDetails(cachedVapidKeys.subject, cachedVapidKeys.publicKey, cachedVapidKeys.privateKey);
+        return cachedVapidKeys;
+      }
+    } catch {
+      // Regenerate below if corrupted
+    }
+  }
+
+  const generated = webpush.generateVAPIDKeys();
+  cachedVapidKeys = {
+    publicKey: generated.publicKey,
+    privateKey: generated.privateKey,
+    subject
+  };
+  try {
+    fs.writeFileSync(keyFile, JSON.stringify(cachedVapidKeys, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  } catch (err) {
+    console.warn('Could not persist VAPID keys to disk:', err);
+  }
+  webpush.setVapidDetails(cachedVapidKeys.subject, cachedVapidKeys.publicKey, cachedVapidKeys.privateKey);
+  return cachedVapidKeys;
+}
+
+function isValidPushEndpoint(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol === 'https:') return true;
+    if (parsed.protocol === 'http:' && (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1')) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function dispatchPushNotifications(opts: {
+  topic: 'newArrivals' | 'storeHours' | 'all';
+  title: string;
+  body: string;
+  url?: string;
+}): Promise<{ sentCount: number; failedCount: number; removedCount: number; totalTargeted: number }> {
+  const keys = getVapidKeys();
+  webpush.setVapidDetails(keys.subject, keys.publicKey, keys.privateKey);
+
+  const subscriptions = readData<StoredPushSubscription[]>('push_subscriptions.json', []);
+  const targets = subscriptions.filter(sub => {
+    if (opts.topic === 'all') return sub.topics.newArrivals || sub.topics.storeHours;
+    if (opts.topic === 'newArrivals') return Boolean(sub.topics.newArrivals);
+    if (opts.topic === 'storeHours') return Boolean(sub.topics.storeHours);
+    return false;
+  });
+
+  if (targets.length === 0) {
+    return { sentCount: 0, failedCount: 0, removedCount: 0, totalTargeted: 0 };
+  }
+
+  const payload = JSON.stringify({
+    title: opts.title.substring(0, 120),
+    body: opts.body.substring(0, 260),
+    icon: '/pwa-192x192.png',
+    badge: '/pwa-192x192.png',
+    url: opts.url && opts.url.startsWith('/') ? opts.url : '/',
+    topic: opts.topic,
+    tag: `mamasam-${opts.topic}-${Date.now()}`
+  });
+
+  let sentCount = 0;
+  let failedCount = 0;
+  const expiredEndpoints = new Set<string>();
+
+  await Promise.all(
+    targets.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: sub.keys
+          },
+          payload,
+          { TTL: 86400 }
+        );
+        sentCount += 1;
+      } catch (err: any) {
+        const statusCode = err?.statusCode;
+        if (statusCode === 404 || statusCode === 410) {
+          expiredEndpoints.add(sub.endpoint);
+        } else {
+          failedCount += 1;
+        }
+      }
+    })
+  );
+
+  if (expiredEndpoints.size > 0) {
+    const remaining = subscriptions.filter(s => !expiredEndpoints.has(s.endpoint));
+    writeData('push_subscriptions.json', remaining);
+  }
+
+  const history = readData<PushDispatchLog[]>('push_history.json', []);
+  history.unshift({
+    id: `push-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+    title: opts.title.substring(0, 120),
+    body: opts.body.substring(0, 260),
+    topic: opts.topic,
+    sentCount,
+    failedCount,
+    removedCount: expiredEndpoints.size,
+    createdAt: new Date().toISOString()
+  });
+  if (history.length > 50) history.length = 50;
+  writeData('push_history.json', history);
+
+  return {
+    sentCount,
+    failedCount,
+    removedCount: expiredEndpoints.size,
+    totalTargeted: targets.length
+  };
+}
+
+// Public VAPID public key endpoint
+app.get('/api/push/vapid-public-key', (_req: Request, res: Response) => {
+  try {
+    const { publicKey } = getVapidKeys();
+    res.setHeader('Cache-Control', 'public, max-age=300');
+    res.json({ publicKey, enabled: true });
+  } catch (err: any) {
+    res.status(500).json({ error: 'VAPID initialization error', enabled: false });
+  }
+});
+
+// Subscribe / update browser push notification preferences
+app.post('/api/push/subscribe', (req: Request, res: Response) => {
+  const { subscription, topics } = req.body || {};
+
+  if (
+    !subscription ||
+    typeof subscription.endpoint !== 'string' ||
+    !isValidPushEndpoint(subscription.endpoint) ||
+    !subscription.keys ||
+    typeof subscription.keys.p256dh !== 'string' ||
+    typeof subscription.keys.auth !== 'string' ||
+    subscription.keys.p256dh.length < 10 ||
+    subscription.keys.p256dh.length > 512 ||
+    subscription.keys.auth.length < 10 ||
+    subscription.keys.auth.length > 512
+  ) {
+    return res.status(400).json({ error: 'Sottoscrizione push non valida.' });
+  }
+
+  const newArrivals = topics?.newArrivals !== false;
+  const storeHours = topics?.storeHours !== false;
+
+  const list = readData<StoredPushSubscription[]>('push_subscriptions.json', []);
+  const nowIso = new Date().toISOString();
+  const existingIdx = list.findIndex(item => item.endpoint === subscription.endpoint);
+
+  if (existingIdx !== -1) {
+    list[existingIdx] = {
+      ...list[existingIdx],
+      keys: {
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth
+      },
+      topics: { newArrivals, storeHours },
+      updatedAt: nowIso
+    };
+  } else {
+    if (list.length >= 5000) {
+      list.shift();
+    }
+    list.push({
+      id: `sub-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`,
+      endpoint: subscription.endpoint,
+      keys: {
+        p256dh: subscription.keys.p256dh,
+        auth: subscription.keys.auth
+      },
+      topics: { newArrivals, storeHours },
+      createdAt: nowIso,
+      updatedAt: nowIso
+    });
+  }
+
+  writeData('push_subscriptions.json', list);
+  res.status(201).json({
+    success: true,
+    topics: { newArrivals, storeHours }
+  });
+});
+
+// Unsubscribe browser push notifications
+app.post('/api/push/unsubscribe', (req: Request, res: Response) => {
+  const { endpoint } = req.body || {};
+  if (!endpoint || typeof endpoint !== 'string') {
+    return res.status(400).json({ error: 'Endpoint obbligatorio.' });
+  }
+
+  const list = readData<StoredPushSubscription[]>('push_subscriptions.json', []);
+  const filtered = list.filter(item => item.endpoint !== endpoint);
+  writeData('push_subscriptions.json', filtered);
+
+  res.json({ success: true, removed: list.length - filtered.length });
+});
+
+// Admin Push Stats & Recent History
+app.get('/api/push/stats', requireAdminAuth, (_req: Request, res: Response) => {
+  const list = readData<StoredPushSubscription[]>('push_subscriptions.json', []);
+  const history = readData<PushDispatchLog[]>('push_history.json', []);
+
+  res.json({
+    totalSubscribers: list.length,
+    newArrivalsSubscribers: list.filter(s => s.topics.newArrivals).length,
+    storeHoursSubscribers: list.filter(s => s.topics.storeHours).length,
+    recentHistory: history.slice(0, 15)
+  });
+});
+
+// Admin Manual Broadcast Push Notification
+app.post('/api/push/send', requireAdminAuth, async (req: Request, res: Response) => {
+  const { title, body, topic, url } = req.body || {};
+  if (!title || typeof title !== 'string' || !body || typeof body !== 'string') {
+    return res.status(400).json({ error: 'Titolo e messaggio della notifica sono obbligatori.' });
+  }
+
+  const safeTopic: 'newArrivals' | 'storeHours' | 'all' =
+    topic === 'newArrivals' || topic === 'storeHours' ? topic : 'all';
+
+  try {
+    const result = await dispatchPushNotifications({
+      topic: safeTopic,
+      title: title.trim(),
+      body: body.trim(),
+      url: typeof url === 'string' && url.startsWith('/') ? url : '/'
+    });
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    res.status(500).json({ error: `Errore invio notifiche push: ${err.message || 'Unknown'}` });
+  }
+});
+
+// Prevent unmatched /api/* requests from returning SPA HTML
+app.all('/api/*', (_req: Request, res: Response) => {
+  res.status(404).json({ error: 'API endpoint not found.' });
 });
 
 // ----------------- VITE / STATIC SERVING -----------------

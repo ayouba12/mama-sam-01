@@ -1,13 +1,15 @@
 import React from 'react';
-import { MapPin, Clock, Phone, Mail, Navigation, ExternalLink } from 'lucide-react';
+import { MapPin, Clock, Phone, Mail, Navigation, Bell } from 'lucide-react';
 import { IMAGES } from '../assets/images';
 import { StoreSettings } from '../types';
+import { OptimizedImage } from './OptimizedImage';
 
 interface StoreLocationSectionProps {
   settings: StoreSettings;
+  onOpenNotifications?: () => void;
 }
 
-export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ settings }) => {
+export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ settings, onOpenNotifications }) => {
   return (
     <section id="location-section" className="py-12 sm:py-16 bg-white border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -52,6 +54,16 @@ export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ sett
                 <p className="text-slate-600 mt-0.5">
                   <strong className="text-slate-700">Domenica:</strong> {settings.hoursSun}
                 </p>
+                {onOpenNotifications && (
+                  <button
+                    type="button"
+                    onClick={onOpenNotifications}
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-[#124b2e] hover:text-emerald-950 underline cursor-pointer"
+                  >
+                    <Bell className="w-3 h-3" />
+                    <span>Avvisami su cambi orario</span>
+                  </button>
+                )}
               </div>
 
               <div className="p-3 bg-stone-50 rounded-xl border border-stone-200/80 text-xs">
@@ -95,14 +107,15 @@ export const StoreLocationSection: React.FC<StoreLocationSectionProps> = ({ sett
           {/* Right Column: Messina Physical Storefront Image */}
           <div className="lg:col-span-5">
             <div className="relative rounded-2xl overflow-hidden shadow-xl border border-stone-200 bg-stone-100 group">
-              <img
+              <OptimizedImage
                 src={IMAGES.storefrontShop}
                 alt="Mama Sam Supermercato Africano e Caraibico a Messina"
                 width={640}
                 height={480}
-                loading="lazy"
-                decoding="async"
-                className="w-full h-auto aspect-[4/3] object-cover object-center group-hover:scale-102 transition-transform duration-500"
+                widths={[400, 640, 800]}
+                sizes="(max-width: 1024px) 95vw, 42vw"
+                wrapperClassName="w-full aspect-[4/3] block"
+                className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500"
               />
               
               {/* Caption Overlay */}

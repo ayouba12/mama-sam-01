@@ -3,6 +3,7 @@ import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, MapPin, Info } from 'l
 import { CartItem } from '../types';
 import { resolveProductImage } from '../utils/imageHelper';
 import { getContainsList } from '../utils/allergenHelper';
+import { OptimizedImage } from './OptimizedImage';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -83,15 +84,16 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 const lineTotal = hasPrice ? (item.product.price! * item.quantity).toFixed(2) : null;
                 return (
                   <div key={item.product.id} className="py-3.5 flex gap-3">
-                    <img
+                    <OptimizedImage
                       src={resolveProductImage(item.product)}
                       alt={item.product.name}
-                      width={64}
-                      height={64}
-                      loading="lazy"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      className="w-16 h-16 object-cover rounded-xl border border-stone-200 bg-stone-50 shrink-0"
+                      width={80}
+                      height={80}
+                      widths={[80, 160]}
+                      sizes="64px"
+                      priority={true}
+                      wrapperClassName="w-16 h-16 shrink-0"
+                      className="w-16 h-16 object-cover rounded-xl border border-stone-200 bg-stone-50"
                     />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Check } from 'lucide-react';
 import { Recipe } from '../types';
 import { resolveImage } from '../utils/imageHelper';
+import { OptimizedImage } from './OptimizedImage';
 
 interface RecipesSectionProps {
   recipes: Recipe[];
@@ -58,15 +59,14 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                   className="relative aspect-[4/3] w-full overflow-hidden bg-[#ede9dd] cursor-pointer"
                   title="Clicca per visualizzare la ricetta"
                 >
-                  <img
+                  <OptimizedImage
                     src={imgSrc}
                     alt={recipe.title}
                     width={400}
                     height={300}
+                    widths={[240, 400, 640]}
+                    sizes="(max-width: 768px) 95vw, 25vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
                   />
                   <div className="absolute top-2.5 left-2.5 px-2 py-0.5 bg-black/75 backdrop-blur-xs text-white text-[10px] font-bold rounded-md">
                     {recipe.region}
@@ -107,13 +107,13 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
                             title={`${ing.name} (${ing.amount})`}
                             className="w-7 h-7 rounded-full border-2 border-white overflow-hidden bg-stone-100 shadow-2xs shrink-0"
                           >
-                            <img
+                            <OptimizedImage
                               src={resolveImage(ing.image)}
                               alt={ing.name}
-                              width={28}
-                              height={28}
-                              loading="lazy"
-                              decoding="async"
+                              width={80}
+                              height={80}
+                              widths={[80]}
+                              sizes="28px"
                               className="w-full h-full object-cover"
                             />
                           </div>

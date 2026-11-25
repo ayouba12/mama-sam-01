@@ -33,10 +33,13 @@ import {
   ExternalLink,
   Layers,
   Mail,
-  Key
+  Key,
+  Bell,
+  Send
 } from 'lucide-react';
 import { Product, Order, OrderStatus, StoreSettings, ProductCategory } from '../types';
 import { ImageUploadDropzone } from './ImageUploadDropzone';
+import { OptimizedImage } from './OptimizedImage';
 import { resolveImage, resolveProductImage } from '../utils/imageHelper';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { 
@@ -116,6 +119,27 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [localSettings, setLocalSettings] = useState<StoreSettings>(settings);
   const [settingsSaved, setSettingsSaved] = useState(false);
 
+  // Push Notifications admin controls
+  const [pushStats, setPushStats] = useState<{
+    totalSubscribers: number;
+    newArrivalsSubscribers: number;
+    storeHoursSubscribers: number;
+    recentHistory: any[];
+  } | null>(null);
+  const [pushForm, setPushForm] = useState<{
+    topic: 'newArrivals' | 'storeHours' | 'all';
+    title: string;
+    body: string;
+    url: string;
+  }>({
+    topic: 'newArrivals',
+    title: 'Nuovi Arrivi da Mama Sam!',
+    body: 'Nuove scorte fresche appena arrivate in Via Ugo Bassi 104, Messina.',
+    url: '/#new-arrivals-section'
+  });
+  const [pushSending, setPushSending] = useState(false);
+  const [pushFeedback, setPushFeedback] = useState<string | null>(null);
+
   // Authenticate (Email & Password via Supabase Auth + Admin Role Check)
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,7 +195,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!token) return;
     setOrdersLoading(true);
     try {
-      const [statsRes, ordersRes, catRes, supaRes] = await Promise.all([
+      const [statsRes, ordersRes, catRes, supaRes, pushRes] = await Promise.all([
         fetch('/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -179,7 +203,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch('/api/categories').catch(() => null),
-        fetch('/api/admin/supabase-status').catch(() => null)
+        fetch('/api/admin/supabase-status').catch(() => null),
+        fetch('/api/push/stats', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => null)
       ]);
 
       if (statsRes.status === 401 || ordersRes.status === 401) {
@@ -197,6 +224,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       }
       if (supaRes && supaRes.ok) {
         setSupabaseStatus(await supaRes.json());
+      }
+      if (pushRes && pushRes.ok) {
+        setPushStats(await pushRes.json());
       }
     } catch (err) {
       console.error(err);
@@ -436,10 +466,41 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         const data = await res.json();
         onUpdateSettings(data);
         setSettingsSaved(true);
+        fetchDashboardData();
         setTimeout(() => setSettingsSaved(false), 2500);
       }
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  // Send Manual Push Notification Broadcast
+  const handleSendPushNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pushForm.title.trim() || !pushForm.body.trim()) return;
+    setPushSending(true);
+    setPushFeedback(null);
+    try {
+      const res = await fetch('/api/push/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify(pushForm)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Errore invio notifiche');
+      }
+      setPushFeedback(
+        `Notifica elaborata: ${data.sentCount} inviate su ${data.totalTargeted} dispositivi destinatari${data.removedCount ? ` (${data.removedCount} iscrizioni scadute rimosse)` : ''}.`
+      );
+      fetchDashboardData();
+    } catch (err: any) {
+      setPushFeedback(err?.message || 'Errore durante l’invio della notifica push.');
+    } finally {
+      setPushSending(false);
     }
   };
 
@@ -1943,14 +2004,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                   <td className="p-3 font-semibold text-slate-900 max-w-xs">
                                     <div className="flex items-center gap-2.5">
                                       <div className="w-10 h-10 rounded-lg overflow-hidden bg-stone-100 border border-stone-200 shrink-0">
-                                        <img
+                                        <OptimizedImage
                                           src={resolveProductImage(prod)}
                                           alt={prod.name}
-                                          width={40}
-                                          height={40}
-                                          loading="lazy"
-                                          decoding="async"
-                                          referrerPolicy="no-referrer"
+                                          width={80}
+                                          height={80}
+                                          widths={[80, 160]}
+                                          sizes="40px"
                                           className="w-full h-full object-cover"
                                         />
                                       </div>
@@ -2216,6 +2276,125 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       <span>Save &amp; Update Live Storefront</span>
                     </button>
                   </form>
+
+                  {/* PUSH NOTIFICATIONS BROADCAST & SUBSCRIBER MONITOR */}
+                  <div className="bg-white p-5 rounded-xl border border-stone-200 space-y-4 text-xs">
+                    <div className="flex items-start justify-between gap-3 border-b border-stone-100 pb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#124b2e] flex items-center justify-center shrink-0">
+                          <Bell className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900">Notifiche Push Clienti</h4>
+                          <p className="text-[11px] text-slate-500">
+                            I clienti ricevono automaticamente avvisi quando modifichi gli orari o aggiungi un Nuovo Arrivo.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="p-2.5 rounded-lg bg-stone-50 border border-stone-200 text-center">
+                        <span className="block text-[10px] text-slate-500 font-semibold uppercase">Iscritti Totali</span>
+                        <span className="text-base font-extrabold text-slate-900">
+                          {pushStats?.totalSubscribers ?? 0}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200 text-center">
+                        <span className="block text-[10px] text-emerald-800 font-semibold uppercase">Nuovi Arrivi</span>
+                        <span className="text-base font-extrabold text-[#124b2e]">
+                          {pushStats?.newArrivalsSubscribers ?? 0}
+                        </span>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200 text-center">
+                        <span className="block text-[10px] text-amber-800 font-semibold uppercase">Orari Negozio</span>
+                        <span className="text-base font-extrabold text-amber-900">
+                          {pushStats?.storeHoursSubscribers ?? 0}
+                        </span>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleSendPushNotification} className="space-y-3 pt-1">
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setPushForm({
+                            topic: 'newArrivals',
+                            title: 'Nuovi Arrivi da Mama Sam!',
+                            body: 'Nuove scorte fresche appena arrivate in Via Ugo Bassi 104, Messina.',
+                            url: '/#new-arrivals-section'
+                          })}
+                          className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-semibold text-[11px] border border-emerald-200 cursor-pointer"
+                        >
+                          Modello: Nuovi Arrivi
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPushForm({
+                            topic: 'storeHours',
+                            title: 'Aggiornamento Orari · Mama Sam',
+                            body: `Orari aggiornati: Lun–Sab ${localSettings.hoursMonSat} · Dom ${localSettings.hoursSun}`,
+                            url: '/#location-section'
+                          })}
+                          className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold text-[11px] border border-amber-200 cursor-pointer"
+                        >
+                          Modello: Cambio Orari
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Destinatari</label>
+                        <select
+                          value={pushForm.topic}
+                          onChange={e => setPushForm({ ...pushForm, topic: e.target.value as any })}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg bg-white"
+                        >
+                          <option value="newArrivals">Solo iscritti a Nuovi Arrivi</option>
+                          <option value="storeHours">Solo iscritti a Variazioni Orari</option>
+                          <option value="all">Tutti gli iscritti alle notifiche</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Titolo Notifica</label>
+                        <input
+                          type="text"
+                          required
+                          maxLength={120}
+                          value={pushForm.title}
+                          onChange={e => setPushForm({ ...pushForm, title: e.target.value })}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Messaggio</label>
+                        <textarea
+                          rows={2}
+                          required
+                          maxLength={260}
+                          value={pushForm.body}
+                          onChange={e => setPushForm({ ...pushForm, body: e.target.value })}
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg"
+                        />
+                      </div>
+
+                      {pushFeedback && (
+                        <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 font-medium">
+                          {pushFeedback}
+                        </div>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={pushSending}
+                        className="w-full py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Send className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>{pushSending ? 'Invio in corso...' : 'Invia Notifica Push Ora'}</span>
+                      </button>
+                    </form>
+                  </div>
                 </div>
               )}
 

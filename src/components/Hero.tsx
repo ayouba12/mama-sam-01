@@ -2,6 +2,7 @@ import React from 'react';
 import { Flame, Sparkles } from 'lucide-react';
 import { IMAGES } from '../assets/images';
 import { StoreSettings } from '../types';
+import { OptimizedImage } from './OptimizedImage';
 
 interface HeroProps {
   settings: StoreSettings;
@@ -84,15 +85,15 @@ export const Hero: React.FC<HeroProps> = ({
           {/* Right Column: Hero Image with Floating Badge */}
           <div className="lg:col-span-5 relative">
             <div className="relative rounded-2xl overflow-hidden shadow-xl border border-stone-200 aspect-[4/3] lg:aspect-[4/3.2] bg-stone-100 group">
-              <img
+              <OptimizedImage
                 src={IMAGES.heroShopkeeper}
                 alt="Mama Sam Supermercato Africano e Caraibico a Messina"
                 width={800}
                 height={640}
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                className="w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
+                widths={[400, 800, 1200]}
+                sizes="(max-width: 1024px) 95vw, 45vw"
+                priority={true}
+                className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-500"
               />
               
               {/* Subtle bottom gradient */}
