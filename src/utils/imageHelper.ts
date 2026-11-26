@@ -170,13 +170,6 @@ export function resolveImage(
   // General storefront & category banners
   if (imageKey === 'heroShopkeeper') return IMAGES.heroShopkeeper;
   if (imageKey === 'storefrontShop') return IMAGES.storefrontShop;
-  if (imageKey === 'catTubers') return IMAGES.categories.tubers;
-  if (imageKey === 'catGrains') return IMAGES.categories.grains;
-  if (imageKey === 'catFishMeats') return IMAGES.categories.fishMeats;
-  if (imageKey === 'catSpicesOil') return IMAGES.categories.spicesOil;
-  if (imageKey === 'catMaltDrinks') return IMAGES.categories.maltDrinks;
-  if (imageKey === 'catSnacks') return IMAGES.categories.snacks;
-  if (imageKey === 'catCosmetics') return IMAGES.categories.cosmetics;
   if (imageKey in IMAGES.categories) {
     return IMAGES.categories[imageKey as keyof typeof IMAGES.categories];
   }

@@ -50,6 +50,19 @@ import {
   formatDateToItalian 
 } from '../utils/promotionsHelper';
 
+// In-memory session holder (tokens are never stored in localStorage or sessionStorage)
+let inMemoryAdminToken = '';
+let inMemoryAdminUser: any = null;
+
+function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface AdminPortalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -67,28 +80,32 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   settings,
   onUpdateSettings
 }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return !!sessionStorage.getItem('mamasam_admin_token');
-  });
-  const [authToken, setAuthToken] = useState<string>(() => {
-    return sessionStorage.getItem('mamasam_admin_token') || '';
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => Boolean(inMemoryAdminToken));
+  const [authToken, setAuthToken] = useState<string>(() => inMemoryAdminToken);
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
   const [authError, setAuthError] = useState('');
-  const [adminUser, setAdminUser] = useState<any>(() => {
-    try {
-      const s = sessionStorage.getItem('mamasam_admin_user');
-      return s ? JSON.parse(s) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [authSuccessNotice, setAuthSuccessNotice] = useState('');
+  const [authSubmitting, setAuthSubmitting] = useState(false);
+  const [authSetupRequired, setAuthSetupRequired] = useState(false);
+  const [claimPasswordInput, setClaimPasswordInput] = useState('');
+  const [claimConfirmInput, setClaimConfirmInput] = useState('');
+  const [adminUser, setAdminUser] = useState<any>(() => inMemoryAdminUser);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'settings' | 'supabase'>('dashboard');
+
+  // Password Change Controls
+  const [currentPasswordInput, setCurrentPasswordInput] = useState('');
+  const [newPasswordInput, setNewPasswordInput] = useState('');
+  const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
+  const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
+  const [passwordChangeError, setPasswordChangeError] = useState('');
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState('');
 
   // Supabase Diagnostics
   const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
   const [supabaseLoading, setSupabaseLoading] = useState(false);
+  const [supabaseSyncing, setSupabaseSyncing] = useState(false);
+  const [supabaseSyncFeedback, setSupabaseSyncFeedback] = useState<string | null>(null);
   const [sqlCopied, setSqlCopied] = useState(false);
 
   // Category Management
@@ -140,35 +157,115 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [pushSending, setPushSending] = useState(false);
   const [pushFeedback, setPushFeedback] = useState<string | null>(null);
 
-  // Authenticate (Email & Password via Supabase Auth + Admin Role Check)
+  const clearInMemorySession = () => {
+    try {
+      sessionStorage.removeItem('mamasam_admin_token');
+      sessionStorage.removeItem('mamasam_admin_user');
+    } catch {
+      // ignore storage cleanup errors
+    }
+    inMemoryAdminToken = '';
+    inMemoryAdminUser = null;
+    setAuthToken('');
+    setAdminUser(null);
+    setIsAuthenticated(false);
+  };
+
+  useEffect(() => {
+    try {
+      sessionStorage.removeItem('mamasam_admin_token');
+      sessionStorage.removeItem('mamasam_admin_user');
+    } catch {
+      // ignore
+    }
+
+    if (!isOpen) return;
+
+    if (!inMemoryAdminToken) {
+      fetch('/api/admin/auth-status')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          if (data && typeof data.setupRequired === 'boolean') {
+            setAuthSetupRequired(data.setupRequired);
+          }
+        })
+        .catch(() => {});
+    } else {
+      fetchDashboardData(inMemoryAdminToken);
+    }
+  }, [isOpen]);
+
+  // Authenticate single administrator account
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
+    setAuthSuccessNotice('');
+    setAuthSubmitting(true);
 
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          email: emailInput.trim(), 
-          password: passwordInput 
+        body: JSON.stringify({
+          email: emailInput.trim(),
+          password: passwordInput
         })
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Credenziali di accesso non valide.');
+        throw new Error(data.error || 'Credenziali non valide. Verifica i dati inseriti e riprova.');
       }
 
+      inMemoryAdminToken = data.token;
+      inMemoryAdminUser = data.user || null;
       setAuthToken(data.token);
       setAdminUser(data.user || null);
-      sessionStorage.setItem('mamasam_admin_token', data.token);
-      if (data.user) {
-        sessionStorage.setItem('mamasam_admin_user', JSON.stringify(data.user));
-      }
+      setPasswordInput('');
       setIsAuthenticated(true);
       fetchDashboardData(data.token);
     } catch (err: any) {
-      setAuthError(err.message || 'Credenziali di accesso non valide.');
+      setAuthError(err.message || 'Credenziali non valide. Verifica i dati inseriti e riprova.');
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  // First-run password claim (only active if no admin password has ever been configured)
+  const handleClaimAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    setAuthSuccessNotice('');
+    if (claimPasswordInput !== claimConfirmInput) {
+      setAuthError('Le password non coincidono.');
+      return;
+    }
+    setAuthSubmitting(true);
+    try {
+      const res = await fetch('/api/admin/claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password: claimPasswordInput,
+          confirmPassword: claimConfirmInput
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Impossibile completare la configurazione iniziale.');
+      }
+      inMemoryAdminToken = data.token;
+      inMemoryAdminUser = data.user || null;
+      setAuthToken(data.token);
+      setAdminUser(data.user || null);
+      setClaimPasswordInput('');
+      setClaimConfirmInput('');
+      setAuthSetupRequired(false);
+      setIsAuthenticated(true);
+      fetchDashboardData(data.token);
+    } catch (err: any) {
+      setAuthError(err.message || 'Errore durante la configurazione della password.');
+    } finally {
+      setAuthSubmitting(false);
     }
   };
 
@@ -183,11 +280,64 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     } catch (e) {
       console.warn('Logout notification error:', e);
     } finally {
-      sessionStorage.removeItem('mamasam_admin_token');
-      sessionStorage.removeItem('mamasam_admin_user');
-      setAuthToken('');
-      setAdminUser(null);
-      setIsAuthenticated(false);
+      clearInMemorySession();
+      setPasswordInput('');
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordChangeError('');
+    setPasswordChangeSuccess('');
+
+    if (!currentPasswordInput || !newPasswordInput || !confirmPasswordInput) {
+      setPasswordChangeError('Compila tutti i campi richiesti.');
+      return;
+    }
+    if (newPasswordInput !== confirmPasswordInput) {
+      setPasswordChangeError('La nuova password e la conferma non coincidono.');
+      return;
+    }
+    if (newPasswordInput.length < 10) {
+      setPasswordChangeError('La nuova password deve contenere almeno 10 caratteri.');
+      return;
+    }
+
+    setPasswordChangeLoading(true);
+    try {
+      const res = await fetch('/api/admin/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authToken}`
+        },
+        body: JSON.stringify({
+          currentPassword: currentPasswordInput,
+          newPassword: newPasswordInput,
+          confirmPassword: confirmPasswordInput
+        })
+      });
+      const data = await res.json();
+      if (res.status === 401 && data.error?.includes('Session')) {
+        handleLogout();
+        return;
+      }
+      if (!res.ok) {
+        throw new Error(data.error || 'Impossibile aggiornare la password.');
+      }
+
+      setCurrentPasswordInput('');
+      setNewPasswordInput('');
+      setConfirmPasswordInput('');
+      clearInMemorySession();
+      setAuthError('');
+      setAuthSuccessNotice(
+        data.message || 'Password aggiornata con successo. Tutti gli accessi precedenti sono stati disconnessi.'
+      );
+    } catch (err: any) {
+      setPasswordChangeError(err?.message || 'Errore durante il cambio password.');
+    } finally {
+      setPasswordChangeLoading(false);
     }
   };
 
@@ -203,7 +353,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch('/api/categories').catch(() => null),
-        fetch('/api/admin/supabase-status').catch(() => null),
+        fetch('/api/admin/supabase-status', {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => null),
         fetch('/api/push/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => null)
@@ -238,7 +390,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const handleRefreshSupabaseStatus = async () => {
     setSupabaseLoading(true);
     try {
-      const res = await fetch('/api/admin/supabase-status');
+      const res = await fetch('/api/admin/supabase-status', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
       if (res.ok) {
         setSupabaseStatus(await res.json());
       }
@@ -246,6 +400,33 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       console.error('Failed to refresh Supabase status:', err);
     } finally {
       setSupabaseLoading(false);
+    }
+  };
+
+  const handleSyncToSupabase = async () => {
+    setSupabaseSyncing(true);
+    setSupabaseSyncFeedback(null);
+    try {
+      const res = await fetch('/api/admin/supabase/sync', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        }
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Sincronizzazione fallita.');
+      }
+      if (data.status) {
+        setSupabaseStatus(data.status);
+      }
+      setSupabaseSyncFeedback(
+        `Sincronizzazione completata: ${data.synced?.products || 0} prodotti, ${data.synced?.categories || 0} categorie e impostazioni negozio caricati su Supabase.`
+      );
+    } catch (err: any) {
+      setSupabaseSyncFeedback(err?.message || 'Errore durante la sincronizzazione su Supabase.');
+    } finally {
+      setSupabaseSyncing(false);
     }
   };
 
@@ -270,7 +451,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
   const handleCopySql = async () => {
     try {
-      const res = await fetch('/api/admin/schema-sql');
+      const res = await fetch('/api/admin/schema-sql', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      if (!res.ok) throw new Error('Unauthorized');
       const text = await res.text();
       await navigator.clipboard.writeText(text);
       setSqlCopied(true);
@@ -510,7 +694,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     printWindow.document.write(`
       <html>
         <head>
-          <title>Order Receipt - ${order.orderNumber}</title>
+          <title>Order Receipt - ${escapeHtml(order.orderNumber)}</title>
           <style>
             body { font-family: monospace; padding: 20px; max-width: 400px; margin: auto; }
             h2, h3 { text-align: center; margin: 4px 0; }
@@ -523,19 +707,19 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
         <body>
           <h2>MAMA SAM SUPERMARKET</h2>
           <h3>VIA UGO BASSI 104, MESSINA</h3>
-          <p style="text-align:center; font-size:12px;">Tel: ${settings.phone1}</p>
+          <p style="text-align:center; font-size:12px;">Tel: ${escapeHtml(settings.phone1)}</p>
           <div class="divider"></div>
-          <p><strong>ORDINE: ${order.orderNumber}</strong></p>
-          <p>Data: ${new Date(order.createdAt).toLocaleString('it-IT')}</p>
-          <p>Cliente: ${order.customerName}</p>
-          <p>Telefono: ${order.customerPhone}</p>
-          <p>Ritiro: ${order.pickupTimePreference}</p>
+          <p><strong>ORDINE: ${escapeHtml(order.orderNumber)}</strong></p>
+          <p>Data: ${escapeHtml(new Date(order.createdAt).toLocaleString('it-IT'))}</p>
+          <p>Cliente: ${escapeHtml(order.customerName)}</p>
+          <p>Telefono: ${escapeHtml(order.customerPhone)}</p>
+          <p>Ritiro: ${escapeHtml(order.pickupTimePreference)}</p>
           <div class="divider"></div>
           <table>
             ${order.items.map(it => `
               <tr>
-                <td>${it.quantity}x ${it.productName}</td>
-                <td class="right">€${it.lineTotal.toFixed(2)}</td>
+                <td>${Number(it.quantity)}x ${escapeHtml(it.productName)}</td>
+                <td class="right">€${Number(it.lineTotal).toFixed(2)}</td>
               </tr>
             `).join('')}
           </table>
@@ -543,7 +727,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <table>
             <tr>
               <td><strong>TOTALE DOVUTO:</strong></td>
-              <td class="right"><strong>€${order.total.toFixed(2)}</strong></td>
+              <td class="right"><strong>€${Number(order.total).toFixed(2)}</strong></td>
             </tr>
           </table>
           <p style="text-align:center; font-size:11px; margin-top:20px;">
@@ -580,148 +764,192 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/70 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-5xl w-full h-[90vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 w-screen h-screen bg-stone-50 flex flex-col overflow-hidden">
+      <div className="bg-white w-full h-full flex flex-col overflow-hidden">
         
         {/* Top Header */}
-        <div className="px-5 py-3.5 bg-[#124b2e] text-white flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2.5">
-            <Lock className="w-4 h-4 text-emerald-300" />
-            <span className="font-bold text-sm tracking-tight">Portale Gestione &amp; Staff Mama Sam</span>
-            <span className="text-[10px] bg-emerald-800 text-emerald-200 px-2 py-0.5 rounded-full font-mono">
+        <div className="px-4 sm:px-6 py-3 bg-[#124b2e] text-white flex items-center justify-between gap-4 shrink-0 border-b border-emerald-950/30">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <Lock className="w-4 h-4 text-emerald-300 shrink-0" />
+            <span className="font-bold text-sm sm:text-base tracking-tight whitespace-nowrap truncate">
+              Portale Gestione &amp; Staff Mama Sam
+            </span>
+            <span className="hidden lg:inline-block text-[11px] bg-emerald-800/90 text-emerald-100 px-2.5 py-0.5 rounded font-mono whitespace-nowrap shrink-0">
               Messina Live Desk
             </span>
             {supabaseStatus?.connected ? (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-emerald-900/90 text-emerald-200 px-2 py-0.5 rounded-full border border-emerald-400/40">
-                <Database className="w-3 h-3 text-emerald-400" />
-                <span>Supabase PostgreSQL Attivo</span>
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] bg-emerald-900/90 text-emerald-100 px-2.5 py-0.5 rounded border border-emerald-400/40 whitespace-nowrap shrink-0">
+                <Database className="w-3.5 h-3.5 text-emerald-300" />
+                <span>Supabase Attivo</span>
               </span>
             ) : (
-              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-amber-900/60 text-amber-200 px-2 py-0.5 rounded-full border border-amber-600/50">
-                <Server className="w-3 h-3 text-amber-400" />
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] bg-amber-900/60 text-amber-100 px-2.5 py-0.5 rounded border border-amber-500/50 whitespace-nowrap shrink-0">
+                <Server className="w-3.5 h-3.5 text-amber-300" />
                 <span>Supabase in Setup</span>
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
             {isAuthenticated && adminUser?.email && (
-              <span className="hidden md:inline text-[11px] text-emerald-200 font-mono">
+              <span className="hidden md:inline text-xs text-emerald-100 font-mono whitespace-nowrap">
                 {adminUser.email}
               </span>
             )}
             {isAuthenticated && (
               <button
+                type="button"
                 onClick={handleLogout}
-                className="text-xs text-emerald-200 hover:text-white flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-900 text-xs font-semibold text-emerald-100 hover:text-white flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 transition-colors"
               >
                 <LogOut className="w-3.5 h-3.5" />
                 <span>Esci</span>
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
-              className="p-1 rounded-lg text-emerald-200 hover:text-white hover:bg-emerald-800 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0 transition-colors"
+              title="Chiudi pannello e torna al negozio"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
+              <span className="hidden sm:inline">Torna al Negozio</span>
             </button>
           </div>
         </div>
 
-        {/* Not Authenticated Screen */}
+        {/* Not Authenticated Screen (Clean & Minimal — Zero Demo Credentials or Hints) */}
         {!isAuthenticated ? (
           <div className="flex-1 flex items-center justify-center p-6 bg-stone-50">
             <div className="bg-white p-7 sm:p-8 rounded-2xl border border-stone-200 shadow-md max-w-md w-full text-center">
               <div className="w-12 h-12 bg-emerald-100 text-[#124b2e] rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-6 h-6 text-emerald-800" />
               </div>
-              <h3 className="font-bold text-lg text-slate-900 mb-1">Accesso Gestionale Negozio</h3>
-              <p className="text-xs text-slate-500 mb-5">
-                Riservato esclusivamente agli amministratori autorizzati. Autenticazione protetta con ruoli Supabase PostgreSQL.
+              <h3 className="font-bold text-lg text-slate-900 mb-1">
+                {authSetupRequired ? 'Configurazione Password Amministratore' : 'Accesso Amministratore'}
+              </h3>
+              <p className="text-xs text-slate-500 mb-6">
+                {authSetupRequired
+                  ? 'Imposta la password iniziale per l’unico account amministratore del negozio.'
+                  : 'Area riservata esclusivamente all’amministratore autorizzato del negozio.'}
               </p>
 
-              <form onSubmit={handleLogin} className="space-y-3.5">
-                {authError && (
-                  <p className="text-xs text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200 text-left">
-                    {authError}
-                  </p>
-                )}
-
-                <div className="text-left">
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Email Amministratore
-                  </label>
-                  <div className="relative">
-                    <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    <input
-                      type="email"
-                      placeholder="admin@mamasam.it (oppure email Supabase)"
-                      value={emailInput}
-                      onChange={e => setEmailInput(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
-                    />
-                  </div>
+              {authSuccessNotice && (
+                <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs text-left flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                  <span>{authSuccessNotice}</span>
                 </div>
+              )}
 
-                <div className="text-left">
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                    Password *
-                  </label>
-                  <div className="relative">
-                    <Key className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    <input
-                      type="password"
-                      required
-                      placeholder="Inserisci password amministratore"
-                      value={passwordInput}
-                      onChange={e => setPasswordInput(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
-                      autoFocus
-                    />
+              {authSetupRequired ? (
+                <form onSubmit={handleClaimAdmin} className="space-y-4">
+                  {authError && (
+                    <p className="text-xs text-rose-700 bg-rose-50 p-2.5 rounded-lg border border-rose-200 text-left">
+                      {authError}
+                    </p>
+                  )}
+
+                  <div className="text-left">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Nuova Password Amministratore *
+                    </label>
+                    <div className="relative">
+                      <Key className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type="password"
+                        required
+                        minLength={10}
+                        autoComplete="new-password"
+                        placeholder="Minimo 10 caratteri con maiuscole, numeri e simboli"
+                        value={claimPasswordInput}
+                        onChange={e => setClaimPasswordInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                        autoFocus
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white font-bold text-xs sm:text-sm rounded-xl cursor-pointer shadow-xs transition-colors"
-                >
-                  Accedi al Pannello
-                </button>
-
-                <div className="bg-stone-50 p-3 rounded-xl border border-stone-200 text-left text-[11px] text-slate-600 space-y-2">
-                  <p className="font-semibold text-slate-800 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Credenziali Amministratore Backend &amp; Supabase:</span>
-                  </p>
-                  <div className="flex flex-col gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmailInput('limnalione39@gmail.com');
-                        setPasswordInput('MamaSam2026!Admin');
-                      }}
-                      className="text-left p-1.5 rounded-lg bg-white border border-stone-200 hover:border-emerald-500 text-[11px] text-slate-700 flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <span className="truncate"><strong>Admin:</strong> limnalione39@gmail.com</span>
-                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">Inserisci</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEmailInput('admin@mamasam.it');
-                        setPasswordInput('MamaSam2026!Admin');
-                      }}
-                      className="text-left p-1.5 rounded-lg bg-white border border-stone-200 hover:border-emerald-500 text-[11px] text-slate-700 flex items-center justify-between transition-colors cursor-pointer"
-                    >
-                      <span className="truncate"><strong>Store Desk:</strong> admin@mamasam.it</span>
-                      <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded shrink-0">Inserisci</span>
-                    </button>
+                  <div className="text-left">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Conferma Password *
+                    </label>
+                    <div className="relative">
+                      <Key className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type="password"
+                        required
+                        minLength={10}
+                        autoComplete="new-password"
+                        placeholder="Ripeti la password"
+                        value={claimConfirmInput}
+                        onChange={e => setClaimConfirmInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                      />
+                    </div>
                   </div>
-                  <p className="text-[10.5px] text-slate-500">
-                    • Password predefinita: <code className="bg-stone-200 px-1 py-0.2 rounded font-mono font-bold text-slate-800">MamaSam2026!Admin</code> (oppure emergenza: <code className="bg-stone-200 px-1 py-0.2 rounded font-mono">mamasam2026</code>).
-                  </p>
-                </div>
-              </form>
+
+                  <button
+                    type="submit"
+                    disabled={authSubmitting}
+                    className="w-full py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] disabled:opacity-60 text-white font-bold text-xs sm:text-sm rounded-xl cursor-pointer shadow-xs transition-colors"
+                  >
+                    {authSubmitting ? 'Salvataggio...' : 'Attiva Account Amministratore'}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  {authError && (
+                    <p className="text-xs text-rose-700 bg-rose-50 p-2.5 rounded-lg border border-rose-200 text-left">
+                      {authError}
+                    </p>
+                  )}
+
+                  <div className="text-left">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Email Amministratore
+                    </label>
+                    <div className="relative">
+                      <Mail className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type="email"
+                        required
+                        autoComplete="username"
+                        placeholder="Inserisci email"
+                        value={emailInput}
+                        onChange={e => setEmailInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-left">
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Key className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      <input
+                        type="password"
+                        required
+                        autoComplete="current-password"
+                        placeholder="Inserisci password"
+                        value={passwordInput}
+                        onChange={e => setPasswordInput(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2.5 text-xs sm:text-sm border border-stone-300 rounded-xl focus:border-[#124b2e] outline-hidden bg-white text-slate-900"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={authSubmitting}
+                    className="w-full py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] disabled:opacity-60 text-white font-bold text-xs sm:text-sm rounded-xl cursor-pointer shadow-xs transition-colors"
+                  >
+                    {authSubmitting ? 'Verifica in corso...' : 'Accedi al Pannello'}
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         ) : (
@@ -729,81 +957,81 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-stone-50">
             
             {/* Sidebar Navigation */}
-            <div className="w-full md:w-56 bg-white border-r border-stone-200 p-3 shrink-0 flex md:flex-col justify-between overflow-x-auto">
-              <div className="flex md:flex-col gap-1 w-full">
+            <div className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-stone-200 p-3 sm:p-4 shrink-0 flex md:flex-col justify-between overflow-x-auto">
+              <div className="flex md:flex-col gap-1.5 w-full min-w-max md:min-w-0">
                 <button
                   onClick={() => setActiveTab('dashboard')}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'dashboard'
                       ? 'bg-emerald-50 text-[#124b2e]'
                       : 'text-slate-600 hover:bg-stone-100'
                   }`}
                 >
-                  <LayoutDashboard className="w-4 h-4 text-emerald-700" />
+                  <LayoutDashboard className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span>Panoramica</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'orders'
                       ? 'bg-emerald-50 text-[#124b2e]'
                       : 'text-slate-600 hover:bg-stone-100'
                   }`}
                 >
-                  <ShoppingBag className="w-4 h-4 text-emerald-700" />
+                  <ShoppingBag className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span>Ordini ({orders.length})</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('products')}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'products'
                       ? 'bg-emerald-50 text-[#124b2e]'
                       : 'text-slate-600 hover:bg-stone-100'
                   }`}
                 >
-                  <Package className="w-4 h-4 text-emerald-700" />
+                  <Package className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span>Catalogo e Foto</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'settings'
                       ? 'bg-emerald-50 text-[#124b2e]'
                       : 'text-slate-600 hover:bg-stone-100'
                   }`}
                 >
-                  <Settings className="w-4 h-4 text-emerald-700" />
+                  <Settings className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span>Impostazioni Negozio</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('supabase')}
-                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     activeTab === 'supabase'
                       ? 'bg-emerald-50 text-[#124b2e]'
                       : 'text-slate-600 hover:bg-stone-100'
                   }`}
                 >
-                  <Database className="w-4 h-4 text-emerald-700" />
+                  <Database className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span className="flex-1 text-left">Supabase &amp; DB</span>
                   {supabaseStatus?.connected ? (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" title="Supabase Connesso"></span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Supabase Connesso"></span>
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-amber-500" title="Configurazione Richiesta"></span>
+                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Configurazione Richiesta"></span>
                   )}
                 </button>
               </div>
 
               {/* Supabase backend status widget */}
-              <div className="hidden md:block p-2.5 bg-emerald-50/70 rounded-xl border border-emerald-100 text-[11px] text-emerald-950 mt-4">
+              <div className="hidden md:block p-3 bg-emerald-50/70 rounded-xl border border-emerald-100 text-xs text-emerald-950 mt-4">
                 <div className="flex items-center gap-1.5 font-bold text-emerald-900 mb-1">
                   <Database className="w-3.5 h-3.5 text-emerald-700" />
                   <span>Backend Database</span>
                 </div>
-                <p className="text-[10px] text-emerald-800 leading-tight">
+                <p className="text-[11px] text-emerald-800 leading-relaxed">
                   {supabaseStatus?.connected
                     ? `PostgreSQL connesso (${supabaseStatus.tables?.products || products.length} prodotti, ${orders.length} ordini).`
                     : 'Modalità ibrida attiva. Connetti Supabase via env per RLS cloud.'}
@@ -812,7 +1040,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
               
               {/* TAB 1: OVERVIEW DASHBOARD */}
               {activeTab === 'dashboard' && stats && (
@@ -2135,7 +2363,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                       {prod.isAvailable !== false ? 'Attivo' : 'Non disp.'}
                                     </span>
                                   </td>
-                                  <td className="p-3 text-right space-x-1">
+                                  <td className="p-3 text-right whitespace-nowrap space-x-1.5">
                                     <button
                                       onClick={() => {
                                         setEditingProduct(prod);
@@ -2143,25 +2371,25 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                         setProductSaveError(null);
                                         setProductForm(prod);
                                       }}
-                                      className="p-1.5 text-slate-500 hover:text-emerald-700 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
+                                      className="px-2.5 py-1.5 text-slate-700 hover:text-emerald-800 bg-stone-100 hover:bg-emerald-50 rounded-lg cursor-pointer inline-flex items-center gap-1 whitespace-nowrap"
                                       title="Edit product and details"
                                     >
                                       <Edit2 className="w-3.5 h-3.5" />
-                                      <span className="text-[11px] font-semibold">Edit</span>
+                                      <span className="text-[11px] font-semibold">Modifica</span>
                                     </button>
                                     {confirmDeleteId === prod.id ? (
                                       <span className="inline-flex items-center gap-1 ml-1">
                                         <button
                                           type="button"
                                           onClick={() => handleDeleteProduct(prod.id)}
-                                          className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-[10.5px] font-bold cursor-pointer"
+                                          className="px-2.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold cursor-pointer whitespace-nowrap"
                                         >
                                           Elimina
                                         </button>
                                         <button
                                           type="button"
                                           onClick={() => setConfirmDeleteId(null)}
-                                          className="px-1.5 py-1 bg-stone-200 text-slate-700 rounded text-[10.5px] font-semibold cursor-pointer"
+                                          className="px-2 py-1.5 bg-stone-200 text-slate-700 rounded-lg text-[11px] font-semibold cursor-pointer whitespace-nowrap"
                                         >
                                           No
                                         </button>
@@ -2170,10 +2398,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                                       <button
                                         type="button"
                                         onClick={() => setConfirmDeleteId(prod.id)}
-                                        className="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg hover:bg-stone-100 cursor-pointer inline-flex items-center gap-1"
+                                        className="px-2.5 py-1.5 text-slate-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg cursor-pointer inline-flex items-center gap-1 whitespace-nowrap"
                                         title="Elimina prodotto"
                                       >
                                         <Trash2 className="w-3.5 h-3.5" />
+                                        <span className="text-[11px] font-semibold">Elimina</span>
                                       </button>
                                     )}
                                   </td>
@@ -2189,12 +2418,13 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
               {/* TAB 4: STORE SETTINGS */}
               {activeTab === 'settings' && (
-                <div className="space-y-4 max-w-xl">
+                <div className="space-y-5 w-full max-w-6xl">
                   <div>
                     <h3 className="font-bold text-base sm:text-lg text-slate-900">Website &amp; Storefront Settings</h3>
-                    <p className="text-xs text-slate-500">Update top announcement strip, contact numbers, and store hours</p>
+                    <p className="text-xs text-slate-500">Update top announcement strip, contact numbers, store hours, and customer push notifications</p>
                   </div>
 
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                   <form onSubmit={handleSaveSettings} className="bg-white p-5 rounded-xl border border-stone-200 space-y-4 text-xs">
                     {settingsSaved && (
                       <div className="p-2.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg flex items-center gap-2">
@@ -2395,12 +2625,118 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </button>
                     </form>
                   </div>
+                  </div>
+
+                  {/* SINGLE ADMINISTRATOR PASSWORD MANAGEMENT */}
+                  <div className="bg-white p-5 rounded-xl border border-stone-200 space-y-4 text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-100 text-[#124b2e] flex items-center justify-center shrink-0">
+                          <ShieldCheck className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-slate-900">Sicurezza Account Amministratore &amp; Cambio Password</h4>
+                          <p className="text-[11px] text-slate-500">
+                            Account unico autorizzato: <span className="font-mono font-semibold text-slate-700">{adminUser?.email || 'Amministratore Principale'}</span>. Dopo la modifica, tutte le sessioni attive vengono disconnesse.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <form onSubmit={handleChangePassword} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Password Attuale *</label>
+                        <input
+                          type="password"
+                          required
+                          autoComplete="current-password"
+                          value={currentPasswordInput}
+                          onChange={e => setCurrentPasswordInput(e.target.value)}
+                          placeholder="Password attuale"
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Nuova Password *</label>
+                        <input
+                          type="password"
+                          required
+                          minLength={10}
+                          autoComplete="new-password"
+                          value={newPasswordInput}
+                          onChange={e => setNewPasswordInput(e.target.value)}
+                          placeholder="Min. 10 caratteri"
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-bold text-slate-800 mb-1">Conferma Nuova Password *</label>
+                        <input
+                          type="password"
+                          required
+                          minLength={10}
+                          autoComplete="new-password"
+                          value={confirmPasswordInput}
+                          onChange={e => setConfirmPasswordInput(e.target.value)}
+                          placeholder="Ripeti la nuova password"
+                          className="w-full px-3 py-2 border border-stone-300 rounded-lg bg-white"
+                        />
+                      </div>
+
+                      <div className="md:col-span-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-600 bg-stone-50 p-3 rounded-lg border border-stone-200">
+                        <span className="font-semibold text-slate-800">Requisiti password sicura:</span>
+                        <span className={newPasswordInput.length >= 10 ? 'text-emerald-700 font-semibold' : ''}>
+                          {newPasswordInput.length >= 10 ? '✓' : '•'} 10+ caratteri
+                        </span>
+                        <span className={/[A-Z]/.test(newPasswordInput) ? 'text-emerald-700 font-semibold' : ''}>
+                          {/[A-Z]/.test(newPasswordInput) ? '✓' : '•'} Maiuscola
+                        </span>
+                        <span className={/[a-z]/.test(newPasswordInput) ? 'text-emerald-700 font-semibold' : ''}>
+                          {/[a-z]/.test(newPasswordInput) ? '✓' : '•'} Minuscola
+                        </span>
+                        <span className={/[0-9]/.test(newPasswordInput) ? 'text-emerald-700 font-semibold' : ''}>
+                          {/[0-9]/.test(newPasswordInput) ? '✓' : '•'} Numero
+                        </span>
+                        <span className={/[^A-Za-z0-9]/.test(newPasswordInput) ? 'text-emerald-700 font-semibold' : ''}>
+                          {/[^A-Za-z0-9]/.test(newPasswordInput) ? '✓' : '•'} Simbolo (!@#$)
+                        </span>
+                        <span className={newPasswordInput && newPasswordInput === confirmPasswordInput ? 'text-emerald-700 font-semibold' : ''}>
+                          {newPasswordInput && newPasswordInput === confirmPasswordInput ? '✓' : '•'} Conferma identica
+                        </span>
+                      </div>
+
+                      {passwordChangeError && (
+                        <div className="md:col-span-3 p-2.5 bg-rose-50 border border-rose-200 rounded-lg text-rose-800 font-medium">
+                          {passwordChangeError}
+                        </div>
+                      )}
+
+                      {passwordChangeSuccess && (
+                        <div className="md:col-span-3 p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 font-medium">
+                          {passwordChangeSuccess}
+                        </div>
+                      )}
+
+                      <div className="md:col-span-3 flex justify-end">
+                        <button
+                          type="submit"
+                          disabled={passwordChangeLoading}
+                          className="px-5 py-2.5 bg-[#124b2e] hover:bg-[#0e3b24] disabled:opacity-60 text-white rounded-xl font-bold flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                          <span>{passwordChangeLoading ? 'Aggiornamento...' : 'Aggiorna Password Amministratore'}</span>
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               )}
 
               {/* TAB 5: SUPABASE BACKEND MANAGEMENT */}
               {activeTab === 'supabase' && (
-                <div className="space-y-6 max-w-4xl">
+                <div className="space-y-6 w-full max-w-6xl">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
@@ -2437,30 +2773,52 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
 
                   {/* Connection Status Banner */}
                   {supabaseStatus?.connected ? (
-                    <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                          <CheckCircle className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-emerald-950 text-sm">Supabase PostgreSQL Connesso e Operativo</h4>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-200 text-emerald-900 uppercase">
-                              Cloud Live
-                            </span>
+                    <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                            <CheckCircle className="w-5 h-5" />
                           </div>
-                          <p className="text-xs text-emerald-800 mt-0.5">
-                            Istanza: <code className="bg-emerald-100/80 px-1 py-0.5 rounded font-mono text-[11px]">{supabaseStatus.url}</code>
-                          </p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-bold text-emerald-950 text-sm">Supabase PostgreSQL Connesso e Operativo</h4>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-200 text-emerald-900 uppercase">
+                                Cloud Live
+                              </span>
+                            </div>
+                            <p className="text-xs text-emerald-800 mt-0.5">
+                              Istanza: <code className="bg-emerald-100/80 px-1 py-0.5 rounded font-mono text-[11px]">{supabaseStatus.url}</code>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 text-xs text-emerald-900 border-t sm:border-t-0 pt-2 sm:pt-0 border-emerald-200">
+                          <span className="font-semibold">Storage: Bucket 'product-images'</span>
+                          <span className="text-[11px] text-emerald-700 font-mono">
+                            {supabaseStatus.tables?.products ?? 0} Prodotti · {supabaseStatus.tables?.categories ?? 0} Cat · {supabaseStatus.tables?.orders ?? 0} Ordini
+                          </span>
                         </div>
                       </div>
 
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between text-xs text-emerald-900 border-t sm:border-t-0 pt-2 sm:pt-0 border-emerald-200">
-                        <span className="font-semibold">Storage: Bucket 'product-images'</span>
-                        <span className="text-[11px] text-emerald-700 font-mono">
-                          {supabaseStatus.tables?.products || products.length} Prodotti · {orders.length} Ordini
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-200/80">
+                        <span className="text-[11px] text-emerald-800">
+                          Hai appena collegato un nuovo account Supabase? Popola o aggiorna le tabelle cloud dai dati locali in 1 clic.
                         </span>
+                        <button
+                          type="button"
+                          onClick={handleSyncToSupabase}
+                          disabled={supabaseSyncing}
+                          className="px-3 py-1.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
+                        >
+                          <Database className={`w-3.5 h-3.5 ${supabaseSyncing ? 'animate-spin' : ''}`} />
+                          <span>{supabaseSyncing ? 'Sincronizzazione...' : 'Sincronizza Catalogo & Impostazioni'}</span>
+                        </button>
                       </div>
+                      {supabaseSyncFeedback && (
+                        <p className="text-xs font-semibold text-emerald-900 bg-white/80 px-3 py-2 rounded-xl border border-emerald-200">
+                          {supabaseSyncFeedback}
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -2470,7 +2828,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-amber-950 text-sm">Configurazione Supabase in Attesa</h4>
+                            <h4 className="font-bold text-amber-950 text-sm">
+                              {supabaseStatus?.apiReachable ? 'Tabelle Database Non Ancora Create' : 'Configurazione Supabase in Attesa'}
+                            </h4>
                             <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-900 uppercase">
                               Zero-Downtime Attivo
                             </span>
@@ -2479,7 +2839,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                             {supabaseStatus?.reason || 'Credenziali Supabase non ancora rilevate nelle variabili d\'ambiente.'}
                           </p>
                           <p className="text-[11px] text-amber-800 mt-1">
-                            Il negozio è attualmente <strong>100% operativo</strong> tramite fallback duraturo. Non appena configuri le chiavi in <code className="font-mono bg-amber-100 px-1 py-0.2 rounded">.env</code>, il server passerà automaticamente a PostgreSQL.
+                            Il negozio è attualmente <strong>100% operativo</strong> tramite fallback duraturo. Una volta impostate le chiavi nell'ambiente ed eseguito lo script SQL, premi «Testa Connessione Ora».
                           </p>
                         </div>
                       </div>
@@ -2594,15 +2954,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
                     <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
                       <Lock className="w-4 h-4 text-[#124b2e]" />
-                      <span>Istruzioni per la Creazione di Account Amministratore Sicuri</span>
+                      <span>Configurazione Account Amministratore Unico</span>
                     </h4>
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      Per garantire la massima sicurezza, non esiste alcuna registrazione admin pubblica sul sito web. Tutti gli amministratori vengono creati tramite il processo controllato di Supabase:
+                      Per garantire la massima sicurezza, non esiste alcuna registrazione pubblica e il sistema consente un solo account amministratore configurato dal proprietario su Supabase:
                     </p>
 
                     <ol className="space-y-2 text-xs text-slate-700 list-decimal list-inside bg-stone-50 p-4 rounded-xl border border-stone-200">
                       <li>
-                        <strong>Crea l'utente:</strong> Vai nella tua console Supabase su <em>Authentication &gt; Users &gt; Add User &gt; Create User</em> (es. <code className="bg-stone-200 px-1 py-0.2 rounded">admin@mamasam.it</code> con una password sicura).
+                        <strong>Crea l'unico utente amministratore:</strong> Vai nella console Supabase su <em>Authentication &gt; Users &gt; Add User &gt; Create User</em> usando la tua email amministratore e una password complessa.
                       </li>
                       <li>
                         <strong>Copia lo User UID:</strong> Dalla lista utenti di Supabase, copia l'UUID dell'utente appena creato.
@@ -2614,7 +2974,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                         </div>
                       </li>
                       <li>
-                        <strong>Accedi al Pannello:</strong> Ora puoi accedere immediatamente a questo gestionale inserendo la tua email e la password configurata.
+                        <strong>Accedi al Pannello:</strong> Accedi con l'email amministratore autorizzata; puoi cambiare la password in qualsiasi momento dalla scheda <em>Impostazioni Negozio</em>.
                       </li>
                     </ol>
                   </div>

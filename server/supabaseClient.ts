@@ -40,8 +40,11 @@ export const supabaseServer: SupabaseClient | null = isServerSupabaseConfigured(
 export interface SupabaseHealthStatus {
   configured: boolean;
   connected: boolean;
+  apiReachable?: boolean;
+  schemaReady?: boolean;
   hasServiceRoleKey: boolean;
   url: string;
+  reason?: string;
   tables?: {
     products: number;
     categories: number;
@@ -61,46 +64,82 @@ export async function testSupabaseConnection(): Promise<SupabaseHealthStatus> {
     return {
       configured: false,
       connected: false,
+      apiReachable: false,
+      schemaReady: false,
       hasServiceRoleKey: Boolean(serviceRoleKey),
-      url: supabaseUrl ? supabaseUrl.replace(/https:\/\/[^.]+\./, 'https://***.') : 'Not configured'
+      url: supabaseUrl ? supabaseUrl.replace(/https:\/\/[^.]+\./, 'https://***.') : 'Not configured',
+      reason: 'Variabili SUPABASE_URL e chiavi API non ancora configurate nell’ambiente.'
     };
   }
 
   try {
-    const [prodRes, catRes, ordRes, rolesRes, bucketRes] = await Promise.all([
+    const [prodRes, catRes, ordRes, setRes, rolesRes, bucketRes] = await Promise.all([
       supabaseServer.from('products').select('id', { count: 'exact', head: true }),
       supabaseServer.from('categories').select('id', { count: 'exact', head: true }),
       supabaseServer.from('orders').select('id', { count: 'exact', head: true }),
+      supabaseServer.from('store_settings').select('id').limit(1),
       supabaseServer.from('user_roles').select('id', { count: 'exact', head: true }),
       supabaseServer.storage.getBucket('product-images').catch(() => ({ data: null, error: null }))
     ]);
 
-    const isConnected = !prodRes.error || prodRes.error.code !== 'PGRST301';
+    const schemaReady =
+      !prodRes.error &&
+      !catRes.error &&
+      !ordRes.error &&
+      !setRes.error &&
+      !rolesRes.error;
+
+    const networkError =
+      prodRes.error?.message?.toLowerCase().includes('fetch failed') ||
+      prodRes.error?.code === 'PGRST301';
+    const apiReachable = !networkError;
+    const isConnected = apiReachable && schemaReady;
+
+    const firstTableError =
+      prodRes.error?.message ||
+      catRes.error?.message ||
+      ordRes.error?.message ||
+      setRes.error?.message ||
+      rolesRes.error?.message;
+
+    let reason: string | undefined;
+    if (!apiReachable) {
+      reason = 'Impossibile raggiungere l’URL del progetto Supabase configurato.';
+    } else if (!schemaReady) {
+      reason =
+        'Progetto Supabase collegato via API, ma le tabelle PostgreSQL non esistono ancora. Esegui lo script SQL di migrazione qui sotto nell’SQL Editor del nuovo progetto.';
+    }
 
     return {
       configured: true,
       connected: isConnected,
+      apiReachable,
+      schemaReady,
       hasServiceRoleKey: Boolean(serviceRoleKey),
       url: supabaseUrl.replace(/https:\/\/([^.]+)\./, (_, id) => `https://${id.substring(0, 4)}***.`),
+      reason,
       tables: {
-        products: prodRes.count ?? 0,
-        categories: catRes.count ?? 0,
-        orders: ordRes.count ?? 0,
-        settings: true,
+        products: !prodRes.error ? (prodRes.count ?? 0) : 0,
+        categories: !catRes.error ? (catRes.count ?? 0) : 0,
+        orders: !ordRes.error ? (ordRes.count ?? 0) : 0,
+        settings: !setRes.error,
         userRoles: !rolesRes.error
       },
       storageBucket: {
         name: 'product-images',
         exists: Boolean(bucketRes && bucketRes.data)
       },
-      error: prodRes.error ? prodRes.error.message : undefined
+      error: firstTableError
     };
   } catch (err: any) {
     return {
       configured: true,
       connected: false,
+      apiReachable: false,
+      schemaReady: false,
       hasServiceRoleKey: Boolean(serviceRoleKey),
       url: supabaseUrl.replace(/https:\/\/([^.]+)\./, (_, id) => `https://${id.substring(0, 4)}***.`),
+      reason: 'Errore di connessione verso il progetto Supabase.',
       error: err.message || 'Failed to ping Supabase backend.'
     };
   }

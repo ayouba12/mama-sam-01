@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
@@ -54,7 +55,7 @@ app.use(express.urlencoded({ extended: true, limit: '15mb' }));
 // Paths & Storage Directories
 const DATA_DIR = path.resolve(__dirname, 'data');
 const UPLOADS_DIR = path.resolve(DATA_DIR, 'uploads');
-const IMG_CACHE_DIR = path.resolve(DATA_DIR, '.img_cache');
+const IMG_CACHE_DIR = path.join(os.tmpdir(), 'mamasam-img-cache');
 const SRC_IMAGES_DIR = path.resolve(__dirname, 'src', 'assets', 'images');
 const PUBLIC_ASSETS_DIR = path.resolve(__dirname, 'public', 'assets');
 const DIST_ASSETS_DIR = path.resolve(__dirname, 'dist', 'assets');
@@ -341,14 +342,14 @@ function writeData<T>(file: string, data: T): void {
 export interface SecurityAuditEntry {
   id: string;
   timestamp: string;
-  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded';
+  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded' | 'password_changed';
   ip: string;
   userAgent: string;
   details: string;
 }
 
 function logSecurityEvent(
-  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded',
+  eventType: 'failed_login' | 'lockout' | 'rate_limit_exceeded' | 'password_changed',
   req: Request,
   details: string
 ): void {
@@ -385,9 +386,10 @@ function saveLockoutMap(map: Record<string, PersistentLockoutRecord>): void {
   writeData('security_lockouts.json', map);
 }
 
-// ----------------- AUTHENTICATION & SECURE CREDENTIAL VERIFICATION -----------------
+// ----------------- SINGLE-ADMINISTRATOR AUTHENTICATION & PASSWORD MANAGEMENT -----------------
 interface AdminSession {
-  role: string;
+  email: string;
+  role: 'admin';
   createdAt: number;
   expiresAt: number;
 }
@@ -401,24 +403,38 @@ function getClientIp(req: Request): string {
   return req.socket.remoteAddress || 'unknown';
 }
 
-/**
- * Verifies candidate password using secure constant-time comparison against configured secret.
- * Rejects insecure defaults ('admin', 'mamasam', or empty).
- */
-// Configured administrator accounts
-const CONFIGURED_ADMIN_EMAILS = [
-  process.env.ADMIN_EMAIL || 'limnalione39@gmail.com',
-  process.env.ADMIN_SECONDARY_EMAIL || 'admin@mamasam.it',
-  'limnalione39@gmail.com',
-  'admin@mamasam.it'
-].map(e => e.trim().toLowerCase());
+const SINGLE_ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'limnalione39@gmail.com').trim().toLowerCase();
+
+const FORBIDDEN_WEAK_PASSWORDS = new Set([
+  'admin',
+  'admin123',
+  'administrator',
+  'mamasam',
+  'password',
+  'password123',
+  '123456',
+  '12345678',
+  'qwerty',
+  'root',
+  'user',
+  'changeme'
+]);
+
+const FORBIDDEN_WEAK_PASSWORD_DIGESTS = new Set([
+  'b79cf6fb02b855b3ab04ed070bf4a4670e9799dcdca00dfcf6cf57541e344af2',
+  '9faa4cac0ea465262fbaac2263ea6207cc03cc354affcda4d642aa32f0fd75b3'
+]);
 
 interface StoredAdminCredential {
   email: string;
   salt: string;
   hash: string;
+  hashAlgorithm?: 'scrypt' | 'pbkdf2';
   role: 'admin';
   createdAt: string;
+  updatedAt?: string;
+  passwordChangedAt?: string | null;
+  envSeedDigest?: string | null;
 }
 
 function getStoredAdminCredentials(): Record<string, StoredAdminCredential> {
@@ -429,146 +445,221 @@ function saveStoredAdminCredentials(creds: Record<string, StoredAdminCredential>
   writeData('admin_credentials.json', creds);
 }
 
+function hashPasswordScrypt(password: string): { salt: string; hash: string; hashAlgorithm: 'scrypt' } {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+  return { salt, hash, hashAlgorithm: 'scrypt' };
+}
+
+function verifyStoredCredentialHash(candidate: string, entry: StoredAdminCredential): boolean {
+  if (!candidate || !entry?.salt || !entry?.hash) return false;
+  try {
+    const computed =
+      entry.hashAlgorithm === 'scrypt'
+        ? crypto.scryptSync(candidate, entry.salt, 64).toString('hex')
+        : crypto.pbkdf2Sync(candidate, entry.salt, 100000, 64, 'sha256').toString('hex');
+    const candBuf = Buffer.from(computed, 'hex');
+    const expBuf = Buffer.from(entry.hash, 'hex');
+    return candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf);
+  } catch {
+    return false;
+  }
+}
+
+function validateStrongPassword(password: string): string | null {
+  if (typeof password !== 'string') {
+    return 'Inserisci una password valida.';
+  }
+  if (password.length < 10 || password.length > 128) {
+    return 'La password deve contenere tra 10 e 128 caratteri.';
+  }
+  if (!/[A-Z]/.test(password)) {
+    return 'La password deve includere almeno una lettera maiuscola.';
+  }
+  if (!/[a-z]/.test(password)) {
+    return 'La password deve includere almeno una lettera minuscola.';
+  }
+  if (!/[0-9]/.test(password)) {
+    return 'La password deve includere almeno un numero.';
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    return 'La password deve includere almeno un carattere speciale (es. ! @ # $ % & *).';
+  }
+  const normalizedCandidate = password.trim().toLowerCase();
+  const candidateDigest = crypto.createHash('sha256').update(normalizedCandidate).digest('hex');
+  if (FORBIDDEN_WEAK_PASSWORDS.has(normalizedCandidate) || FORBIDDEN_WEAK_PASSWORD_DIGESTS.has(candidateDigest)) {
+    return 'Password troppo comune o non sicura. Scegline una diversa.';
+  }
+  const emailLocal = SINGLE_ADMIN_EMAIL.split('@')[0];
+  if (emailLocal && emailLocal.length >= 3 && password.toLowerCase().includes(emailLocal)) {
+    return 'La password non può contenere il nome dell’account email.';
+  }
+  return null;
+}
+
+function getSingleAdminCredential(): StoredAdminCredential | null {
+  const creds = getStoredAdminCredentials();
+  return creds[SINGLE_ADMIN_EMAIL] || null;
+}
+
+function isAdminSetupRequired(): boolean {
+  const existing = getSingleAdminCredential();
+  if (existing?.hash && existing?.salt) return false;
+  const envPass = process.env.ADMIN_PASSWORD?.trim();
+  const envHash = process.env.ADMIN_PASSWORD_HASH?.trim();
+  return !envPass && !(envHash && envHash.includes(':'));
+}
+
 /**
- * Ensures backend admin credentials exist with secure PBKDF2 hashing.
- * Also synchronizes with Supabase Auth using the service role key.
+ * Enforces a single administrator credential record using scrypt hashing.
+ * Removes any secondary or legacy admin entries and never uses hardcoded fallback passwords.
  */
 async function ensureBackendAdminAccounts(): Promise<void> {
-  const masterPassword = process.env.ADMIN_PASSWORD || 'MamaSam2026!Admin';
   const creds = getStoredAdminCredentials();
   let updated = false;
 
-  const targetAccounts = [
-    { email: 'limnalione39@gmail.com', role: 'admin' as const },
-    { email: 'admin@mamasam.it', role: 'admin' as const }
-  ];
+  // Enforce single administrator account: purge any secondary/stale admin keys
+  for (const existingKey of Object.keys(creds)) {
+    if (existingKey.toLowerCase() !== SINGLE_ADMIN_EMAIL) {
+      delete creds[existingKey];
+      updated = true;
+    }
+  }
 
-  for (const acc of targetAccounts) {
-    const key = acc.email.toLowerCase();
-    if (!creds[key]) {
-      const salt = crypto.randomBytes(16).toString('hex');
-      const hash = crypto.pbkdf2Sync(masterPassword, salt, 100000, 64, 'sha256').toString('hex');
-      creds[key] = {
-        email: acc.email,
+  const envPassword = process.env.ADMIN_PASSWORD?.trim() || '';
+  const envHash = process.env.ADMIN_PASSWORD_HASH?.trim() || '';
+  const envDigest = envPassword ? crypto.createHash('sha256').update(envPassword).digest('hex') : null;
+
+  const currentEntry = creds[SINGLE_ADMIN_EMAIL];
+
+  if (!currentEntry) {
+    if (envHash && envHash.includes(':')) {
+      const [salt, hash] = envHash.split(':');
+      creds[SINGLE_ADMIN_EMAIL] = {
+        email: SINGLE_ADMIN_EMAIL,
         salt,
         hash,
-        role: acc.role,
-        createdAt: new Date().toISOString()
+        hashAlgorithm: 'pbkdf2',
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        passwordChangedAt: null,
+        envSeedDigest: null
+      };
+      updated = true;
+    } else if (envPassword) {
+      const hashed = hashPasswordScrypt(envPassword);
+      creds[SINGLE_ADMIN_EMAIL] = {
+        email: SINGLE_ADMIN_EMAIL,
+        ...hashed,
+        role: 'admin',
+        createdAt: new Date().toISOString(),
+        passwordChangedAt: null,
+        envSeedDigest: envDigest
       };
       updated = true;
     }
+  } else if (
+    !currentEntry.passwordChangedAt &&
+    envPassword &&
+    envDigest &&
+    (currentEntry.envSeedDigest !== envDigest || currentEntry.hashAlgorithm !== 'scrypt')
+  ) {
+    // Environment password seeded/rotated before any dashboard password change (or upgrading legacy record)
+    const hashed = hashPasswordScrypt(envPassword);
+    creds[SINGLE_ADMIN_EMAIL] = {
+      ...currentEntry,
+      ...hashed,
+      updatedAt: new Date().toISOString(),
+      envSeedDigest: envDigest
+    };
+    updated = true;
   }
 
   if (updated) {
     saveStoredAdminCredentials(creds);
   }
 
-  // Ensure Supabase Auth users exist via service-role client
-  if (isServerSupabaseConfigured() && supabaseServer) {
+  // Optional Supabase Auth sync ONLY for the single admin email when explicitly seeded via env
+  if (isServerSupabaseConfigured() && supabaseServer && envPassword && !creds[SINGLE_ADMIN_EMAIL]?.passwordChangedAt) {
     try {
       const { data: userList } = await supabaseServer.auth.admin.listUsers();
-      const existingEmails = new Set(
-        (userList?.users || []).map(u => u.email?.toLowerCase()).filter(Boolean)
+      const existingUser = (userList?.users || []).find(
+        u => u.email?.toLowerCase() === SINGLE_ADMIN_EMAIL
       );
-
-      for (const acc of targetAccounts) {
-        if (!existingEmails.has(acc.email.toLowerCase())) {
-          await supabaseServer.auth.admin.createUser({
-            email: acc.email,
-            password: masterPassword,
-            email_confirm: true,
-            user_metadata: { role: 'admin', full_name: 'Mama Sam Admin' }
-          });
-          console.log(`[Supabase Auth] Created admin account: ${acc.email}`);
-        }
+      if (!existingUser) {
+        await supabaseServer.auth.admin.createUser({
+          email: SINGLE_ADMIN_EMAIL,
+          password: envPassword,
+          email_confirm: true,
+          user_metadata: { role: 'admin', full_name: 'Mama Sam Administrator' }
+        });
       }
     } catch (e: any) {
-      console.warn('[Supabase Auth] Admin sync note:', e.message);
+      console.warn('[Supabase Auth] Single admin sync note:', e.message);
     }
   }
 }
 
-/**
- * Verifies candidate password using secure constant-time comparison against configured secret.
- * Rejects insecure defaults ('admin', 'mamasam', or empty).
- */
-function verifyAdminPassword(candidate: string): boolean {
-  if (typeof candidate !== 'string' || candidate.trim().length === 0) {
-    return false;
+function verifySingleAdminPassword(candidate: string): { valid: boolean; matchedEntry: StoredAdminCredential | null } {
+  if (typeof candidate !== 'string' || candidate.length === 0) {
+    return { valid: false, matchedEntry: null };
   }
 
-  // Explicitly reject known weak or default credentials
-  const forbiddenWeak = ['admin', 'mamasam', 'password', '123456', 'root', 'user'];
-  if (forbiddenWeak.includes(candidate.trim().toLowerCase())) {
-    return false;
-  }
-
-  // Accept store staff default password
-  if (candidate.trim() === 'mamasam2026') {
-    return true;
-  }
-
-  const envPassword = process.env.ADMIN_PASSWORD || 'MamaSam2026!Admin';
-  const envHash = process.env.ADMIN_PASSWORD_HASH;
-
-  // 1. If PBKDF2 hash is configured in environment (format: "salt:hash")
-  if (envHash && envHash.includes(':')) {
-    const [salt, expectedHash] = envHash.split(':');
-    const computedHash = crypto.pbkdf2Sync(candidate, salt, 100000, 64, 'sha256').toString('hex');
-    const candBuf = Buffer.from(computedHash);
-    const expBuf = Buffer.from(expectedHash);
-    if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
-      return true;
-    }
-  }
-
-  // 2. If candidate matches env password
-  if (envPassword && envPassword.trim().length > 0) {
-    const candBuf = Buffer.from(candidate);
-    const expBuf = Buffer.from(envPassword.trim());
-    if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
-      return true;
-    }
-  }
-
-  // 3. Fallback: check stored secret in data/.admin_secret
-  const secretPath = path.join(DATA_DIR, '.admin_secret');
-  if (fs.existsSync(secretPath)) {
-    try {
-      const stored = fs.readFileSync(secretPath, 'utf-8').trim();
-      if (stored) {
-        const candBuf = Buffer.from(candidate);
-        const expBuf = Buffer.from(stored);
-        if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
-          return true;
-        }
-      }
-    } catch {}
-  }
-
-  return false;
-}
-
-/**
- * Checks email & password against stored backend admin credentials
- */
-function verifyBackendAdminAccount(candidateEmail: string, candidatePass: string): boolean {
-  if (!candidateEmail || !candidatePass) return false;
-  const emailNorm = candidateEmail.trim().toLowerCase();
   const creds = getStoredAdminCredentials();
-  const entry = creds[emailNorm];
-  if (entry && entry.salt && entry.hash) {
-    const computedHash = crypto.pbkdf2Sync(candidatePass, entry.salt, 100000, 64, 'sha256').toString('hex');
-    const candBuf = Buffer.from(computedHash);
-    const expBuf = Buffer.from(entry.hash);
-    if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
-      return true;
+  const entry = creds[SINGLE_ADMIN_EMAIL] || null;
+
+  if (entry && verifyStoredCredentialHash(candidate, entry)) {
+    // Automatically upgrade legacy PBKDF2 hash to scrypt on verification
+    if (entry.hashAlgorithm !== 'scrypt') {
+      const upgraded = hashPasswordScrypt(candidate);
+      creds[SINGLE_ADMIN_EMAIL] = {
+        ...entry,
+        ...upgraded,
+        updatedAt: new Date().toISOString()
+      };
+      saveStoredAdminCredentials(creds);
+    }
+    return { valid: true, matchedEntry: creds[SINGLE_ADMIN_EMAIL] };
+  }
+
+  // Only allow process.env password fallback if no password change has occurred in backend store
+  if (!entry?.passwordChangedAt) {
+    const envHash = process.env.ADMIN_PASSWORD_HASH?.trim() || '';
+    if (envHash && envHash.includes(':')) {
+      const [salt, expectedHash] = envHash.split(':');
+      const computedHash = crypto.pbkdf2Sync(candidate, salt, 100000, 64, 'sha256').toString('hex');
+      const candBuf = Buffer.from(computedHash);
+      const expBuf = Buffer.from(expectedHash);
+      if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
+        return { valid: true, matchedEntry: entry };
+      }
+    }
+
+    const envPassword = process.env.ADMIN_PASSWORD?.trim() || '';
+    if (envPassword) {
+      const candBuf = Buffer.from(candidate);
+      const expBuf = Buffer.from(envPassword);
+      if (candBuf.length === expBuf.length && crypto.timingSafeEqual(candBuf, expBuf)) {
+        const upgraded = hashPasswordScrypt(candidate);
+        creds[SINGLE_ADMIN_EMAIL] = {
+          email: SINGLE_ADMIN_EMAIL,
+          ...upgraded,
+          role: 'admin',
+          createdAt: entry?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          passwordChangedAt: null,
+          envSeedDigest: crypto.createHash('sha256').update(envPassword).digest('hex')
+        };
+        saveStoredAdminCredentials(creds);
+        return { valid: true, matchedEntry: creds[SINGLE_ADMIN_EMAIL] };
+      }
     }
   }
-  return false;
+
+  return { valid: false, matchedEntry: entry };
 }
 
-// Session auth middleware for protected admin APIs
+// Session auth middleware for protected admin APIs (single administrator enforcement)
 function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -578,7 +669,7 @@ function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
   const token = authHeader.substring(7).trim();
   const session = activeSessions.get(token);
 
-  if (!session) {
+  if (!session || session.role !== 'admin' || session.email !== SINGLE_ADMIN_EMAIL) {
     return res.status(401).json({ error: 'Unauthorized: Invalid or expired session.' });
   }
 
@@ -696,14 +787,14 @@ function checkOrderRateLimit(ip: string): boolean {
 
 // ----------------- API ENDPOINTS -----------------
 
-// 0. Supabase Backend Health Status Endpoint
-app.get('/api/admin/supabase-status', async (_req: Request, res: Response) => {
+// 0. Supabase Backend Health Status Endpoint (Admin only)
+app.get('/api/admin/supabase-status', requireAdminAuth, async (_req: Request, res: Response) => {
   const status = await testSupabaseConnection();
   res.json(status);
 });
 
-// 0b. SQL Migration script content endpoint
-app.get('/api/admin/schema-sql', (_req: Request, res: Response) => {
+// 0b. SQL Migration script content endpoint (Admin only)
+app.get('/api/admin/schema-sql', requireAdminAuth, (_req: Request, res: Response) => {
   try {
     const schemaPath = path.join(process.cwd(), 'supabase', 'schema.sql');
     if (fs.existsSync(schemaPath)) {
@@ -713,6 +804,87 @@ app.get('/api/admin/schema-sql', (_req: Request, res: Response) => {
     res.status(404).send('-- Schema file not found');
   } catch (err: any) {
     res.status(500).send(`-- Error reading schema: ${err.message}`);
+  }
+});
+
+// 0c. Sync local catalog, categories, and settings into connected Supabase database (Admin only)
+app.post('/api/admin/supabase/sync', requireAdminAuth, async (_req: Request, res: Response) => {
+  if (!isServerSupabaseConfigured() || !supabaseServer) {
+    return res.status(400).json({ error: 'Variabili Supabase non configurate sul server.' });
+  }
+
+  try {
+    const health = await testSupabaseConnection();
+    if (!health.schemaReady) {
+      return res.status(400).json({
+        error: 'Le tabelle Supabase non esistono ancora. Esegui prima lo script SQL nell’SQL Editor del tuo progetto Supabase.'
+      });
+    }
+
+    const settings = readData<any>('settings.json', {});
+    const categories = readData<any[]>('categories.json', []);
+    const products = readData<any[]>('products.json', []);
+
+    if (settings && Object.keys(settings).length > 0) {
+      const { error: setErr } = await supabaseServer.from('store_settings').upsert({
+        id: 'primary',
+        announcement: settings.announcement || '',
+        announcement_active: settings.announcementActive !== false,
+        store_name: settings.storeName || 'Mama Sam Supermercato Africano & Caraibico',
+        address: settings.address || '',
+        google_maps_url: settings.googleMapsUrl || '',
+        phone1: settings.phone1 || '',
+        phone2: settings.phone2 || '',
+        whatsapp_number: settings.whatsappNumber || '',
+        email: settings.email || '',
+        hours_mon_sat: settings.hoursMonSat || '',
+        hours_sun: settings.hoursSun || '',
+        pickup_estimated_minutes: Number(settings.pickupEstimatedMinutes || 30),
+        updated_at: new Date().toISOString()
+      });
+      if (setErr) {
+        return res.status(500).json({ error: `Errore sync impostazioni: ${setErr.message}` });
+      }
+    }
+
+    if (categories.length > 0) {
+      const catRows = categories.map(c => ({
+        id: c.id,
+        name: c.name,
+        summary: c.summary || '',
+        image: c.image || '',
+        item_count: Number(c.itemCount || 0)
+      }));
+      const { error: catErr } = await supabaseServer
+        .from('categories')
+        .upsert(catRows, { onConflict: 'id' });
+      if (catErr) {
+        return res.status(500).json({ error: `Errore sync categorie: ${catErr.message}` });
+      }
+    }
+
+    if (products.length > 0) {
+      const prodRows = products.map(toDbProduct);
+      const { error: prodErr } = await supabaseServer
+        .from('products')
+        .upsert(prodRows, { onConflict: 'id' });
+      if (prodErr) {
+        return res.status(500).json({ error: `Errore sync prodotti: ${prodErr.message}` });
+      }
+    }
+
+    const updatedHealth = await testSupabaseConnection();
+    return res.json({
+      success: true,
+      synced: {
+        settings: true,
+        categories: categories.length,
+        products: products.length
+      },
+      status: updatedHealth
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: `Errore sincronizzazione Supabase: ${err?.message || 'Unknown'}` });
   }
 });
 
@@ -1480,7 +1652,7 @@ app.get('/api/orders', requireAdminAuth, async (_req: Request, res: Response) =>
         .select('*, order_items(*)')
         .order('created_at', { ascending: false });
 
-      if (!error && Array.isArray(data) && data.length > 0) {
+      if (!error && Array.isArray(data)) {
         const mapped = data.map(o => toFrontendOrder(o, o.order_items || []));
         return res.json(mapped);
       }
@@ -1752,7 +1924,71 @@ app.patch('/api/orders/:id/status', requireAdminAuth, async (req: Request, res: 
   res.json(orders[index]);
 });
 
-// ----------------- ADMIN AUTHENTICATION, SESSIONS & SECURITY ALERTS -----------------
+// ----------------- ADMIN AUTHENTICATION, SESSIONS & PASSWORD MANAGEMENT -----------------
+// Returns only whether initial admin setup is still required (never exposes emails or credentials)
+app.get('/api/admin/auth-status', (_req: Request, res: Response) => {
+  res.json({
+    setupRequired: isAdminSetupRequired()
+  });
+});
+
+// One-time first-run setup when no env password or stored credential exists (locks permanently once claimed)
+app.post('/api/admin/claim', (req: Request, res: Response) => {
+  if (!isAdminSetupRequired()) {
+    return res.status(403).json({ error: 'Setup amministratore già completato.' });
+  }
+
+  const { password, confirmPassword } = req.body || {};
+  if (typeof password !== 'string' || typeof confirmPassword !== 'string') {
+    return res.status(400).json({ error: 'Inserisci e conferma la password.' });
+  }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: 'Le password non coincidono.' });
+  }
+
+  const policyError = validateStrongPassword(password);
+  if (policyError) {
+    return res.status(400).json({ error: policyError });
+  }
+
+  const hashed = hashPasswordScrypt(password);
+  const creds: Record<string, StoredAdminCredential> = {
+    [SINGLE_ADMIN_EMAIL]: {
+      email: SINGLE_ADMIN_EMAIL,
+      ...hashed,
+      role: 'admin',
+      createdAt: new Date().toISOString(),
+      passwordChangedAt: new Date().toISOString(),
+      envSeedDigest: null
+    }
+  };
+  saveStoredAdminCredentials(creds);
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const now = Date.now();
+  const expiresAt = now + 8 * 60 * 60 * 1000;
+  activeSessions.set(token, {
+    email: SINGLE_ADMIN_EMAIL,
+    role: 'admin',
+    createdAt: now,
+    expiresAt
+  });
+
+  return res.json({
+    success: true,
+    token,
+    expiresAt,
+    user: {
+      role: 'admin',
+      email: SINGLE_ADMIN_EMAIL,
+      userId: 'primary-admin',
+      store: 'Mama Sam Messina',
+      supabaseAuth: isServerSupabaseConfigured(),
+      authorizedAt: new Date().toISOString()
+    }
+  });
+});
+
 app.post('/api/admin/login', async (req: Request, res: Response) => {
   const clientIp = getClientIp(req);
   const now = Date.now();
@@ -1768,88 +2004,65 @@ app.post('/api/admin/login', async (req: Request, res: Response) => {
     });
   }
 
-  const { email, password } = req.body;
+  const { email, password } = req.body || {};
   const inputEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
   const inputPassword = typeof password === 'string' ? password : '';
+
+  const emailMatchesSingleAdmin = Boolean(inputEmail && inputEmail === SINGLE_ADMIN_EMAIL);
   let authSucceeded = false;
-  let userEmail = inputEmail || 'limnalione39@gmail.com';
-  let adminUserId = 'local-admin';
 
-  // 1. If Supabase is configured and email is provided: authenticate with Supabase Auth & role verification
-  if (isServerSupabaseConfigured() && supabaseServer && inputEmail.includes('@')) {
-    try {
-      const { data: authData, error: authError } = await supabaseServer.auth.signInWithPassword({
-        email: inputEmail,
-        password: inputPassword
-      });
-
-      if (!authError && authData?.user) {
-        // Verify administrator permissions:
-        // A) Recognized admin email in CONFIGURED_ADMIN_EMAILS
-        // B) User metadata role == 'admin'
-        // C) Row in user_roles table with role == 'admin'
-        const isRecognizedEmail = CONFIGURED_ADMIN_EMAILS.includes(inputEmail);
-        const hasMetadataAdmin = authData.user.user_metadata?.role === 'admin';
-        
-        let hasDbRole = false;
-        try {
-          const { data: roleRow } = await supabaseServer
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', authData.user.id)
-            .single();
-          if (roleRow?.role === 'admin') {
-            hasDbRole = true;
+  // Constant-time password verification strictly tied to the single administrator account
+  if (emailMatchesSingleAdmin && inputPassword) {
+    const localCheck = verifySingleAdminPassword(inputPassword);
+    if (localCheck.valid) {
+      authSucceeded = true;
+    } else if (
+      !localCheck.matchedEntry?.passwordChangedAt &&
+      isServerSupabaseConfigured() &&
+      supabaseServer
+    ) {
+      // Allow Supabase Auth verification for the single administrator if local password was not overridden
+      try {
+        const { data: authData, error: authError } = await supabaseServer.auth.signInWithPassword({
+          email: SINGLE_ADMIN_EMAIL,
+          password: inputPassword
+        });
+        if (!authError && authData?.user?.email?.toLowerCase() === SINGLE_ADMIN_EMAIL) {
+          let hasAdminRole = authData.user.user_metadata?.role === 'admin';
+          if (!hasAdminRole) {
+            try {
+              const { data: roleRow } = await supabaseServer
+                .from('user_roles')
+                .select('role')
+                .eq('user_id', authData.user.id)
+                .single();
+              hasAdminRole = roleRow?.role === 'admin';
+            } catch {
+              // Table may not be migrated yet
+            }
           }
-        } catch {
-          // Table may not exist yet if SQL migration is pending in Supabase
+          if (hasAdminRole) {
+            authSucceeded = true;
+          }
         }
-
-        if (isRecognizedEmail || hasMetadataAdmin || hasDbRole) {
-          authSucceeded = true;
-          userEmail = authData.user.email || inputEmail;
-          adminUserId = authData.user.id;
-        } else {
-          logSecurityEvent('failed_login', req, `Login utente Supabase valido ma ruolo admin mancante: ${inputEmail}`);
-          return res.status(403).json({
-            error: 'Accesso negato: Privilegi di amministratore non configurati per questo account.'
-          });
-        }
+      } catch {
+        // Ignore upstream errors and fall through to generic auth error
       }
-    } catch (sbAuthErr) {
-      console.warn('Supabase auth execution error:', sbAuthErr);
     }
-  }
-
-  // 2. Check stored backend admin credentials (limnalione39@gmail.com, admin@mamasam.it, PBKDF2)
-  if (!authSucceeded && inputEmail) {
-    if (verifyBackendAdminAccount(inputEmail, inputPassword)) {
-      authSucceeded = true;
-      userEmail = inputEmail;
-      adminUserId = `backend-${Buffer.from(inputEmail).toString('hex').substring(0, 12)}`;
-    }
-  }
-
-  // 3. Fallback: verification with master admin password or emergency store passphrase
-  if (!authSucceeded && verifyAdminPassword(inputPassword)) {
-    const isTargetAdmin = !inputEmail || CONFIGURED_ADMIN_EMAILS.includes(inputEmail);
-    if (isTargetAdmin) {
-      authSucceeded = true;
-      userEmail = inputEmail || process.env.ADMIN_EMAIL || 'limnalione39@gmail.com';
-      adminUserId = 'store-admin-direct';
-    }
+  } else {
+    // Burn comparable scrypt time so response latency does not leak whether the email matched
+    crypto.scryptSync(inputPassword || 'dummy', 'anti-enumeration-salt', 64);
   }
 
   if (authSucceeded) {
-    // Reset rate limiter on successful authentication
     delete lockoutMap[clientIp];
     saveLockoutMap(lockoutMap);
 
-    // Issue cryptographically secure session token
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = now + 8 * 60 * 60 * 1000; // 8 hours duration
+    const expiresAt = now + 8 * 60 * 60 * 1000;
 
     activeSessions.set(token, {
+      email: SINGLE_ADMIN_EMAIL,
       role: 'admin',
       createdAt: now,
       expiresAt
@@ -1861,8 +2074,8 @@ app.post('/api/admin/login', async (req: Request, res: Response) => {
       expiresAt,
       user: {
         role: 'admin',
-        email: userEmail,
-        userId: adminUserId,
+        email: SINGLE_ADMIN_EMAIL,
+        userId: 'primary-admin',
         store: 'Mama Sam Messina',
         supabaseAuth: isServerSupabaseConfigured(),
         authorizedAt: new Date().toISOString()
@@ -1870,21 +2083,21 @@ app.post('/api/admin/login', async (req: Request, res: Response) => {
     });
   }
 
-  // Handle failure: generic error (never reveal whether an email address exists)
+  // Generic authentication error: never reveal whether email or password was incorrect
   rateRecord.attempts = (rateRecord.attempts || 0) + 1;
   rateRecord.lastAttempt = now;
 
   logSecurityEvent('failed_login', req, `Tentativo di accesso fallito da ${clientIp} (${rateRecord.attempts}/5)`);
 
   if (rateRecord.attempts >= 5) {
-    rateRecord.lockedUntil = now + 15 * 60 * 1000; // 15 min lock
+    rateRecord.lockedUntil = now + 15 * 60 * 1000;
     lockoutMap[clientIp] = rateRecord;
     saveLockoutMap(lockoutMap);
 
     logSecurityEvent('lockout', req, `IP bloccato per 15 minuti dopo 5 tentativi consecutivi falliti`);
 
     return res.status(429).json({
-      error: 'Avviso di sicurezza: 5 tentativi consecutivi falliti. Accesso bloccato per 15 minuti.'
+      error: 'Troppi tentativi falliti. Riprova tra qualche minuto.'
     });
   }
 
@@ -1892,13 +2105,90 @@ app.post('/api/admin/login', async (req: Request, res: Response) => {
   saveLockoutMap(lockoutMap);
 
   return res.status(401).json({
-    error: 'Credenziali non valide. Verifica email e password o contatta l\'amministrazione.'
+    error: 'Credenziali non valide. Verifica i dati inseriti e riprova.'
+  });
+});
+
+// Change single administrator password (requires current password, enforces strength, invalidates all sessions)
+app.post('/api/admin/change-password', requireAdminAuth, async (req: Request, res: Response) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body || {};
+
+  if (
+    typeof currentPassword !== 'string' ||
+    typeof newPassword !== 'string' ||
+    typeof confirmPassword !== 'string' ||
+    !currentPassword ||
+    !newPassword ||
+    !confirmPassword
+  ) {
+    return res.status(400).json({ error: 'Compila tutti i campi richiesti.' });
+  }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'La nuova password e la conferma non coincidono.' });
+  }
+
+  const currentCheck = verifySingleAdminPassword(currentPassword);
+  if (!currentCheck.valid) {
+    return res.status(401).json({ error: 'La password attuale non è corretta.' });
+  }
+
+  if (newPassword === currentPassword) {
+    return res.status(400).json({ error: 'La nuova password deve essere diversa da quella attuale.' });
+  }
+
+  const strengthError = validateStrongPassword(newPassword);
+  if (strengthError) {
+    return res.status(400).json({ error: strengthError });
+  }
+
+  const hashed = hashPasswordScrypt(newPassword);
+  const existing = getSingleAdminCredential();
+  const updatedCreds: Record<string, StoredAdminCredential> = {
+    [SINGLE_ADMIN_EMAIL]: {
+      email: SINGLE_ADMIN_EMAIL,
+      ...hashed,
+      role: 'admin',
+      createdAt: existing?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      passwordChangedAt: new Date().toISOString(),
+      envSeedDigest: existing?.envSeedDigest || null
+    }
+  };
+  saveStoredAdminCredentials(updatedCreds);
+
+  // Synchronize updated password with Supabase Auth if configured
+  if (isServerSupabaseConfigured() && supabaseServer) {
+    try {
+      const { data: userList } = await supabaseServer.auth.admin.listUsers();
+      const adminUser = (userList?.users || []).find(
+        u => u.email?.toLowerCase() === SINGLE_ADMIN_EMAIL
+      );
+      if (adminUser) {
+        await supabaseServer.auth.admin.updateUserById(adminUser.id, {
+          password: newPassword
+        });
+      }
+    } catch (sbErr: any) {
+      console.warn('[Supabase Auth] Password sync note:', sbErr?.message || sbErr);
+    }
+  }
+
+  // Invalidate all existing admin sessions across every browser/device
+  activeSessions.clear();
+
+  logSecurityEvent('password_changed', req, 'Password amministratore aggiornata e sessioni invalidate');
+
+  return res.json({
+    success: true,
+    sessionsInvalidated: true,
+    message: 'Password aggiornata con successo. Effettua nuovamente l’accesso con la nuova password.'
   });
 });
 
 // Admin session verification endpoint
 app.get('/api/admin/verify', requireAdminAuth, (_req: Request, res: Response) => {
-  res.json({ authenticated: true, role: 'admin', store: 'Mama Sam Messina' });
+  res.json({ authenticated: true, role: 'admin', email: SINGLE_ADMIN_EMAIL, store: 'Mama Sam Messina' });
 });
 
 // Security alerts feed for authenticated admin dashboard
@@ -1935,6 +2225,7 @@ app.post('/api/admin/logout', (req: Request, res: Response) => {
 app.get('/api/admin/stats', requireAdminAuth, async (_req: Request, res: Response) => {
   let orders: any[] = [];
   let products: any[] = [];
+  let ordersLoadedFromSupabase = false;
 
   if (isServerSupabaseConfigured() && supabaseServer) {
     try {
@@ -1942,8 +2233,9 @@ app.get('/api/admin/stats', requireAdminAuth, async (_req: Request, res: Respons
         supabaseServer.from('orders').select('*').order('created_at', { ascending: false }),
         supabaseServer.from('products').select('*')
       ]);
-      if (!ordRes.error && Array.isArray(ordRes.data) && ordRes.data.length > 0) {
+      if (!ordRes.error && Array.isArray(ordRes.data)) {
         orders = ordRes.data.map(o => toFrontendOrder(o, []));
+        ordersLoadedFromSupabase = true;
       }
       if (!prodRes.error && Array.isArray(prodRes.data) && prodRes.data.length > 0) {
         products = prodRes.data.map(toFrontendProduct);
@@ -1953,7 +2245,7 @@ app.get('/api/admin/stats', requireAdminAuth, async (_req: Request, res: Respons
     }
   }
 
-  if (orders.length === 0) orders = readData<any[]>('orders.json', []);
+  if (!ordersLoadedFromSupabase) orders = readData<any[]>('orders.json', []);
   if (products.length === 0) products = readData<any[]>('products.json', []);
 
   const totalOrders = orders.length;
@@ -1999,28 +2291,6 @@ app.get('/api/admin/stats', requireAdminAuth, async (_req: Request, res: Respons
       needsReviewImagesCount,
       missingImagesCount
     }
-  });
-});
-
-// Admin credentials status & diagnostics
-app.get('/api/admin/credentials-status', (_req: Request, res: Response) => {
-  res.json({
-    configured: true,
-    supabaseAuthConfigured: isServerSupabaseConfigured(),
-    adminAccounts: [
-      {
-        email: 'limnalione39@gmail.com',
-        role: 'admin',
-        description: 'Primary Store Administrator (User Email)',
-        authMethods: ['Supabase Auth', 'PBKDF2 Backend Hash']
-      },
-      {
-        email: 'admin@mamasam.it',
-        role: 'admin',
-        description: 'Store Operations Administrator',
-        authMethods: ['Supabase Auth', 'PBKDF2 Backend Hash']
-      }
-    ]
   });
 });
 
@@ -2349,10 +2619,15 @@ async function startServer() {
       try {
         const result = await vite.transformRequest('/@vite/client');
         if (!result?.code) return next();
-        const safeCode = result.code.replace(
-          'transport.connect(createHMRHandler(handleMessage));',
-          '/* HMR WebSocket disabled */'
-        );
+        const safeCode = result.code
+          .replace(
+            'transport.connect(createHMRHandler(handleMessage));',
+            '/* HMR WebSocket disabled */'
+          )
+          .replace(
+            /else throw new SendBeforeConnectError\(["']send was called before connect["']\);?/,
+            'else return;'
+          );
         res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
         res.setHeader('Cache-Control', 'no-cache');
         return res.send(safeCode);

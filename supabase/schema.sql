@@ -40,10 +40,12 @@ AS $$
 $$;
 
 -- RLS for user_roles: only admins can view or modify roles; self-promotion is blocked
+DROP POLICY IF EXISTS "user_roles_select_admin" ON public.user_roles;
 CREATE POLICY "user_roles_select_admin" ON public.user_roles
   FOR SELECT TO authenticated
   USING (public.is_admin() OR auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "user_roles_modify_admin" ON public.user_roles;
 CREATE POLICY "user_roles_modify_admin" ON public.user_roles
   FOR ALL TO authenticated
   USING (public.is_admin())
@@ -64,10 +66,12 @@ CREATE TABLE IF NOT EXISTS public.categories (
 ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 
 -- Public can read categories; only admins can insert/update/delete
+DROP POLICY IF EXISTS "categories_public_read" ON public.categories;
 CREATE POLICY "categories_public_read" ON public.categories
   FOR SELECT TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "categories_admin_all" ON public.categories;
 CREATE POLICY "categories_admin_all" ON public.categories
   FOR ALL TO authenticated
   USING (public.is_admin())
@@ -126,10 +130,12 @@ CREATE INDEX IF NOT EXISTS idx_products_stock ON public.products(stock);
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 -- Public can read all active products; admins have full CRUD
+DROP POLICY IF EXISTS "products_public_read" ON public.products;
 CREATE POLICY "products_public_read" ON public.products
   FOR SELECT TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "products_admin_all" ON public.products;
 CREATE POLICY "products_admin_all" ON public.products
   FOR ALL TO authenticated
   USING (public.is_admin())
@@ -161,21 +167,25 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DES
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 -- Anonymous and authenticated customers can create their own order
+DROP POLICY IF EXISTS "orders_insert_checkout" ON public.orders;
 CREATE POLICY "orders_insert_checkout" ON public.orders
   FOR INSERT TO anon, authenticated
   WITH CHECK (true);
 
 -- Only authorized administrators can view all orders (prevents customers from viewing other customers' personal info)
+DROP POLICY IF EXISTS "orders_select_admin" ON public.orders;
 CREATE POLICY "orders_select_admin" ON public.orders
   FOR SELECT TO authenticated
   USING (public.is_admin());
 
 -- Only administrators can update order status or delete orders
+DROP POLICY IF EXISTS "orders_modify_admin" ON public.orders;
 CREATE POLICY "orders_modify_admin" ON public.orders
   FOR UPDATE TO authenticated
   USING (public.is_admin())
   WITH CHECK (public.is_admin());
 
+DROP POLICY IF EXISTS "orders_delete_admin" ON public.orders;
 CREATE POLICY "orders_delete_admin" ON public.orders
   FOR DELETE TO authenticated
   USING (public.is_admin());
@@ -201,11 +211,13 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_
 ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
 
 -- Customers can insert items during checkout
+DROP POLICY IF EXISTS "order_items_insert_checkout" ON public.order_items;
 CREATE POLICY "order_items_insert_checkout" ON public.order_items
   FOR INSERT TO anon, authenticated
   WITH CHECK (true);
 
 -- Only admins can inspect order items
+DROP POLICY IF EXISTS "order_items_select_admin" ON public.order_items;
 CREATE POLICY "order_items_select_admin" ON public.order_items
   FOR SELECT TO authenticated
   USING (public.is_admin());
@@ -232,10 +244,12 @@ CREATE TABLE IF NOT EXISTS public.store_settings (
 
 ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "settings_public_read" ON public.store_settings;
 CREATE POLICY "settings_public_read" ON public.store_settings
   FOR SELECT TO anon, authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "settings_admin_update" ON public.store_settings;
 CREATE POLICY "settings_admin_update" ON public.store_settings
   FOR ALL TO authenticated
   USING (public.is_admin())
@@ -259,18 +273,22 @@ ON CONFLICT (id) DO UPDATE SET
   allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/jpg', 'image/gif'];
 
 -- Storage RLS: Public can view images; only admins can upload/update/delete
+DROP POLICY IF EXISTS "product_images_public_read" ON storage.objects;
 CREATE POLICY "product_images_public_read" ON storage.objects
   FOR SELECT TO anon, authenticated
   USING (bucket_id = 'product-images');
 
+DROP POLICY IF EXISTS "product_images_admin_upload" ON storage.objects;
 CREATE POLICY "product_images_admin_upload" ON storage.objects
   FOR INSERT TO authenticated
   WITH CHECK (bucket_id = 'product-images' AND public.is_admin());
 
+DROP POLICY IF EXISTS "product_images_admin_update" ON storage.objects;
 CREATE POLICY "product_images_admin_update" ON storage.objects
   FOR UPDATE TO authenticated
   USING (bucket_id = 'product-images' AND public.is_admin());
 
+DROP POLICY IF EXISTS "product_images_admin_delete" ON storage.objects;
 CREATE POLICY "product_images_admin_delete" ON storage.objects
   FOR DELETE TO authenticated
   USING (bucket_id = 'product-images' AND public.is_admin());
@@ -282,6 +300,7 @@ CREATE OR REPLACE FUNCTION public.decrement_product_stock(p_product_id TEXT, p_q
 RETURNS VOID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   UPDATE public.products
@@ -291,3 +310,6 @@ BEGIN
   WHERE id = p_product_id;
 END;
 $$;
+
+REVOKE ALL ON FUNCTION public.decrement_product_stock(TEXT, INTEGER) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.decrement_product_stock(TEXT, INTEGER) TO service_role;
