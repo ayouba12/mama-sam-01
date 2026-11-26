@@ -26,11 +26,6 @@ import {
   Sparkles,
   Calendar,
   Tag,
-  Database,
-  Server,
-  Check,
-  Copy,
-  ExternalLink,
   Layers,
   Mail,
   Key,
@@ -41,7 +36,6 @@ import { Product, Order, OrderStatus, StoreSettings, ProductCategory } from '../
 import { ImageUploadDropzone } from './ImageUploadDropzone';
 import { OptimizedImage } from './OptimizedImage';
 import { resolveImage, resolveProductImage } from '../utils/imageHelper';
-import { isSupabaseConfigured } from '../lib/supabase';
 import { 
   isProductDiscountActive, 
   isProductNewArrival, 
@@ -91,7 +85,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [claimPasswordInput, setClaimPasswordInput] = useState('');
   const [claimConfirmInput, setClaimConfirmInput] = useState('');
   const [adminUser, setAdminUser] = useState<any>(() => inMemoryAdminUser);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'settings' | 'supabase'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'orders' | 'products' | 'settings'>('dashboard');
 
   // Password Change Controls
   const [currentPasswordInput, setCurrentPasswordInput] = useState('');
@@ -100,13 +94,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
   const [passwordChangeLoading, setPasswordChangeLoading] = useState(false);
   const [passwordChangeError, setPasswordChangeError] = useState('');
   const [passwordChangeSuccess, setPasswordChangeSuccess] = useState('');
-
-  // Supabase Diagnostics
-  const [supabaseStatus, setSupabaseStatus] = useState<any>(null);
-  const [supabaseLoading, setSupabaseLoading] = useState(false);
-  const [supabaseSyncing, setSupabaseSyncing] = useState(false);
-  const [supabaseSyncFeedback, setSupabaseSyncFeedback] = useState<string | null>(null);
-  const [sqlCopied, setSqlCopied] = useState(false);
 
   // Category Management
   const [categoriesList, setCategoriesList] = useState<any[]>([]);
@@ -345,7 +332,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
     if (!token) return;
     setOrdersLoading(true);
     try {
-      const [statsRes, ordersRes, catRes, supaRes, pushRes] = await Promise.all([
+      const [statsRes, ordersRes, catRes, pushRes] = await Promise.all([
         fetch('/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -353,9 +340,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
           headers: { Authorization: `Bearer ${token}` }
         }),
         fetch('/api/categories').catch(() => null),
-        fetch('/api/admin/supabase-status', {
-          headers: { Authorization: `Bearer ${token}` }
-        }).catch(() => null),
         fetch('/api/push/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }).catch(() => null)
@@ -374,9 +358,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       if (catRes && catRes.ok) {
         setCategoriesList(await catRes.json());
       }
-      if (supaRes && supaRes.ok) {
-        setSupabaseStatus(await supaRes.json());
-      }
       if (pushRes && pushRes.ok) {
         setPushStats(await pushRes.json());
       }
@@ -384,49 +365,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       console.error(err);
     } finally {
       setOrdersLoading(false);
-    }
-  };
-
-  const handleRefreshSupabaseStatus = async () => {
-    setSupabaseLoading(true);
-    try {
-      const res = await fetch('/api/admin/supabase-status', {
-        headers: { Authorization: `Bearer ${authToken}` }
-      });
-      if (res.ok) {
-        setSupabaseStatus(await res.json());
-      }
-    } catch (err) {
-      console.error('Failed to refresh Supabase status:', err);
-    } finally {
-      setSupabaseLoading(false);
-    }
-  };
-
-  const handleSyncToSupabase = async () => {
-    setSupabaseSyncing(true);
-    setSupabaseSyncFeedback(null);
-    try {
-      const res = await fetch('/api/admin/supabase/sync', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${authToken}`
-        }
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Sincronizzazione fallita.');
-      }
-      if (data.status) {
-        setSupabaseStatus(data.status);
-      }
-      setSupabaseSyncFeedback(
-        `Sincronizzazione completata: ${data.synced?.products || 0} prodotti, ${data.synced?.categories || 0} categorie e impostazioni negozio caricati su Supabase.`
-      );
-    } catch (err: any) {
-      setSupabaseSyncFeedback(err?.message || 'Errore durante la sincronizzazione su Supabase.');
-    } finally {
-      setSupabaseSyncing(false);
     }
   };
 
@@ -446,21 +384,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
       }
     } catch (e) {
       console.error('Quick verification error:', e);
-    }
-  };
-
-  const handleCopySql = async () => {
-    try {
-      const res = await fetch('/api/admin/schema-sql', {
-        headers: { Authorization: `Bearer ${authToken}` }
-      });
-      if (!res.ok) throw new Error('Unauthorized');
-      const text = await res.text();
-      await navigator.clipboard.writeText(text);
-      setSqlCopied(true);
-      setTimeout(() => setSqlCopied(false), 3000);
-    } catch (err) {
-      console.error('Copy SQL failed:', err);
     }
   };
 
@@ -777,17 +700,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
             <span className="hidden lg:inline-block text-[11px] bg-emerald-800/90 text-emerald-100 px-2.5 py-0.5 rounded font-mono whitespace-nowrap shrink-0">
               Messina Live Desk
             </span>
-            {supabaseStatus?.connected ? (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] bg-emerald-900/90 text-emerald-100 px-2.5 py-0.5 rounded border border-emerald-400/40 whitespace-nowrap shrink-0">
-                <Database className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Supabase Attivo</span>
-              </span>
-            ) : (
-              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] bg-amber-900/60 text-amber-100 px-2.5 py-0.5 rounded border border-amber-500/50 whitespace-nowrap shrink-0">
-                <Server className="w-3.5 h-3.5 text-amber-300" />
-                <span>Supabase in Setup</span>
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
@@ -1006,36 +918,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                   <Settings className="w-4 h-4 text-emerald-700 shrink-0" />
                   <span>Impostazioni Negozio</span>
                 </button>
-
-                <button
-                  onClick={() => setActiveTab('supabase')}
-                  className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
-                    activeTab === 'supabase'
-                      ? 'bg-emerald-50 text-[#124b2e]'
-                      : 'text-slate-600 hover:bg-stone-100'
-                  }`}
-                >
-                  <Database className="w-4 h-4 text-emerald-700 shrink-0" />
-                  <span className="flex-1 text-left">Supabase &amp; DB</span>
-                  {supabaseStatus?.connected ? (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Supabase Connesso"></span>
-                  ) : (
-                    <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" title="Configurazione Richiesta"></span>
-                  )}
-                </button>
-              </div>
-
-              {/* Supabase backend status widget */}
-              <div className="hidden md:block p-3 bg-emerald-50/70 rounded-xl border border-emerald-100 text-xs text-emerald-950 mt-4">
-                <div className="flex items-center gap-1.5 font-bold text-emerald-900 mb-1">
-                  <Database className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Backend Database</span>
-                </div>
-                <p className="text-[11px] text-emerald-800 leading-relaxed">
-                  {supabaseStatus?.connected
-                    ? `PostgreSQL connesso (${supabaseStatus.tables?.products || products.length} prodotti, ${orders.length} ordini).`
-                    : 'Modalità ibrida attiva. Connetti Supabase via env per RLS cloud.'}
-                </p>
               </div>
             </div>
 
@@ -2731,291 +2613,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({
                       </div>
                     </form>
                   </div>
-                </div>
-              )}
-
-              {/* TAB 5: SUPABASE BACKEND MANAGEMENT */}
-              {activeTab === 'supabase' && (
-                <div className="space-y-6 w-full max-w-6xl">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-                        <Database className="w-5 h-5 text-emerald-700" />
-                        <span>Integrazione Backend Supabase (PostgreSQL &amp; Storage)</span>
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        Stato connessione, migrazioni database con Row Level Security (RLS) e policy storage
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleRefreshSupabaseStatus}
-                        disabled={supabaseLoading}
-                        className="px-3 py-1.5 bg-white border border-stone-300 hover:border-emerald-600 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5 cursor-pointer shadow-2xs transition-colors disabled:opacity-50"
-                      >
-                        <Server className={`w-3.5 h-3.5 text-emerald-700 ${supabaseLoading ? 'animate-spin' : ''}`} />
-                        <span>{supabaseLoading ? 'Verifica in corso...' : 'Testa Connessione Ora'}</span>
-                      </button>
-
-                      <a
-                        href="https://supabase.com/dashboard"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-3 py-1.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
-                      >
-                        <span>Dashboard Supabase</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Connection Status Banner */}
-                  {supabaseStatus?.connected ? (
-                    <div className="p-4 bg-emerald-50 border border-emerald-300 rounded-2xl flex flex-col gap-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-start gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                            <CheckCircle className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-emerald-950 text-sm">Supabase PostgreSQL Connesso e Operativo</h4>
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-200 text-emerald-900 uppercase">
-                                Cloud Live
-                              </span>
-                            </div>
-                            <p className="text-xs text-emerald-800 mt-0.5">
-                              Istanza: <code className="bg-emerald-100/80 px-1 py-0.5 rounded font-mono text-[11px]">{supabaseStatus.url}</code>
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 text-xs text-emerald-900 border-t sm:border-t-0 pt-2 sm:pt-0 border-emerald-200">
-                          <span className="font-semibold">Storage: Bucket 'product-images'</span>
-                          <span className="text-[11px] text-emerald-700 font-mono">
-                            {supabaseStatus.tables?.products ?? 0} Prodotti · {supabaseStatus.tables?.categories ?? 0} Cat · {supabaseStatus.tables?.orders ?? 0} Ordini
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-200/80">
-                        <span className="text-[11px] text-emerald-800">
-                          Hai appena collegato un nuovo account Supabase? Popola o aggiorna le tabelle cloud dai dati locali in 1 clic.
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleSyncToSupabase}
-                          disabled={supabaseSyncing}
-                          className="px-3 py-1.5 bg-[#124b2e] hover:bg-[#0e3b24] text-white rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs disabled:opacity-50"
-                        >
-                          <Database className={`w-3.5 h-3.5 ${supabaseSyncing ? 'animate-spin' : ''}`} />
-                          <span>{supabaseSyncing ? 'Sincronizzazione...' : 'Sincronizza Catalogo & Impostazioni'}</span>
-                        </button>
-                      </div>
-                      {supabaseSyncFeedback && (
-                        <p className="text-xs font-semibold text-emerald-900 bg-white/80 px-3 py-2 rounded-xl border border-emerald-200">
-                          {supabaseSyncFeedback}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
-                          <AlertTriangle className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-amber-950 text-sm">
-                              {supabaseStatus?.apiReachable ? 'Tabelle Database Non Ancora Create' : 'Configurazione Supabase in Attesa'}
-                            </h4>
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200 text-amber-900 uppercase">
-                              Zero-Downtime Attivo
-                            </span>
-                          </div>
-                          <p className="text-xs text-amber-900/90 mt-0.5 leading-relaxed">
-                            {supabaseStatus?.reason || 'Credenziali Supabase non ancora rilevate nelle variabili d\'ambiente.'}
-                          </p>
-                          <p className="text-[11px] text-amber-800 mt-1">
-                            Il negozio è attualmente <strong>100% operativo</strong> tramite fallback duraturo. Una volta impostate le chiavi nell'ambiente ed eseguito lo script SQL, premi «Testa Connessione Ora».
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleCopySql}
-                        className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 cursor-pointer shadow-xs"
-                      >
-                        {sqlCopied ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4" />}
-                        <span>{sqlCopied ? 'SQL Copiato!' : 'Copia Script SQL'}</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* 1-Click SQL & Migration Box */}
-                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-stone-100">
-                      <div>
-                        <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                          <Database className="w-4 h-4 text-[#124b2e]" />
-                          <span>Script SQL di Migrazione Completo (`supabase/schema.sql`)</span>
-                        </h4>
-                        <p className="text-xs text-slate-500">
-                          Crea le tabelle, chiavi esterne, policy RLS, trigger e bucket Storage `product-images` con 1 clic.
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleCopySql}
-                        className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-[#124b2e] border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
-                      >
-                        {sqlCopied ? <Check className="w-4 h-4 text-emerald-700" /> : <Copy className="w-4 h-4 text-emerald-700" />}
-                        <span>{sqlCopied ? 'Copiato negli Appunti!' : 'Copia Tutto lo Script SQL'}</span>
-                      </button>
-                    </div>
-
-                    <div className="bg-stone-900 text-stone-100 p-3.5 rounded-xl font-mono text-[11px] overflow-x-auto max-h-40 leading-relaxed border border-stone-800">
-                      <p className="text-emerald-400 font-bold mb-1">-- Anteprima DDL Supabase PostgreSQL con RLS --</p>
-                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.products (id TEXT PRIMARY KEY, name TEXT NOT NULL, ...);</p>
-                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.orders (id TEXT PRIMARY KEY, order_number TEXT UNIQUE, ...);</p>
-                      <p className="text-stone-400">CREATE TABLE IF NOT EXISTS public.user_roles (user_id UUID REFERENCES auth.users, role TEXT);</p>
-                      <p className="text-stone-400">ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;</p>
-                      <p className="text-stone-400">CREATE POLICY "products_public_select" ON public.products FOR SELECT USING (true);</p>
-                      <p className="text-stone-400">CREATE POLICY "products_admin_all" ON public.products FOR ALL USING (public.is_admin());</p>
-                    </div>
-                  </div>
-
-                  {/* Schema & RLS Matrix */}
-                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                      <span>Tabelle Database &amp; Regole di Sicurezza Row Level Security (RLS)</span>
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Ogni tabella applica il principio del minimo privilegio. I clienti non possono vedere ordini altrui né modificare prodotti.
-                    </p>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">products</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">Lettura pubblica di catalogo, disponibilità e promozioni. Modifica/eliminazione riservata agli admin.</p>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">categories</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">African &amp; Asian groceries, bevande, noodles, oli, cosmetici afro. Gestione dinamica admin.</p>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">orders</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">Inserimento ordini dal carrello (solo ritiro in negozio). Visualizzazione e cambio stato solo admin.</p>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">order_items</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RLS Attivo</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">Snapshot immutabile di prezzi calcolati dal server e quantità ordinate al momento del checkout.</p>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">user_roles</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">RBAC Protetto</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">Ruolo admin collegato ad auth.users. Auto-promozione bloccata da security definer `is_admin()`.</p>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 rounded-xl border border-stone-200 text-xs space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono font-bold text-slate-900">product-images</span>
-                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">Storage Bucket</span>
-                        </div>
-                        <p className="text-slate-500 text-[11px]">Bucket pubblico per servire foto con CDN. Upload e cancellazione consentiti solo agli admin.</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Admin User Provisioning Guide */}
-                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                      <Lock className="w-4 h-4 text-[#124b2e]" />
-                      <span>Configurazione Account Amministratore Unico</span>
-                    </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      Per garantire la massima sicurezza, non esiste alcuna registrazione pubblica e il sistema consente un solo account amministratore configurato dal proprietario su Supabase:
-                    </p>
-
-                    <ol className="space-y-2 text-xs text-slate-700 list-decimal list-inside bg-stone-50 p-4 rounded-xl border border-stone-200">
-                      <li>
-                        <strong>Crea l'unico utente amministratore:</strong> Vai nella console Supabase su <em>Authentication &gt; Users &gt; Add User &gt; Create User</em> usando la tua email amministratore e una password complessa.
-                      </li>
-                      <li>
-                        <strong>Copia lo User UID:</strong> Dalla lista utenti di Supabase, copia l'UUID dell'utente appena creato.
-                      </li>
-                      <li>
-                        <strong>Assegna il Ruolo Admin:</strong> Apri il <em>SQL Editor</em> in Supabase ed esegui la query:
-                        <div className="bg-stone-900 text-emerald-400 p-2.5 rounded-lg mt-1 font-mono text-[11px]">
-                          INSERT INTO public.user_roles (user_id, role) VALUES ('&lt;INCOLLA_USER_UUID&gt;', 'admin') ON CONFLICT (user_id) DO UPDATE SET role = 'admin';
-                        </div>
-                      </li>
-                      <li>
-                        <strong>Accedi al Pannello:</strong> Accedi con l'email amministratore autorizzata; puoi cambiare la password in qualsiasi momento dalla scheda <em>Impostazioni Negozio</em>.
-                      </li>
-                    </ol>
-                  </div>
-
-                  {/* Required Environment Variables Checklist */}
-                  <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-2xs space-y-3">
-                    <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-                      <Key className="w-4 h-4 text-emerald-700" />
-                      <span>Variabili d'Ambiente Richieste (`.env`)</span>
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      Aggiungi queste variabili al tuo file di ambiente o impostazioni del server:
-                    </p>
-
-                    <div className="space-y-2 font-mono text-xs">
-                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <span className="font-bold text-slate-900">VITE_SUPABASE_URL</span>
-                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">L'URL del tuo progetto Supabase (es. https://xyz.supabase.co)</p>
-                        </div>
-                        <span className="text-[10px] bg-stone-200 text-slate-700 font-bold px-2 py-0.5 rounded">Client &amp; Server</span>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <span className="font-bold text-slate-900">VITE_SUPABASE_ANON_KEY</span>
-                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">La chiave pubblica anonima per le query frontend protette da RLS</p>
-                        </div>
-                        <span className="text-[10px] bg-stone-200 text-slate-700 font-bold px-2 py-0.5 rounded">Client &amp; Server</span>
-                      </div>
-
-                      <div className="p-3 bg-stone-50 border border-stone-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div>
-                          <span className="font-bold text-slate-900">SUPABASE_SERVICE_ROLE_KEY</span>
-                          <p className="text-[11px] text-slate-500 font-sans mt-0.5">La chiave con privilegi elevati (usata SOLO lato server, mai esposta nel frontend)</p>
-                        </div>
-                        <span className="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded">Server-Only</span>
-                      </div>
-                    </div>
-                  </div>
-
                 </div>
               )}
 

@@ -431,6 +431,7 @@ interface StoredAdminCredential {
   hash: string;
   hashAlgorithm?: 'scrypt' | 'pbkdf2';
   role: 'admin';
+  setupPending?: boolean;
   createdAt: string;
   updatedAt?: string;
   passwordChangedAt?: string | null;
@@ -504,6 +505,7 @@ function getSingleAdminCredential(): StoredAdminCredential | null {
 
 function isAdminSetupRequired(): boolean {
   const existing = getSingleAdminCredential();
+  if (existing?.setupPending) return true;
   if (existing?.hash && existing?.salt) return false;
   const envPass = process.env.ADMIN_PASSWORD?.trim();
   const envHash = process.env.ADMIN_PASSWORD_HASH?.trim();
@@ -559,6 +561,7 @@ async function ensureBackendAdminAccounts(): Promise<void> {
       updated = true;
     }
   } else if (
+    !currentEntry.setupPending &&
     !currentEntry.passwordChangedAt &&
     envPassword &&
     envDigest &&
@@ -608,6 +611,10 @@ function verifySingleAdminPassword(candidate: string): { valid: boolean; matched
   const creds = getStoredAdminCredentials();
   const entry = creds[SINGLE_ADMIN_EMAIL] || null;
 
+  if (entry?.setupPending) {
+    return { valid: false, matchedEntry: entry };
+  }
+
   if (entry && verifyStoredCredentialHash(candidate, entry)) {
     // Automatically upgrade legacy PBKDF2 hash to scrypt on verification
     if (entry.hashAlgorithm !== 'scrypt') {
@@ -623,7 +630,7 @@ function verifySingleAdminPassword(candidate: string): { valid: boolean; matched
   }
 
   // Only allow process.env password fallback if no password change has occurred in backend store
-  if (!entry?.passwordChangedAt) {
+  if (!entry?.passwordChangedAt && !entry?.setupPending) {
     const envHash = process.env.ADMIN_PASSWORD_HASH?.trim() || '';
     if (envHash && envHash.includes(':')) {
       const [salt, expectedHash] = envHash.split(':');
@@ -1933,7 +1940,7 @@ app.get('/api/admin/auth-status', (_req: Request, res: Response) => {
 });
 
 // One-time first-run setup when no env password or stored credential exists (locks permanently once claimed)
-app.post('/api/admin/claim', (req: Request, res: Response) => {
+app.post('/api/admin/claim', async (req: Request, res: Response) => {
   if (!isAdminSetupRequired()) {
     return res.status(403).json({ error: 'Setup amministratore già completato.' });
   }
@@ -1963,6 +1970,29 @@ app.post('/api/admin/claim', (req: Request, res: Response) => {
     }
   };
   saveStoredAdminCredentials(creds);
+
+  if (isServerSupabaseConfigured() && supabaseServer) {
+    try {
+      const { data: userList } = await supabaseServer.auth.admin.listUsers();
+      const adminUser = (userList?.users || []).find(
+        u => u.email?.toLowerCase() === SINGLE_ADMIN_EMAIL
+      );
+      if (adminUser) {
+        await supabaseServer.auth.admin.updateUserById(adminUser.id, { password });
+      } else {
+        await supabaseServer.auth.admin.createUser({
+          email: SINGLE_ADMIN_EMAIL,
+          password,
+          email_confirm: true,
+          user_metadata: { role: 'admin', full_name: 'Mama Sam Administrator' }
+        });
+      }
+    } catch (sbErr: any) {
+      console.warn('[Supabase Auth] Claim sync note:', sbErr?.message || sbErr);
+    }
+  }
+
+  activeSessions.clear();
 
   const token = crypto.randomBytes(32).toString('hex');
   const now = Date.now();
@@ -2017,6 +2047,7 @@ app.post('/api/admin/login', async (req: Request, res: Response) => {
     if (localCheck.valid) {
       authSucceeded = true;
     } else if (
+      !isAdminSetupRequired() &&
       !localCheck.matchedEntry?.passwordChangedAt &&
       isServerSupabaseConfigured() &&
       supabaseServer
